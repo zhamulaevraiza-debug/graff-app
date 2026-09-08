@@ -1,0 +1,31 @@
+/* Экран «Статус заказа» — локальные стили. */
+
+/* Пара кнопок «ПОЗВОНИТЬ» / «ПОВТОРИТЬ ЗАКАЗ» (design 441–443):
+   в прототипе у кнопок нет внутренних отступов и радиус 14px у обеих —
+   иначе «ПОВТОРИТЬ ЗАКАЗ» переносится на две строки на 360–390px,
+   а .btn--md у CallButton даёт 12px рядом с 14px у соседа. */
+.status-actions .btn {
+  padding: 0 6px;
+  border-radius: 14px;
+}
+
+/* Глобальное a:hover красит ссылку в var(--price); в прототипе «ПОЗВОНИТЬ» всегда медная. */
+.status-actions a.btn:hover {
+  color: var(--copper);
+}
+
+/* Подтверждение предварительного заказа */
+.status-doc {
+  margin-top: 18px;
+  padding: 12px 14px;
+  border: 1px dashed var(--line);
+  border-radius: var(--r-card);
+}
+.status-doc__line {
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--sec);
+  text-wrap: pretty;
+  margin-top: 4px;
+}
+

@@ -1,0 +1,921 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style data-omelette-injected>html,body{background:transparent}</style><script data-omelette-injected>(()=>{{const n=new URLSearchParams(location.search).get("theme");if(n==="light"||n==="dark"){document.documentElement.dataset.theme=n}}{if(new URLSearchParams(location.search).get("_omthumb")==="1"){const n=(f)=>{const g=f.focus;if(!g)return;f.focus=function(h){g.call(this,{...h,preventScroll:true})}};n(HTMLElement.prototype);n(SVGElement.prototype);if(typeof MathMLElement!=="undefined"){n(MathMLElement.prototype)}const d=(f)=>{f.removeAttribute("autofocus");f.inert=true;if(!(f instanceof HTMLElement))f.removeAttribute("tabindex")};const p=(f)=>{if(f.hasAttribute("autofocus"))d(f);for(const g of f.querySelectorAll("[autofocus]")){d(g)}};p(document.documentElement);new MutationObserver((f)=>{for(const g of f){for(const h of g.addedNodes){if(h.nodeType===1)p(h)}}}).observe(document,{childList:true,subtree:true})}}{const n=()=>{try{if(document.querySelector('meta[name="color-scheme"]'))return;const d=getComputedStyle(document.documentElement).getPropertyValue("color-scheme").trim();if(d&&d!=="normal")return;const p=(y)=>{if(!y)return null;const m=getComputedStyle(y).backgroundColor.match(/^rgba?\(\s*(\d+)[,\s]+(\d+)[,\s]+(\d+)(?:[,\s/]+([\d.]+%?))?\s*\)$/);if(!m)return null;const w=m[4]==null?1:parseFloat(m[4])/(m[4].endsWith("%")?100:1);if(w<0.99)return null;return[+m[1],+m[2],+m[3]]};const f=p(document.body)||p(document.documentElement);if(!f)return;const g=(y)=>{const m=y/255;return m<=0.04045?m/12.92:((m+0.055)/1.055)**2.4};const h=0.2126*g(f[0])+0.7152*g(f[1])+0.0722*g(f[2]);document.documentElement.style.setProperty("color-scheme",h<0.4?"dark":"light")}catch{}};if(document.readyState==="complete")n();else window.addEventListener("load",n)}var I=[];var B=false;var K=false;var C=()=>{};if(K===true){try{const n=setTimeout.bind(window);const d=1e4;const p=15;const f=1e4;const g=120000;const h=200;const y=(o)=>{try{let r;if(typeof o==="string")r=o;else if(o instanceof URL)r=o.href;else if(typeof Request!=="undefined"&&o instanceof Request)r=o.url;else return null;if(!r)return null;const l=document.baseURI;const i=new URL(r,l);if(i.protocol!=="http:"&&i.protocol!=="https:")return null;if(i.origin!==new URL(l).origin)return null;return i.origin+i.pathname}catch{return null}};const m=new Map;const w=(o)=>{let r=m.get(o);if(!r){if(m.size>=h){const l=m.keys().next().value;if(l!==undefined)m.delete(l)}r={fails:[],until:0,cooldown:f,hard:false};m.set(o,r)}return r};const R=(o)=>{const r=m.get(o);return r!==undefined&&r.until>Date.now()};const O=(o,r)=>{const l=Date.now();const i=w(o);if(r)i.hard=true;if(i.until>l)return;i.fails.push(l);while(i.fails.length>0&&i.fails[0]<=l-d)i.fails.shift();if(i.fails.length>=p){i.until=l+i.cooldown;if(i.hard)i.cooldown=Math.min(i.cooldown*2,g);i.fails.length=0;try{n(()=>{try{S(true)}catch{}},i.until-l+100)}catch{}console.warn("[omelette] asset circuit breaker: pausing requests to "+o+" for "+Math.round((i.until-l)/1000)+"s after "+p+" failures in "+d/1000+"s")}};const e=(o)=>{m.delete(o)};const t=100;const a=new WeakMap;const u=new Set;let s=null;const S=(o)=>{for(const r of Array.from(u)){try{const l=a.get(r);if(l===undefined){u.delete(r);continue}if(o){const i=y(l);if(i!==null&&R(i))continue}a.delete(r);u.delete(r);if(s!==null)s.call(r,l)}catch{}}};C=()=>{try{m.clear();S(false)}catch{}};document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")C()});const _=window.fetch;if(typeof _==="function"){const o=function(...r){let l=null;try{l=y(r[0])}catch{}if(l!==null&&R(l)){let c;try{if(r[1]&&r[1].signal!==undefined){c=r[1].signal||undefined}else if(typeof Request!=="undefined"&&r[0]instanceof Request){c=r[0].signal||undefined}}catch{c=undefined}return new Promise((k,b)=>{const E=()=>{try{return c.reason!==undefined?c.reason:new DOMException("The operation was aborted.","AbortError")}catch{return new DOMException("The operation was aborted.","AbortError")}};try{if(c&&c.aborted){b(E());return}}catch{}let T=false;const j=()=>{if(T)return;T=true;b(E())};try{if(c)c.addEventListener("abort",j,{once:true})}catch{}n(()=>{if(T)return;T=true;try{if(c)c.removeEventListener("abort",j)}catch{}let L;try{L=new Response(null,{status:429,statusText:"Too Many Requests",headers:{"Retry-After":"10"}})}catch{L={ok:false,status:429}}k(L)},250)})}const i=_.apply(window,r);if(l!==null){const c=l;i.then((k)=>{try{if(k.ok)e(c);else if(k.status===401||k.status===403||k.status===404||k.status===429){O(c,k.status!==404)}}catch{}},()=>{})}return i};window.fetch=o}const v=Object.getOwnPropertyDescriptor(HTMLImageElement.prototype,"src");if(v!==undefined&&v.set!==undefined&&v.get!==undefined){const o=v.set;s=o;Object.defineProperty(HTMLImageElement.prototype,"src",{configurable:true,enumerable:v.enumerable,get:v.get,set(r){const l=`${r}`;try{const i=y(l);if(i!==null&&R(i)){a.set(this,l);if(u.size<t)u.add(this);return}}catch{}try{a.delete(this);u.delete(this)}catch{}o.call(this,l)}})}try{const o=HTMLImageElement.prototype.setAttribute;HTMLImageElement.prototype.setAttribute=function(r,l){if(arguments.length<2){o.apply(this,arguments);return}if(typeof r==="string"&&r.toLowerCase()==="src"){const i=`${l}`;try{const c=y(i);if(c!==null&&R(c)){a.set(this,i);if(u.size<t)u.add(this);return}a.delete(this);u.delete(this)}catch{}o.call(this,r,i);return}o.call(this,r,l)}}catch{}window.addEventListener("error",(o)=>{try{const r=o.target;if(r instanceof HTMLImageElement){const l=y(r.currentSrc||r.src||"");if(l!==null)O(l,true)}}catch{}},true);window.addEventListener("load",(o)=>{try{const r=o.target;if(r instanceof HTMLImageElement){const l=y(r.currentSrc||r.src||"");if(l!==null)e(l);const i=a.get(r);if(i!==undefined){let c=false;try{c=new URL(i,document.baseURI).href===new URL(r.currentSrc||r.src||"",document.baseURI).href}catch{c=false}if(c){a.delete(r);u.delete(r)}}}}catch{}},true)}catch{}}var J=30000;var G=3000;document.addEventListener("DOMContentLoaded",()=>{const n=window.Babel;const d="om-src-id";if(n&&n.registerPlugin&&!(n.availablePlugins&&n.availablePlugins[d])){n.registerPlugin(d,({types:h})=>({visitor:{JSXOpeningElement(y,m){const w=y.node;if(w.name&&w.name.type==="JSXMemberExpression")return;for(let t=0;t<w.attributes.length;t++){const a=w.attributes[t];if(a.type==="JSXAttribute"&&a.name&&a.name.name==="data-om-id")return}const R=m.file&&m.file.opts&&m.file.opts.filename||"?";const O=w.loc&&w.loc.start;const e=`jsx:${R}:${w.start??0}:${O?O.line:0}:${O?O.column+1:0}`;w.attributes.push(h.jsxAttribute(h.jsxIdentifier("data-om-id"),h.stringLiteral(e)))}}}))}const p="om-text-extract";let f=false;if(B&&n&&n.registerPlugin&&!(n.availablePlugins&&n.availablePlugins[p])){const h=window.React;if(h&&h.useSyncExternalStore&&h.createElement){f=true;const y={};const m=new Set;let w=0;window.__omTextO=y;window.__omTextSet=(e)=>{for(const t in e){const a=e[t];if(a==null)delete y[t];else y[t]=a}w++;m.forEach((t)=>t())};const R=(e)=>{m.add(e);return()=>m.delete(e)};const O=()=>w;window.__OmT=function e(t){h.useSyncExternalStore(R,O,O);return h.createElement("span",{"data-om-text":t.i,className:"__om-t"},t.i in y?y[t.i]:t.children)};n.registerPlugin(p,({types:e})=>{const t={style:1,script:1,noscript:1,textarea:1,title:1,option:1,text:1,tspan:1,textPath:1};const a={placeholder:1,alt:1,title:1,label:1,"aria-label":1,"aria-description":1,"aria-placeholder":1};const u=(o,r)=>e.logicalExpression("??",e.memberExpression(e.logicalExpression("||",e.memberExpression(e.identifier("window"),e.identifier("__omTextO")),e.objectExpression([])),e.stringLiteral(o),true),r);const s=(o)=>o.file&&o.file.opts&&o.file.opts.filename||"?";const S=(o)=>o.file&&o.file.code||"";const _=(o,r)=>{const l=(c)=>c&&c.start!=null&&c.end!=null&&(c.type==="StringLiteral"||c.type==="TemplateLiteral"&&c.expressions.length===0)?[c.start,c.end]:null;const i=l(r);if(i)return i;if(r&&r.type==="Identifier"){const c=o.scope.getBinding(r.name);if(c&&c.constant&&c.path.node.type==="VariableDeclarator"){return l(c.path.node.init)}}return null};const v=(o,r,l)=>{const i=o.node;let c=false;const k=(E,T)=>{c=true;return e.jsxElement(e.jsxOpeningElement(e.jsxIdentifier("__OmT"),[e.jsxAttribute(e.jsxIdentifier("i"),e.stringLiteral(E))],false),e.jsxClosingElement(e.jsxIdentifier("__OmT")),[T],false)};const b=i.children.map((E)=>{if(E.type==="JSXText"){if(E.start==null||E.end==null)return E;const T=l.slice(E.start,E.end);const j=T.length-T.trimStart().length;const L=T.length-T.trimEnd().length;if(j+L>=T.length)return E;return k(`txt:${r}:${E.start+j}:${E.end-L}`,E)}if(E.type==="JSXExpressionContainer"){const T=_(o,E.expression);if(T)return k(`str:${r}:${T[0]}:${T[1]}`,E)}return E});if(c)i.children=b};return{visitor:{JSXOpeningElement(o,r){const l=o.node;const i=s(r);const c={};for(let k=0;k<l.attributes.length;k++){const b=l.attributes[k];if(b.type!=="JSXAttribute"||!b.name)continue;const E=b.name.name;if(!a[E])continue;if(!b.value||b.value.type!=="StringLiteral")continue;if(b.value.start==null||b.value.end==null)continue;const T=`txt:${i}:${b.value.start}:${b.value.end}`;c[E]=T;b.value=e.jsxExpressionContainer(u(T,e.stringLiteral(b.value.value)))}if(Object.keys(c).length){l.attributes.push(e.jsxAttribute(e.jsxIdentifier("data-om-text-attrs"),e.stringLiteral(JSON.stringify(c))))}},JSXElement(o,r){const l=o.node.openingElement;const i=l&&l.name&&l.name.name;if(i==="__OmT")return;if(typeof i==="string"&&t[i])return;v(o,s(r),S(r))},JSXFragment(o,r){v(o,s(r),S(r))}}}})}}const g=f?["transform-react-jsx-source",d,p]:["transform-react-jsx-source",d];document.querySelectorAll('script[type="text/babel"],script[type="text/jsx"]').forEach((h,y)=>{const m=h.getAttribute("data-plugins")||"";const w=g.filter((R)=>m.indexOf(R)<0);if(w.length){h.setAttribute("data-plugins",m?`${m},${w.join(",")}`:w.join(","))}if(!h.hasAttribute("data-filename")){h.setAttribute("data-filename",h.getAttribute("src")||`inline-${y}`)}})});var A=window.parent;var U="not editable here — open the project in the Claude Design editor to save";var W=()=>Promise.resolve({persisted:false,noHost:true,reason:U});var H=W;var M="data/storage.json";var z=()=>{try{const n=new URL(document.baseURI);const d=n.pathname.match(/\/projects\/([^/]+)\/serve\//);if(d)return d[1];return n.hostname.split(".")[0]||""}catch{return location.hostname.split(".")[0]||""}};var Z=()=>{try{const n=new URL(document.baseURI);const d=n.pathname.indexOf("/serve/");if(d>=0)return n.origin+n.pathname.slice(0,d+"/serve/".length)+M}catch{}return"./"+M};var x=null;var N=()=>{if(!x){x=fetch(Z(),{cache:"no-store"}).then((n)=>{if(n.ok)return n.text();return n.status===404?"":null}).catch(()=>null).then((n)=>{if(n===null){x=null;return null}const d=new Map;if(!n)return d;let p;try{p=JSON.parse(n)}catch{console.warn("[omelette.storage] "+M+" is not valid JSON; treating the store as unreadable so a save cannot overwrite the "+"hand-edited bytes. Fix the JSON (or delete the file) to re-enable persistence.");x=null;return null}if(p===null||typeof p!=="object"||Array.isArray(p)){console.warn("[omelette.storage] "+M+" doesn't hold a JSON object; treating the store as unreadable so a save cannot "+"overwrite the hand-edited bytes. Make the top level a JSON object to re-enable persistence.");x=null;return null}const f=p;if("data"in f){const g=f.data;if(g===null||typeof g!=="object"||Array.isArray(g)){console.warn("[omelette.storage] "+M+' has a "data" field that is not a JSON object; treating the store as unreadable so a '+'save cannot overwrite the hand-edited bytes. Make "data" a JSON object to re-enable persistence.');x=null;return null}const h=f._meta;const y=h!==null&&typeof h==="object"?h.project:undefined;if(typeof y==="string"&&y!==""&&y!==z())return d;for(const m of Object.keys(g))d.set(m,g[m]);return d}for(const g of Object.keys(f)){if(g!=="_meta")d.set(g,f[g])}return d})}return x};var F=(n)=>H(M,JSON.stringify({_meta:{project:z(),version:1},data:Object.fromEntries(n)},null,2));var D=Promise.resolve();var $=(n)=>{const d=D.then(n);D=d.then(()=>{return},()=>{return});return d};var V=/sk-(?:ant-)?[A-Za-z0-9_-]{16,}|AKIA[0-9A-Z]{16}|gh[pousr]_[A-Za-z0-9]{20,}|xox[a-z]-[A-Za-z0-9][A-Za-z0-9-]{9,}|AIza[0-9A-Za-z_-]{30,}|-----BEGIN [A-Z ]*PRIVATE KEY-----/;var Y=/password|passwd|secret|api[_-]?key|access[_-]?token|auth[_-]?token|credential/i;var Q=(n,d,p)=>{if(V.test(d)||Y.test(n)&&typeof p==="string"&&p.length>=8){console.warn('[omelette.storage] the value for "'+n+'" looks like a credential. The storage file is a plaintext project file — visible to '+"everyone with project access and copied when the project is duplicated. Do not store secrets here.")}};var q={persisted:false,reason:"could not load the existing store — not overwriting it"};var X={persisted:false,reason:"stored value changed since a failed read — re-read this key before saving"};var P=new Set;var ee={get:(n)=>{if(typeof n!=="string"){return Promise.reject(new TypeError("storage.get: key must be a string"))}return $(N).then((d)=>{if(d===null){P.add(n);return null}P.delete(n);if(!d.has(n))return null;const p=d.get(n);return p==null?null:JSON.parse(JSON.stringify(p))})},set:(n,d)=>{if(typeof n!=="string"){return Promise.reject(new TypeError("storage.set: key must be a string"))}let p;try{p=JSON.stringify(d)}catch(g){return Promise.reject(new TypeError("storage.set: value must be JSON-serializable ("+String(g)+")"))}if(p===undefined){return Promise.reject(new TypeError("storage.set: value must be JSON-serializable"))}Q(n,p,d);const f=JSON.parse(p);return $(()=>N().then((g)=>{if(g===null)return q;if(P.has(n)){if(g.has(n))return X;P.delete(n)}g.set(n,f);return F(g)}))},delete:(n)=>{if(typeof n!=="string"){return Promise.reject(new TypeError("storage.delete: key must be a string"))}return $(()=>N().then((d)=>{if(d===null)return q;if(P.has(n)){if(d.has(n))return X;P.delete(n)}d.delete(n);return F(d)}))},keys:()=>$(N).then((n)=>n===null?[]:Array.from(n.keys()))};window.omelette={writeFile:(n,d)=>H(n,d).then((p)=>{if(!p.persisted&&!p.noHost){throw new Error(p.reason||"write failed")}}),storage:ee};if(A&&A!==window){const n=(e,t)=>{try{A.postMessage({__omelette_log:true,type:e,data:t},"*")}catch{}};["log","warn","error"].forEach((e)=>{const t=console[e];console[e]=(...a)=>{const u=a.map((s)=>{try{return typeof s==="object"?JSON.stringify(s):String(s)}catch{try{return String(s)}catch{return"[unstringifiable]"}}}).join(" ");n(e,u);t.apply(console,a)}});window.addEventListener("error",(e)=>{const t=e.target;if(t&&t!==window&&t.tagName){const a=t.src||t.href||"";n("resource_error",`${t.tagName} failed to load: ${a}`)}else{n("error",`${e.message||"Unknown error"} at ${e.filename||"?"}:${e.lineno||0}:${e.colno||0}`)}},true);window.addEventListener("unhandledrejection",(e)=>{const t=e.reason;const a=t instanceof Error?`${t.message} ${t.stack}`:String(t);n("error",`Unhandled rejection: ${a}`)});window.addEventListener("click",(e)=>{if(e.defaultPrevented||e.button!==0)return;if(e.metaKey||e.ctrlKey||e.shiftKey||e.altKey)return;const t=e.composedPath?e.composedPath():[];const a=["button","input","select","textarea","summary","label"];let u=null;for(const v of t){if(!(v instanceof Element))continue;if(v.localName==="a"){if(!(v instanceof HTMLAnchorElement))return;u=v;break}if(a.indexOf(v.localName)!==-1)return}if(!u)return;if(u.isContentEditable)return;const s=u.closest("[contenteditable]");if(s&&s.getAttribute("contenteditable")!=="false")return;const S=(u.getAttribute("target")||"_self").toLowerCase();if(S!=="_self"&&S!=="_top"&&S!=="_parent")return;let _;try{_=new URL(u.href)}catch{return}if(_.protocol!=="http:"&&_.protocol!=="https:")return;if(location.origin==="null")return;if(_.origin===location.origin)return;e.preventDefault();window.open(_.href,"_blank","noopener,noreferrer")});const d=()=>{try{A.postMessage({type:"omelette:height",height:document.documentElement.scrollHeight},"*")}catch{}};if(window.ResizeObserver)new ResizeObserver(d).observe(document.documentElement);const p=()=>{d();if(!document.querySelector('script[type="text/babel"],script[type="text/jsx"]'))return;const e=()=>document.getElementById("root")||document.querySelector("body > div[id]");const t=e()?.firstElementChild??null;let a=0;const u=()=>{const s=e();if(s&&s.firstElementChild!==t||++a>30){d();return}setTimeout(u,100)};setTimeout(u,100)};if(document.readyState==="complete")p();else window.addEventListener("load",p);const f={};let g=0;const h=(e)=>new Promise((t,a)=>{if(!I.length){a(new Error("claude.complete: no parent origin"));return}const u=`c${++g}`;const s=()=>setTimeout(()=>{delete f[u];a(new Error(`claude.complete: no data for ${J/1000}s`))},J);const S=s();f[u]={resolve:t,reject:a,text:"",t:S,arm:s};try{for(const _ of I){A.postMessage({__om_api:true,id:u,body:e},_)}}catch(_){clearTimeout(S);delete f[u];a(_)}});const y=8;const m=async(e,t)=>{if(!Array.isArray(e.messages)){throw new Error("claude.complete: tools require a messages array")}const a=e.messages.slice();const u={...e,tools:e.tools.map((_)=>{if(_===null||typeof _!=="object")return _;const v={};for(const o of Object.keys(_)){if(typeof _[o]!=="function")v[o]=_[o]}return v})};const s=u.tool_choice;const S=s!=null&&(s.type==="any"||s.type==="tool")?{...u,tool_choice:s.disable_parallel_tool_use!==undefined?{type:"auto",disable_parallel_tool_use:s.disable_parallel_tool_use}:{type:"auto"}}:u;for(let _=0;_<y;_++){const v=await h({..._===0?u:S,messages:a});const o=v.message;const r=o&&Array.isArray(o.content)?o.content:null;const l=r?r.filter((c)=>c?.type==="tool_use"):[];if(o?.stop_reason!=="tool_use"||l.length===0){return v.text}const i=[];for(const c of l){const k=t.get(c.name);if(!k){i.push({type:"tool_result",tool_use_id:c.id,content:`no handler for tool "${c.name}"`,is_error:true});continue}try{const b=await k(c.input);const E=typeof b==="string"?b:O(b)??"";i.push({type:"tool_result",tool_use_id:c.id,content:E})}catch(b){i.push({type:"tool_result",tool_use_id:c.id,content:String(b?.message??b??"tool handler failed"),is_error:true})}}a.push({role:"assistant",content:r},{role:"user",content:i})}throw new Error(`claude.complete: exceeded ${y} tool turns`)};window.claude={complete(e){const t=e;if(t!==null&&typeof t==="object"&&Array.isArray(t.tools)&&t.tools.some((a)=>a!==null&&typeof a==="object"&&typeof a.run==="function")){const a=new Map;for(const u of t.tools){if(u!==null&&typeof u==="object"&&typeof u.run==="function"){a.set(String(u.name),u.run)}}return m(t,a)}return h(e).then((a)=>a.text)}};const w={};let R=0;H=(e,t)=>new Promise((a)=>{if(!I.length){a({persisted:false,noHost:true,reason:U});return}const u=`f${++R}`;const s=setTimeout(()=>{delete w[u];a({persisted:false,noHost:true,reason:U})},G);w[u]={settle:a,t:s};try{for(const S of I){A.postMessage({__om_file:true,id:u,op:"write",path:e,content:t},S)}}catch{clearTimeout(s);delete w[u];a({persisted:false,noHost:true,reason:U})}});const O=(e)=>{try{return JSON.stringify(e)}catch{return JSON.stringify(String(e))}};window.addEventListener("message",(e)=>{if(I.indexOf(e.origin)<0)return;if(e.source!==A)return;const t=e.data;if(!t)return;if(t.type==="omelette-preview-refresh"){if(typeof t.token!=="string"||!/^[0-9a-f.-]+(\.(rc|pr-[0-9]+))?(\.[0-9]+\.[0-9a-f]{16})?$/.test(t.token))return;const s=Math.max(1,Math.floor((t.expiresAt||0)-Date.now()/1000));document.cookie="__Host-omelette-preview="+t.token+"; Path=/; Secure; SameSite=None; Partitioned; Max-Age="+s;C();return}if(t.__om_file_r){const s=w[t.id];if(!s)return;clearTimeout(s.t);delete w[t.id];s.settle(t.ok?{persisted:true}:{persisted:false,reason:t.error||"write failed"});return}if(t.__om_api_r){const s=f[t.id];if(!s)return;if(t.error!=null){clearTimeout(s.t);delete f[t.id];s.reject(new Error(t.error));return}if(t.chunk!=null){clearTimeout(s.t);s.t=s.arm();s.text+=t.chunk;return}if(t.done){clearTimeout(s.t);delete f[t.id];s.resolve({text:t.text!=null?t.text:s.text,message:t.message});return}return}if(!t.__om_eval)return;const a=t;const u=(s)=>{e.source.postMessage({...s,__om_eval_r:1,id:a.id},e.origin)};try{const s=(0,eval)(a.code);if(s&&typeof s.then==="function"){s.then((S)=>u({ok:1,v:O(S)}),(S)=>u({ok:0,e:String(S)}))}else{u({ok:1,v:O(s)})}}catch(s){u({ok:0,e:String(s)})}})}})();
+</script>
+
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@900&family=Montserrat:wght@500;600&family=Marck+Script&family=Oswald:wght@500;700&family=Roboto+Condensed:wght@400;500;700&family=Caveat:wght@500;600&display=swap" rel="stylesheet">
+<script src="./image-slot.js"></script>
+<style>
+body{margin:0;background:#EDE4D6;font-family:'Roboto Condensed',system-ui,sans-serif;color:#2E2119;-webkit-font-smoothing:antialiased}
+a{color:#B8622B}a:hover{color:#B9432A}
+input,button{font-family:inherit}
+@keyframes gr-pulse{0%,100%{opacity:1}50%{opacity:.35}}
+@keyframes gr-toast{from{transform:translateY(-140%);opacity:0}to{transform:none;opacity:1}}
+</style>
+</helmet>
+<div style="display:flex;flex-wrap:wrap;gap:36px;align-items:flex-start;justify-content:center;padding:36px 28px 60px;min-height:100vh;box-sizing:border-box">
+<aside style="flex:1 1 260px;max-width:360px;display:flex;flex-direction:column;gap:18px;font-size:14px;line-height:1.45">
+<div>
+<div style="font:900 32px 'Playfair Display',serif;color:#B8622B;line-height:1">GRAFF</div>
+<div style="font:600 10px 'Montserrat',sans-serif;letter-spacing:.3em;color:#7A5C48;margin-top:6px">ПРОТОТИП ПРИЛОЖЕНИЯ · iOS / ANDROID</div>
+</div>
+<p style="margin:0;color:#7A5C48;text-wrap:pretty">Кликабельный прототип по брифу: клиент заказывает с телефона, видит статус и таймер готовности; персонал ведёт заказы и столики. Стиль — печатное меню кафе, перенесённое на экран: кремовая бумага, медь, точечные лидеры, рукописные акценты.</p>
+<div>
+<div style="font:700 12px 'Oswald',sans-serif;letter-spacing:.14em;margin-bottom:8px">ЭКРАНЫ</div>
+<div style="display:flex;flex-wrap:wrap;gap:6px">
+<sc-for list="{{ jumps }}" as="j" hint-placeholder-count="9">
+<button onClick="{{ j.go }}" style="border:1px solid #D4B79B;border-radius:999px;padding:6px 12px;background:{{ j.bg }};color:{{ j.fg }};font:500 13px 'Roboto Condensed',sans-serif;cursor:pointer;white-space:nowrap">{{ j.label }}</button>
+</sc-for>
+</div>
+</div>
+<div>
+<div style="font:700 12px 'Oswald',sans-serif;letter-spacing:.14em;margin-bottom:6px">ДОПУЩЕНИЯ</div>
+<ul style="margin:0;padding-left:18px;color:#7A5C48;display:flex;flex-direction:column;gap:4px">
+<li>Столики: терраса 1–6, зал 7–14. Нумерация условная.</li>
+<li>Адрес и часы — плейсхолдеры [АДРЕС], [ЧАСЫ РАБОТЫ].</li>
+<li>Фото и логотип к брифу не приложились — стоят слоты, перетащите файлы прямо в них.</li>
+<li>Доставки нет. Оплата: наличные, карта при получении, онлайн (заглушка).</li>
+<li>Описания блюд — [состав], заполню по вашему списку.</li>
+</ul>
+</div>
+<div>
+<div style="font:700 12px 'Oswald',sans-serif;letter-spacing:.14em;margin-bottom:6px">КАК ПРОВЕРИТЬ</div>
+<ol style="margin:0;padding-left:18px;color:#7A5C48;display:flex;flex-direction:column;gap:4px">
+<li>Меню → блюдо → «В корзину» → столик → «Оформить заказ».</li>
+<li>Кухня-автопилот сам принимает заказ и ведёт статусы; время ускорено (1 мин = 5 с). В Tweaks обе опции выключаются — тогда статусы ведутся вручную в «Персонале».</li>
+<li>Push «Ваш заказ готов!» появляется баннером сверху экрана.</li>
+</ol>
+</div>
+</aside>
+<div style="flex:none">
+<x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" hint-size="402px,874px">
+<div style="position:absolute;inset:0;overflow:hidden;background:#FBF6EF;font-family:'Roboto Condensed',sans-serif;color:#2E2119;font-size:15px;line-height:1.35">
+<div style="position:absolute;inset:0;opacity:.55;pointer-events:none;background-image:url(data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27240%27%20height%3D%27240%27%3E%3Cfilter%20id%3D%27n%27%3E%3CfeTurbulence%20type%3D%27fractalNoise%27%20baseFrequency%3D%27.8%27%20numOctaves%3D%272%27%20stitchTiles%3D%27stitch%27%2F%3E%3CfeColorMatrix%20values%3D%270%200%200%200%20.35%200%200%200%200%20.22%200%200%200%200%20.1%200%200%200%20.12%200%27%2F%3E%3C%2Ffilter%3E%3Crect%20width%3D%27100%25%27%20height%3D%27100%25%27%20filter%3D%27url%28%23n%29%27%2F%3E%3C%2Fsvg%3E)"></div>
+<div style="position:absolute;top:0;left:0;right:0;height:62px;background:rgba(251,246,239,.9);backdrop-filter:blur(8px);z-index:5"></div>
+
+<sc-if value="{{ isSplash }}" hint-placeholder-val="{{ true }}">
+<div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;padding:112px 26px 36px;overflow-y:auto;scrollbar-width:none">
+<svg viewBox="0 0 40 40" width="46" height="46" fill="none" stroke="#B8622B" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" style="position:absolute;left:16px;top:74px;opacity:.7"><path d="M4 36C8 20 18 10 36 4"></path><path d="M12 24c-1-6 2-9 6-10 0 5-2 8-6 10zM20 15c-1-5 1-8 5-9 0 4-1 7-5 9zM9 31c-4 1-7-1-8-4 4-1 7 1 8 4zM15 22c-4 1-7-1-8-4 4-1 7 1 8 4z"></path></svg>
+<svg viewBox="0 0 40 40" width="46" height="46" fill="none" stroke="#B8622B" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" style="position:absolute;right:16px;top:74px;opacity:.7;transform:scaleX(-1)"><path d="M4 36C8 20 18 10 36 4"></path><path d="M12 24c-1-6 2-9 6-10 0 5-2 8-6 10zM20 15c-1-5 1-8 5-9 0 4-1 7-5 9zM9 31c-4 1-7-1-8-4 4-1 7 1 8 4zM15 22c-4 1-7-1-8-4 4-1 7 1 8 4z"></path></svg>
+<svg viewBox="0 0 24 14" width="36" height="21" fill="none" stroke="#B8622B" stroke-width="1.4" stroke-linejoin="round" stroke-linecap="round"><path d="M3 11L2 4l5 3.5L12 2l5 5.5L22 4l-1 7z"></path><path d="M4 13.2h16"></path></svg>
+<svg viewBox="0 0 48 48" width="108" height="108" fill="none" stroke-linecap="round" style="margin-top:6px"><defs><linearGradient id="gg1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#B8622B"></stop><stop offset="1" stop-color="#D08A4E"></stop></linearGradient></defs><path d="M34.5 11.5A16 16 0 1 0 40 27" stroke="url(#gg1)" stroke-width="3.4"></path><path d="M40 27a8 8 0 0 0-8-8" stroke="url(#gg1)" stroke-width="3.4"></path><path d="M25 27h15" stroke="url(#gg1)" stroke-width="1.5"></path></svg>
+<div style="font:900 48px 'Playfair Display',serif;color:#B8622B;letter-spacing:.02em;line-height:1;margin-top:10px">GRAFF</div>
+<div style="font:600 11px 'Montserrat',sans-serif;letter-spacing:.34em;color:#7A5C48;margin-top:10px">FAST &amp; DELICIOUS</div>
+<div style="font:500 26px 'Caveat',cursive;color:#B8622B;margin-top:14px">Вкус · Качество · Скорость</div>
+<div style="flex:1"></div>
+<div style="width:100%;background:#F4E9DB;border:1px solid #D4B79B;border-radius:18px;padding:18px;display:flex;flex-direction:column;gap:12px;box-shadow:0 10px 28px rgba(120,80,40,.12)">
+<sc-if value="{{ stepPhone }}" hint-placeholder-val="{{ true }}">
+<div style="font:700 18px 'Oswald',sans-serif;letter-spacing:.06em">ВХОД ПО НОМЕРУ</div>
+<div style="font-size:14px;color:#7A5C48;text-wrap:pretty">Пришлём SMS с кодом. История заказов, избранное и статус заказа по звонку будут в профиле.</div>
+<input value="{{ phoneInput }}" onChange="{{ setPhoneInput }}" placeholder="+7 ___ ___-__-__" style="height:50px;border:1px solid #D4B79B;border-radius:14px;padding:0 16px;font-size:18px;background:#FBF6EF;color:#2E2119;outline:none;width:100%;box-sizing:border-box">
+<sc-if value="{{ phoneErr }}" hint-placeholder-val="{{ false }}"><div style="font-size:13px;color:#B9432A">Введите номер полностью — 10 цифр после +7</div></sc-if>
+<button onClick="{{ sendCode }}" style="height:50px;border:0;border-radius:14px;background:linear-gradient(135deg,#B8622B,#D08A4E);color:#fff;font:700 16px 'Oswald',sans-serif;letter-spacing:.06em;cursor:pointer;box-shadow:0 6px 16px rgba(184,98,43,.28)">ПОЛУЧИТЬ КОД</button>
+<button onClick="{{ skipLogin }}" style="background:none;border:0;color:#B8622B;font:500 15px 'Roboto Condensed',sans-serif;cursor:pointer;padding:4px">Продолжить без входа</button>
+</sc-if>
+<sc-if value="{{ stepCode }}" hint-placeholder-val="{{ false }}">
+<div style="font:700 18px 'Oswald',sans-serif;letter-spacing:.06em">КОД ИЗ SMS</div>
+<div style="font-size:14px;color:#7A5C48">Отправили на {{ phoneShown }} · <span onClick="{{ backToPhone }}" style="color:#B8622B;cursor:pointer">изменить</span></div>
+<input value="{{ codeInput }}" onChange="{{ setCodeInput }}" placeholder="••••" style="height:56px;border:1px solid #D4B79B;border-radius:14px;padding:0 16px;font-size:28px;letter-spacing:.5em;text-align:center;background:#FBF6EF;color:#2E2119;outline:none;width:100%;box-sizing:border-box">
+<button onClick="{{ confirmCode }}" style="height:50px;border:0;border-radius:14px;background:linear-gradient(135deg,#B8622B,#D08A4E);color:#fff;font:700 16px 'Oswald',sans-serif;letter-spacing:.06em;cursor:pointer;box-shadow:0 6px 16px rgba(184,98,43,.28)">ПОДТВЕРДИТЬ</button>
+<div style="font-size:12px;color:#7A5C48;text-align:center">В прототипе подходит любой код из 4 цифр</div>
+</sc-if>
+<sc-if value="{{ stepName }}" hint-placeholder-val="{{ false }}">
+<div style="font:700 18px 'Oswald',sans-serif;letter-spacing:.06em">КАК ВАС ЗОВУТ?</div>
+<input value="{{ nameInput }}" onChange="{{ setNameInput }}" placeholder="Имя" style="height:50px;border:1px solid #D4B79B;border-radius:14px;padding:0 16px;font-size:18px;background:#FBF6EF;color:#2E2119;outline:none;width:100%;box-sizing:border-box">
+<button onClick="{{ finishLogin }}" style="height:50px;border:0;border-radius:14px;background:linear-gradient(135deg,#B8622B,#D08A4E);color:#fff;font:700 16px 'Oswald',sans-serif;letter-spacing:.06em;cursor:pointer;box-shadow:0 6px 16px rgba(184,98,43,.28)">ГОТОВО</button>
+</sc-if>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isHome }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;inset:0;overflow-y:auto;scrollbar-width:none;padding:66px 0 104px">
+<div style="display:flex;align-items:flex-start;justify-content:space-between;padding:0 18px">
+<div style="display:flex;align-items:center;gap:8px">
+<svg viewBox="0 0 48 48" width="42" height="42" fill="none" stroke-linecap="round"><defs><linearGradient id="gg2" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#B8622B"></stop><stop offset="1" stop-color="#D08A4E"></stop></linearGradient></defs><path d="M34.5 11.5A16 16 0 1 0 40 27" stroke="url(#gg2)" stroke-width="3.6"></path><path d="M40 27a8 8 0 0 0-8-8" stroke="url(#gg2)" stroke-width="3.6"></path><path d="M25 27h15" stroke="url(#gg2)" stroke-width="1.6"></path></svg>
+<div style="display:flex;flex-direction:column;align-items:center">
+<svg viewBox="0 0 24 14" width="16" height="9" fill="none" stroke="#B8622B" stroke-width="1.6" stroke-linejoin="round"><path d="M3 11L2 4l5 3.5L12 2l5 5.5L22 4l-1 7z"></path><path d="M4 13.2h16"></path></svg>
+<div style="font:900 22px 'Playfair Display',serif;color:#B8622B;letter-spacing:.02em;line-height:1">GRAFF</div>
+<div style="font:600 7px 'Montserrat',sans-serif;letter-spacing:.3em;color:#7A5C48;margin-top:3px">FAST &amp; DELICIOUS</div>
+</div>
+</div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:4px">
+<div onClick="{{ callPhone }}" style="width:46px;height:46px;border-radius:50%;background:linear-gradient(135deg,#B8622B,#D08A4E);display:flex;align-items:center;justify-content:center;box-shadow:0 6px 14px rgba(184,98,43,.3);cursor:pointer"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"></path></svg></div>
+<div style="font:500 12px 'Roboto Condensed',sans-serif;color:#7A5C48">+7 938 900-90-67</div>
+</div>
+</div>
+<div style="margin:22px 18px 0;display:grid;grid-template-columns:104px 1fr 104px;align-items:center;gap:6px">
+<div style="position:relative">
+<div style="position:absolute;left:0;top:-18px;font:600 15px 'Caveat',cursive;color:#B8622B;line-height:1.05;width:96px">Вкус Качество Скорость</div>
+<image-slot id="hero-burger" shape="circle" style="width:104px;height:104px;margin-top:20px" placeholder="Фото бургера"></image-slot>
+</div>
+<div style="display:flex;flex-direction:column;align-items:center;text-align:center">
+<svg viewBox="0 0 24 14" width="26" height="15" fill="none" stroke="#B8622B" stroke-width="1.4" stroke-linejoin="round"><path d="M3 11L2 4l5 3.5L12 2l5 5.5L22 4l-1 7z"></path><path d="M4 13.2h16"></path></svg>
+<div style="display:flex;align-items:center;gap:6px">
+<svg viewBox="0 0 24 16" width="20" height="13" fill="none" stroke="#B8622B" stroke-width="1.5" stroke-linecap="round"><path d="M3 13L9 3M9 13l6-10M15 13l6-10"></path></svg>
+<div style="font:400 46px 'Marck Script',cursive;color:#B8622B;line-height:1">Меню</div>
+<svg viewBox="0 0 24 16" width="20" height="13" fill="none" stroke="#B8622B" stroke-width="1.5" stroke-linecap="round" style="transform:scaleX(-1)"><path d="M3 13L9 3M9 13l6-10M15 13l6-10"></path></svg>
+</div>
+<div onClick="{{ nav.menu }}" style="margin-top:8px;border:1.5px solid #B8622B;border-radius:999px;padding:5px 14px;font:700 12px 'Oswald',sans-serif;letter-spacing:.1em;color:#B8622B;cursor:pointer">СМОТРЕТЬ</div>
+</div>
+<div style="position:relative">
+<image-slot id="hero-fries" shape="circle" style="width:104px;height:104px" placeholder="Фото фри GRAFF"></image-slot>
+<div style="font:600 15px 'Caveat',cursive;color:#B8622B;text-align:right;line-height:1.05;margin-top:6px">Еда, которая всегда рядом ♥</div>
+</div>
+</div>
+<div style="margin:18px 18px 0;display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;padding:10px 4px;border-top:1px solid #D4B79B;border-bottom:1px solid #D4B79B">
+<div style="display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center;font-size:12px;color:#7A5C48;line-height:1.2"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#B8622B" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 11a4 4 0 0 1 1-7.5 5 5 0 0 1 8 0A4 4 0 0 1 17 11v9H7zM7 16h10"></path></svg>Свежие продукты каждый день</div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center;font-size:12px;color:#7A5C48;line-height:1.2"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#B8622B" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0-18 0M12 7v5l3.5 2"></path></svg>Быстрое приготовление, без лишнего ожидания</div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center;font-size:12px;color:#7A5C48;line-height:1.2"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#B8622B" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20.5s-8-5.2-8-11.2A4.4 4.4 0 0 1 12 6.8a4.4 4.4 0 0 1 8 2.5c0 6-8 11.2-8 11.2z"></path></svg>С любовью для вас!</div>
+</div>
+<sc-if value="{{ hasActive }}" hint-placeholder-val="{{ false }}">
+<div onClick="{{ openActive }}" style="margin:16px 18px 0;background:#fff;border:1px solid #D4B79B;border-radius:16px;padding:12px 14px;display:flex;align-items:center;gap:14px;cursor:pointer;box-shadow:0 4px 14px rgba(120,80,40,.08)">
+<div style="width:56px;height:56px;border-radius:50%;border:3px solid {{ active.ringColor }};display:flex;align-items:center;justify-content:center;font:700 14px 'Oswald',sans-serif;color:{{ active.ringColor }};text-align:center;line-height:1;flex:none">{{ active.minutesShort }}</div>
+<div style="flex:1;min-width:0">
+<div style="font:700 11px 'Oswald',sans-serif;letter-spacing:.14em;color:#7A5C48">ВАШ ЗАКАЗ</div>
+<div style="font:700 18px 'Oswald',sans-serif">№{{ active.no }} · {{ active.statusText }}</div>
+<div style="font-size:13px;color:#7A5C48">{{ active.subline }}</div>
+</div>
+<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#B8622B" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"></path></svg>
+</div>
+</sc-if>
+<div style="margin:16px 18px 0;display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+<sc-for list="{{ formats }}" as="f" hint-placeholder-count="3">
+<div onClick="{{ f.pick }}" style="display:flex;flex-direction:column;align-items:center;gap:5px;padding:10px 6px;border-radius:14px;border:1px solid {{ f.border }};background:{{ f.bg }};color:{{ f.fg }};cursor:pointer;font:500 14px 'Roboto Condensed',sans-serif"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="{{ f.fg }}" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="{{ f.icon }}"></path></svg>{{ f.name }}</div>
+</sc-for>
+</div>
+<div style="margin:20px 18px 0;font:700 13px 'Oswald',sans-serif;letter-spacing:.14em">КАТЕГОРИИ</div>
+<div style="display:flex;gap:10px;overflow-x:auto;scrollbar-width:none;padding:10px 18px 4px">
+<sc-for list="{{ cats }}" as="c" hint-placeholder-count="6">
+<div onClick="{{ c.open }}" style="flex:none;display:flex;flex-direction:column;align-items:center;gap:6px;width:72px;cursor:pointer">
+<div style="width:60px;height:60px;border-radius:18px;background:{{ c.plateBg }};border:1px solid #D4B79B;display:flex;align-items:center;justify-content:center"><svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="#B8622B" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="{{ c.icon }}"></path></svg></div>
+<div style="font:500 12px 'Roboto Condensed',sans-serif;text-align:center">{{ c.name }}</div>
+</div>
+</sc-for>
+</div>
+<div style="margin:14px 18px 0;background:#F8DCC0;border:1px solid #D4B79B;border-radius:16px;padding:12px 0">
+<div style="display:flex;align-items:center;gap:6px;padding:0 14px;font:700 15px 'Oswald',sans-serif;letter-spacing:.1em"><span style="color:#B9432A;font-size:18px;line-height:1">★</span> НОВИНКИ</div>
+<div style="display:flex;gap:10px;overflow-x:auto;scrollbar-width:none;padding:10px 14px 0">
+<sc-for list="{{ newItems }}" as="n" hint-placeholder-count="3">
+<div onClick="{{ n.open }}" style="flex:none;width:150px;background:#FBF6EF;border:1px solid #D4B79B;border-radius:14px;padding:10px;cursor:pointer;display:flex;flex-direction:column;gap:8px">
+<image-slot id="new-{{ n.id }}" style="width:100%;height:84px" radius="10" placeholder="Фото"></image-slot>
+<div style="font-size:14px;line-height:1.2;min-height:34px">{{ n.name }}</div>
+<div style="display:flex;justify-content:space-between;align-items:center"><span style="font:500 15px 'Roboto Condensed',sans-serif;color:#B9432A">{{ n.priceLabel }}</span><span style="width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#B8622B,#D08A4E);color:#fff;display:flex;align-items:center;justify-content:center;font-size:18px;line-height:1">+</span></div>
+</div>
+</sc-for>
+</div>
+</div>
+<div onClick="{{ nav.about }}" style="margin:14px 18px 0;display:flex;align-items:center;gap:10px;padding:12px 14px;background:#F4E9DB;border:1px solid #D4B79B;border-radius:14px;cursor:pointer">
+<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#B8622B" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s7-7.5 7-13a7 7 0 0 0-14 0c0 5.5 7 13 7 13zM12 9m-2.5 0a2.5 2.5 0 1 0 5 0a2.5 2.5 0 1 0-5 0"></path></svg>
+<div style="flex:1;min-width:0"><div style="font-weight:500">Чири-Юрт, [АДРЕС]</div><div style="font-size:13px;color:#7A5C48">[ЧАСЫ РАБОТЫ] · зал и терраса</div></div>
+<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#B8622B" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"></path></svg>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isMenu }}" hint-placeholder-val="{{ false }}">
+<div ref="{{ menuScroll }}" onScroll="{{ onMenuScroll }}" style="position:absolute;inset:0;overflow-y:auto;scrollbar-width:none;padding:62px 0 116px">
+<div style="position:sticky;top:0;z-index:4;background:rgba(251,246,239,.96);backdrop-filter:blur(8px);padding:6px 0 10px;border-bottom:1px solid #D4B79B">
+<div style="display:flex;align-items:center;justify-content:space-between;padding:0 18px 8px">
+<sc-if value="{{ plateTitle }}" hint-placeholder-val="{{ true }}">
+<div style="display:inline-flex;align-items:center;gap:8px;background:#F4E9DB;border:1px solid #D4B79B;border-radius:12px;padding:6px 14px 6px 10px"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#B8622B" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10a8 6.5 0 0 1 16 0zM3 13h18M4 16h16v1a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3z"></path></svg><span style="font:700 18px 'Oswald',sans-serif;letter-spacing:.1em">МЕНЮ</span></div>
+</sc-if>
+<sc-if value="{{ scriptTitle }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;align-items:flex-start;line-height:1"><svg viewBox="0 0 24 14" width="20" height="12" fill="none" stroke="#B8622B" stroke-width="1.5" stroke-linejoin="round" style="margin-left:8px"><path d="M3 11L2 4l5 3.5L12 2l5 5.5L22 4l-1 7z"></path><path d="M4 13.2h16"></path></svg><span style="font:400 34px 'Marck Script',cursive;color:#B8622B">Меню</span></div>
+</sc-if>
+<div style="font:600 15px 'Caveat',cursive;color:#B8622B">Еда, которая всегда рядом ♥</div>
+</div>
+<div style="display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding:0 18px">
+<sc-for list="{{ cats }}" as="c" hint-placeholder-count="7">
+<div onClick="{{ c.select }}" style="flex:none;display:flex;align-items:center;gap:6px;padding:7px 12px 7px 9px;border-radius:12px;border:1px solid {{ c.tabBorder }};background:{{ c.tabBg }};color:{{ c.tabFg }};cursor:pointer;font:700 13px 'Oswald',sans-serif;letter-spacing:.08em;text-transform:uppercase"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="{{ c.tabFg }}" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="{{ c.icon }}"></path></svg>{{ c.name }}</div>
+</sc-for>
+</div>
+</div>
+<sc-for list="{{ cats }}" as="c" hint-placeholder-count="2">
+<div ref="{{ c.ref }}" style="padding:18px 18px 6px">
+<div style="display:flex;align-items:center;gap:10px">
+<div style="flex:1;display:flex;align-items:center;gap:8px;background:{{ c.plateBg }};border:1px solid #D4B79B;border-radius:12px;padding:8px 12px"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#B8622B" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="{{ c.icon }}"></path></svg><span style="font:700 17px 'Oswald',sans-serif;letter-spacing:.1em;text-transform:uppercase">{{ c.name }}</span><sc-if value="{{ c.isNew }}" hint-placeholder-val="{{ false }}"><span style="color:#B9432A;font-size:18px;margin-left:auto;line-height:1">★</span></sc-if></div>
+<svg viewBox="0 0 24 16" width="22" height="14" fill="none" stroke="#B8622B" stroke-width="1.5" stroke-linecap="round"><path d="M3 13L9 3M9 13l6-10M15 13l6-10"></path></svg>
+</div>
+<sc-if value="{{ c.hasPhoto }}" hint-placeholder-val="{{ true }}">
+<image-slot id="cat-{{ c.id }}" style="width:100%;height:130px;margin-top:12px" radius="14" placeholder="{{ c.photo }}"></image-slot>
+</sc-if>
+<sc-for list="{{ c.groups }}" as="g" hint-placeholder-count="1">
+<div style="margin-top:12px">
+<sc-if value="{{ g.hasName }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;align-items:center;gap:6px;font:700 15px 'Roboto Condensed',sans-serif;margin-bottom:2px"><sc-if value="{{ g.hasIcon }}" hint-placeholder-val="{{ false }}"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#B8622B" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="{{ g.icon }}"></path></svg></sc-if>{{ g.name }}</div>
+</sc-if>
+<sc-for list="{{ g.items }}" as="it" hint-placeholder-count="4">
+<div onClick="{{ it.open }}" style="padding:7px 0;cursor:pointer">
+<div style="display:flex;align-items:baseline;gap:6px">
+<span style="font-size:15px">{{ it.name }}</span>
+<span style="flex:1;border-bottom:2px dotted #D4B79B;transform:translateY(-4px)"></span>
+<span style="font:500 15px 'Roboto Condensed',sans-serif;color:#B9432A;white-space:nowrap">{{ it.priceLabel }}</span>
+</div>
+<sc-if value="{{ it.hasSizes }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap">
+<sc-for list="{{ it.sizes }}" as="z" hint-placeholder-count="2">
+<span onClick="{{ z.pick }}" style="border:1px solid #D4B79B;border-radius:999px;padding:2px 10px;font-size:12px;color:#7A5C48">{{ z.l }}</span>
+</sc-for>
+</div>
+</sc-if>
+</div>
+</sc-for>
+</div>
+</sc-for>
+</div>
+</sc-for>
+<div style="margin:20px 18px 0;padding:14px 4px 0;border-top:1px solid #D4B79B;display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;text-align:center;font-size:12px;color:#7A5C48;line-height:1.2">
+<div style="display:flex;flex-direction:column;align-items:center;gap:4px"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#B8622B" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 11a4 4 0 0 1 1-7.5 5 5 0 0 1 8 0A4 4 0 0 1 17 11v9H7zM7 16h10"></path></svg>Свежие продукты каждый день</div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:4px"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#B8622B" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0-18 0M12 7v5l3.5 2"></path></svg>Быстрое приготовление, без лишнего ожидания</div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:4px"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#B8622B" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20.5s-8-5.2-8-11.2A4.4 4.4 0 0 1 12 6.8a4.4 4.4 0 0 1 8 2.5c0 6-8 11.2-8 11.2z"></path></svg>С любовью для вас! Спасибо, что выбираете нас!</div>
+</div>
+</div>
+<sc-if value="{{ hasCart }}" hint-placeholder-val="{{ false }}">
+<div onClick="{{ nav.cart }}" style="position:absolute;left:18px;right:18px;bottom:96px;z-index:6;height:52px;border-radius:16px;background:linear-gradient(135deg,#B8622B,#D08A4E);color:#fff;display:flex;align-items:center;justify-content:space-between;padding:0 18px;font:700 16px 'Oswald',sans-serif;letter-spacing:.06em;box-shadow:0 8px 20px rgba(184,98,43,.35);cursor:pointer">
+<span>КОРЗИНА · {{ cartCount }}</span><span>{{ cartTotalLabel }}</span>
+</div>
+</sc-if>
+</sc-if>
+
+<sc-if value="{{ isDish }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;inset:0;overflow-y:auto;scrollbar-width:none;padding:70px 0 120px">
+<div style="position:relative;margin:0 18px">
+<image-slot id="dish-{{ dish.id }}" style="width:100%;height:250px" radius="18" placeholder="{{ dish.photo }}"></image-slot>
+<div onClick="{{ dishBack }}" style="position:absolute;left:10px;top:10px;width:38px;height:38px;border-radius:50%;background:rgba(251,246,239,.94);border:1px solid #D4B79B;display:flex;align-items:center;justify-content:center;cursor:pointer"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#B8622B" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"></path></svg></div>
+<div onClick="{{ toggleFav }}" style="position:absolute;right:10px;top:10px;width:38px;height:38px;border-radius:50%;background:rgba(251,246,239,.94);border:1px solid #D4B79B;display:flex;align-items:center;justify-content:center;cursor:pointer"><svg viewBox="0 0 24 24" width="20" height="20" fill="{{ dish.favFill }}" stroke="#B8622B" stroke-width="1.7" stroke-linejoin="round"><path d="M12 20.5s-8-5.2-8-11.2A4.4 4.4 0 0 1 12 6.8a4.4 4.4 0 0 1 8 2.5c0 6-8 11.2-8 11.2z"></path></svg></div>
+<sc-if value="{{ dish.isNew }}" hint-placeholder-val="{{ false }}"><div style="position:absolute;left:10px;bottom:10px;background:#F8DCC0;border:1px solid #D4B79B;border-radius:999px;padding:3px 10px;font:600 12px 'Roboto Condensed',sans-serif"><span style="color:#B9432A">★</span> Новинка</div></sc-if>
+</div>
+<div style="padding:16px 18px 0">
+<div style="font:700 12px 'Oswald',sans-serif;letter-spacing:.14em;color:#7A5C48;text-transform:uppercase">{{ dish.catName }}</div>
+<div style="display:flex;align-items:baseline;gap:8px;margin-top:2px"><div style="font:700 26px 'Oswald',sans-serif;line-height:1.1;flex:1">{{ dish.name }}</div><div style="font:500 20px 'Roboto Condensed',sans-serif;color:#B9432A;white-space:nowrap">{{ dish.unitLabel }}</div></div>
+<div style="margin-top:8px;color:#7A5C48;font-size:14px;text-wrap:pretty">{{ dish.desc }}</div>
+<sc-if value="{{ dish.hasSizes }}" hint-placeholder-val="{{ false }}">
+<div style="margin-top:16px;font:700 14px 'Roboto Condensed',sans-serif">{{ dish.sizeTitle }}</div>
+<div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
+<sc-for list="{{ dish.sizes }}" as="z" hint-placeholder-count="2">
+<div onClick="{{ z.pick }}" style="border:1.5px solid #B8622B;border-radius:999px;padding:7px 14px;background:{{ z.bg }};color:{{ z.fg }};font:500 14px 'Roboto Condensed',sans-serif;cursor:pointer;display:flex;gap:6px"><span>{{ z.l }}</span><span style="opacity:.8">{{ z.pLabel }}</span></div>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{ dish.hasSauces }}" hint-placeholder-val="{{ false }}">
+<div style="margin-top:18px;font:700 14px 'Roboto Condensed',sans-serif">Добавить соус</div>
+<div style="margin-top:8px;background:#F4E9DB;border:1px solid #D4B79B;border-radius:14px;overflow:hidden">
+<sc-for list="{{ dish.sauces }}" as="sa" hint-placeholder-count="5">
+<div onClick="{{ sa.toggle }}" style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid rgba(212,183,155,.6);cursor:pointer">
+<div style="width:20px;height:20px;border-radius:6px;border:1.5px solid #B8622B;background:{{ sa.bg }};display:flex;align-items:center;justify-content:center;flex:none"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="opacity:{{ sa.checkOp }}"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg></div>
+<span style="flex:1">{{ sa.name }}</span><span style="color:#B9432A;font-weight:500">+{{ sa.p }} ₽</span>
+</div>
+</sc-for>
+</div>
+</sc-if>
+<div style="margin-top:18px;display:flex;align-items:center;justify-content:space-between">
+<div style="font:700 14px 'Roboto Condensed',sans-serif">Количество</div>
+<div style="display:flex;align-items:center;gap:14px">
+<div onClick="{{ dishDec }}" style="width:36px;height:36px;border-radius:50%;border:1.5px solid #B8622B;color:#B8622B;display:flex;align-items:center;justify-content:center;font-size:22px;line-height:1;cursor:pointer;user-select:none">−</div>
+<div style="font:700 20px 'Oswald',sans-serif;min-width:20px;text-align:center">{{ dish.qty }}</div>
+<div onClick="{{ dishInc }}" style="width:36px;height:36px;border-radius:50%;border:1.5px solid #B8622B;color:#B8622B;display:flex;align-items:center;justify-content:center;font-size:22px;line-height:1;cursor:pointer;user-select:none">+</div>
+</div>
+</div>
+</div>
+</div>
+<div style="position:absolute;left:18px;right:18px;bottom:44px;z-index:6">
+<button onClick="{{ addToCart }}" style="width:100%;height:54px;border:0;border-radius:16px;background:linear-gradient(135deg,#B8622B,#D08A4E);color:#fff;font:700 17px 'Oswald',sans-serif;letter-spacing:.06em;cursor:pointer;box-shadow:0 8px 20px rgba(184,98,43,.35);display:flex;align-items:center;justify-content:space-between;padding:0 20px"><span>В КОРЗИНУ</span><span>{{ dish.totalLabel }}</span></button>
+</div>
+</sc-if>
+
+<sc-if value="{{ isCart }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;inset:0;overflow-y:auto;scrollbar-width:none;padding:66px 18px 120px">
+<sc-if value="{{ plateTitle }}" hint-placeholder-val="{{ true }}">
+<div style="display:inline-flex;align-items:center;gap:8px;background:#F4E9DB;border:1px solid #D4B79B;border-radius:12px;padding:6px 14px 6px 10px"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#B8622B" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8h12l1 13H5zM9 8V6.5a3 3 0 0 1 6 0V8"></path></svg><span style="font:700 18px 'Oswald',sans-serif;letter-spacing:.1em">КОРЗИНА</span></div>
+</sc-if>
+<sc-if value="{{ scriptTitle }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;align-items:flex-start;line-height:1"><svg viewBox="0 0 24 14" width="20" height="12" fill="none" stroke="#B8622B" stroke-width="1.5" stroke-linejoin="round" style="margin-left:8px"><path d="M3 11L2 4l5 3.5L12 2l5 5.5L22 4l-1 7z"></path><path d="M4 13.2h16"></path></svg><span style="font:400 36px 'Marck Script',cursive;color:#B8622B">Корзина</span></div>
+</sc-if>
+<sc-if value="{{ cartEmpty }}" hint-placeholder-val="{{ true }}">
+<div style="margin-top:90px;display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center">
+<svg viewBox="0 0 24 14" width="80" height="47" fill="none" stroke="#B8622B" stroke-width="1" stroke-linejoin="round" stroke-linecap="round"><path d="M3 11L2 4l5 3.5L12 2l5 5.5L22 4l-1 7z"></path><path d="M4 13.2h16"></path></svg>
+<div style="font:600 26px 'Caveat',cursive;color:#B8622B">Пока пусто. Начните с бургера ♥</div>
+<button onClick="{{ nav.menu }}" style="height:48px;padding:0 28px;border:1.5px solid #B8622B;border-radius:14px;background:transparent;color:#B8622B;font:700 15px 'Oswald',sans-serif;letter-spacing:.08em;cursor:pointer">К МЕНЮ</button>
+</div>
+</sc-if>
+<sc-if value="{{ hasCart }}" hint-placeholder-val="{{ false }}">
+<div style="margin-top:14px;background:#fff;border:1px solid #D4B79B;border-radius:16px;overflow:hidden">
+<sc-for list="{{ cartLines }}" as="l" hint-placeholder-count="2">
+<div style="display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid #F4E9DB">
+<div style="flex:1;min-width:0"><div style="font-size:15px">{{ l.name }}</div><div style="font-size:12px;color:#7A5C48">{{ l.meta }}</div></div>
+<div style="display:flex;align-items:center;gap:8px">
+<div onClick="{{ l.dec }}" style="width:28px;height:28px;border-radius:50%;border:1.5px solid #B8622B;color:#B8622B;display:flex;align-items:center;justify-content:center;font-size:18px;line-height:1;cursor:pointer;user-select:none">−</div>
+<div style="font:700 16px 'Oswald',sans-serif;min-width:16px;text-align:center">{{ l.qty }}</div>
+<div onClick="{{ l.inc }}" style="width:28px;height:28px;border-radius:50%;border:1.5px solid #B8622B;color:#B8622B;display:flex;align-items:center;justify-content:center;font-size:18px;line-height:1;cursor:pointer;user-select:none">+</div>
+</div>
+<div style="font:500 15px 'Roboto Condensed',sans-serif;color:#B9432A;min-width:58px;text-align:right">{{ l.sumLabel }}</div>
+</div>
+</sc-for>
+</div>
+<input value="{{ comment }}" onChange="{{ setComment }}" placeholder="Комментарий к заказу" style="margin-top:10px;height:48px;border:1px solid #D4B79B;border-radius:14px;padding:0 14px;font-size:15px;background:#fff;color:#2E2119;outline:none;width:100%;box-sizing:border-box">
+<div style="margin:20px 0 8px;font:700 12px 'Oswald',sans-serif;letter-spacing:.14em;color:#7A5C48">ФОРМАТ ПОЛУЧЕНИЯ</div>
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+<sc-for list="{{ formats }}" as="f" hint-placeholder-count="3">
+<div onClick="{{ f.pick }}" style="display:flex;flex-direction:column;align-items:center;gap:5px;padding:10px 6px;border-radius:14px;border:1px solid {{ f.border }};background:{{ f.bg }};color:{{ f.fg }};cursor:pointer;font:500 14px 'Roboto Condensed',sans-serif"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="{{ f.fg }}" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="{{ f.icon }}"></path></svg>{{ f.name }}</div>
+</sc-for>
+</div>
+<sc-if value="{{ showTables }}" hint-placeholder-val="{{ true }}">
+<div style="margin-top:10px;background:#F4E9DB;border:1px solid #D4B79B;border-radius:16px;padding:12px 14px">
+<div style="display:flex;justify-content:space-between;align-items:center"><span style="font:700 14px 'Roboto Condensed',sans-serif">Столик</span><span onClick="{{ pickAnyTable }}" style="border:1.5px solid #B8622B;border-radius:999px;padding:4px 12px;font-size:13px;background:{{ anyBg }};color:{{ anyFg }};cursor:pointer;white-space:nowrap">Любой свободный</span></div>
+<sc-for list="{{ zones }}" as="zn" hint-placeholder-count="2">
+<div style="margin-top:10px;opacity:{{ zn.dim }}">
+<div style="display:flex;align-items:center;gap:6px;font-size:13px;color:#7A5C48;margin-bottom:6px"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#B8622B" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="{{ zn.icon }}"></path></svg>{{ zn.name }}<span style="flex:1;border-bottom:1px dashed #D4B79B"></span><span>{{ zn.freeText }}</span></div>
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px">
+<sc-for list="{{ zn.tables }}" as="t" hint-placeholder-count="4">
+<div onClick="{{ t.pick }}" style="height:40px;border-radius:10px;border:1px solid {{ t.border }};background:{{ t.bg }};color:{{ t.fg }};display:flex;align-items:center;justify-content:center;font:700 15px 'Oswald',sans-serif;cursor:{{ t.cursor }}">{{ t.n }}</div>
+</sc-for>
+</div>
+</div>
+</sc-for>
+<div style="margin-top:10px;font-size:12px;color:#7A5C48;display:flex;gap:14px;align-items:center"><span style="display:inline-flex;align-items:center;gap:5px"><span style="width:12px;height:12px;border-radius:3px;border:1px solid #D4B79B;background:#FBF6EF"></span>свободен</span><span style="display:inline-flex;align-items:center;gap:5px"><span style="width:12px;height:12px;border-radius:3px;background:#DDD5CB"></span>занят</span><span style="display:inline-flex;align-items:center;gap:5px"><span style="width:12px;height:12px;border-radius:3px;background:#B8622B"></span>ваш</span></div>
+</div>
+</sc-if>
+<sc-if value="{{ showPickup }}" hint-placeholder-val="{{ false }}">
+<div style="margin-top:10px;background:#F4E9DB;border:1px solid #D4B79B;border-radius:16px;padding:12px 14px">
+<div style="font:700 14px 'Roboto Condensed',sans-serif">Когда забрать</div>
+<div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
+<span onClick="{{ pickAsap }}" style="border:1.5px solid #B8622B;border-radius:999px;padding:6px 14px;font-size:14px;background:{{ asapBg }};color:{{ asapFg }};cursor:pointer">Как можно скорее</span>
+<sc-for list="{{ slots }}" as="sl" hint-placeholder-count="4">
+<span onClick="{{ sl.pick }}" style="border:1.5px solid #B8622B;border-radius:999px;padding:6px 14px;font-size:14px;background:{{ sl.bg }};color:{{ sl.fg }};cursor:pointer">{{ sl.label }}</span>
+</sc-for>
+</div>
+</div>
+</sc-if>
+<div style="margin:20px 0 8px;font:700 12px 'Oswald',sans-serif;letter-spacing:.14em;color:#7A5C48">ИМЯ И ТЕЛЕФОН</div>
+<sc-if value="{{ loggedIn }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;align-items:center;gap:12px;background:#fff;border:1px solid #D4B79B;border-radius:14px;padding:10px 14px">
+<div style="width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#B8622B,#D08A4E);color:#fff;display:flex;align-items:center;justify-content:center;font:900 17px 'Playfair Display',serif">{{ userInitial }}</div>
+<div style="flex:1"><div style="font-weight:500">{{ userName }}</div><div style="font-size:13px;color:#7A5C48">{{ userPhone }}</div></div>
+<div style="font-size:12px;color:#7A5C48">из профиля</div>
+</div>
+</sc-if>
+<sc-if value="{{ notLoggedIn }}" hint-placeholder-val="{{ true }}">
+<div style="display:grid;grid-template-columns:1fr 1.3fr;gap:8px">
+<input value="{{ guestName }}" onChange="{{ setGuestName }}" placeholder="Имя" style="height:48px;border:1px solid #D4B79B;border-radius:14px;padding:0 14px;font-size:15px;background:#fff;color:#2E2119;outline:none;width:100%;box-sizing:border-box">
+<input value="{{ guestPhone }}" onChange="{{ setGuestPhone }}" placeholder="+7 ___ ___-__-__" style="height:48px;border:1px solid #D4B79B;border-radius:14px;padding:0 14px;font-size:15px;background:#fff;color:#2E2119;outline:none;width:100%;box-sizing:border-box">
+</div>
+</sc-if>
+<div style="margin:20px 0 8px;font:700 12px 'Oswald',sans-serif;letter-spacing:.14em;color:#7A5C48">ОПЛАТА</div>
+<div style="background:#fff;border:1px solid #D4B79B;border-radius:14px;overflow:hidden">
+<sc-for list="{{ payments }}" as="pm" hint-placeholder-count="3">
+<div onClick="{{ pm.pick }}" style="display:flex;align-items:center;gap:12px;padding:12px 14px;border-bottom:1px solid #F4E9DB;cursor:pointer">
+<div style="width:20px;height:20px;border-radius:50%;border:1.5px solid #B8622B;display:flex;align-items:center;justify-content:center;flex:none"><div style="width:10px;height:10px;border-radius:50%;background:{{ pm.dot }}"></div></div>
+<span style="flex:1">{{ pm.name }}</span>
+</div>
+</sc-for>
+</div>
+<div style="margin-top:18px;display:flex;flex-direction:column;gap:6px">
+<div style="display:flex;align-items:baseline;gap:6px;color:#7A5C48;font-size:14px"><span>Блюда · {{ cartCount }}</span><span style="flex:1;border-bottom:2px dotted #D4B79B;transform:translateY(-4px)"></span><span>{{ cartTotalLabel }}</span></div>
+<div style="display:flex;align-items:baseline;gap:6px;color:#7A5C48;font-size:14px"><span>{{ formatSummary }}</span><span style="flex:1;border-bottom:2px dotted #D4B79B;transform:translateY(-4px)"></span><span>0 ₽</span></div>
+<div style="display:flex;align-items:baseline;gap:6px;font:700 20px 'Oswald',sans-serif"><span>ИТОГО</span><span style="flex:1;border-bottom:2px dotted #D4B79B;transform:translateY(-5px)"></span><span style="color:#B9432A">{{ cartTotalLabel }}</span></div>
+</div>
+<button onClick="{{ placeOrder }}" style="margin-top:16px;width:100%;height:54px;border:0;border-radius:16px;background:linear-gradient(135deg,#B8622B,#D08A4E);color:#fff;font:700 17px 'Oswald',sans-serif;letter-spacing:.06em;cursor:pointer;box-shadow:0 8px 20px rgba(184,98,43,.35)">ОФОРМИТЬ ЗАКАЗ · {{ cartTotalLabel }}</button>
+<div style="text-align:center;margin-top:12px;font-size:14px;color:#7A5C48">Или позвоните нам: <span onClick="{{ callPhone }}" style="color:#B8622B;font-weight:500;cursor:pointer">+7 938 900-90-67</span></div>
+</sc-if>
+</div>
+</sc-if>
+
+<sc-if value="{{ isStatus }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;inset:0;overflow-y:auto;scrollbar-width:none;padding:66px 18px 116px">
+<sc-if value="{{ noOrders }}" hint-placeholder-val="{{ false }}">
+<div style="margin-top:110px;display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center">
+<svg viewBox="0 0 24 14" width="80" height="47" fill="none" stroke="#B8622B" stroke-width="1" stroke-linejoin="round" stroke-linecap="round"><path d="M3 11L2 4l5 3.5L12 2l5 5.5L22 4l-1 7z"></path><path d="M4 13.2h16"></path></svg>
+<div style="font:600 26px 'Caveat',cursive;color:#B8622B">Заказов пока нет</div>
+<div style="font-size:14px;color:#7A5C48;max-width:260px;text-wrap:pretty">Оформите заказ в приложении или по телефону — статус и время готовности появятся здесь.</div>
+<button onClick="{{ nav.menu }}" style="height:48px;padding:0 28px;border:1.5px solid #B8622B;border-radius:14px;background:transparent;color:#B8622B;font:700 15px 'Oswald',sans-serif;letter-spacing:.08em;cursor:pointer">К МЕНЮ</button>
+</div>
+</sc-if>
+<sc-if value="{{ hasOrder }}" hint-placeholder-val="{{ true }}">
+<sc-if value="{{ manyActive }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;gap:8px;justify-content:center;margin-bottom:10px;flex-wrap:wrap">
+<sc-for list="{{ activeChips }}" as="ac" hint-placeholder-count="2">
+<span onClick="{{ ac.pick }}" style="border:1.5px solid #B8622B;border-radius:999px;padding:5px 12px;font:700 13px 'Oswald',sans-serif;background:{{ ac.bg }};color:{{ ac.fg }};cursor:pointer">№{{ ac.no }}</span>
+</sc-for>
+</div>
+</sc-if>
+<div style="text-align:center">
+<div style="font:700 12px 'Oswald',sans-serif;letter-spacing:.16em;color:#7A5C48">{{ ord.formatLabel }}</div>
+<div style="font:700 34px 'Oswald',sans-serif;line-height:1.1">Заказ №{{ ord.no }}</div>
+</div>
+<div style="position:relative;width:220px;height:220px;margin:16px auto 0">
+<svg viewBox="0 0 220 220" width="220" height="220" style="transform:rotate(-90deg)"><circle cx="110" cy="110" r="96" fill="none" stroke="#F4E9DB" stroke-width="14"></circle><circle cx="110" cy="110" r="96" fill="none" stroke="{{ ord.ringColor }}" stroke-width="14" stroke-linecap="round" stroke-dasharray="603.2" stroke-dashoffset="{{ ord.ringOffset }}" style="transition:stroke-dashoffset .8s ease"></circle></svg>
+<div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:30px">
+<div style="font-size:13px;color:#7A5C48">{{ ord.ringTop }}</div>
+<div style="font:700 42px 'Oswald',sans-serif;color:{{ ord.ringColor }};line-height:1.05">{{ ord.ringMain }}</div>
+<div style="font-size:13px;color:#7A5C48;margin-top:4px">{{ ord.ringSub }}</div>
+</div>
+</div>
+<div style="text-align:center;margin-top:12px;font:600 24px 'Caveat',cursive;color:#B8622B">{{ ord.headline }}</div>
+<div style="display:grid;grid-template-columns:repeat(4,1fr);margin-top:16px;position:relative">
+<div style="position:absolute;left:13%;right:13%;top:19px;border-top:2px dotted #D4B79B"></div>
+<sc-for list="{{ ord.steps }}" as="st" hint-placeholder-count="4">
+<div style="display:flex;flex-direction:column;align-items:center;gap:6px;position:relative">
+<div style="width:40px;height:40px;border-radius:50%;background:{{ st.bg }};border:1.5px solid {{ st.border }};display:flex;align-items:center;justify-content:center;animation:{{ st.anim }}"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="{{ st.fg }}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="{{ st.icon }}"></path></svg></div>
+<div style="font-size:12px;color:{{ st.textColor }};font-weight:{{ st.weight }}">{{ st.name }}</div>
+</div>
+</sc-for>
+</div>
+<div style="margin-top:20px;background:#F4E9DB;border:1px solid #D4B79B;border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:6px">
+<sc-for list="{{ ord.lines }}" as="l" hint-placeholder-count="2">
+<div style="display:flex;align-items:baseline;gap:6px;font-size:14px"><span>{{ l.qtyName }}</span><span style="flex:1;border-bottom:2px dotted #D4B79B;transform:translateY(-4px)"></span><span style="color:#B9432A;font-weight:500">{{ l.sumLabel }}</span></div>
+</sc-for>
+<div style="display:flex;align-items:baseline;gap:6px;font-size:14px;color:#7A5C48;margin-top:4px"><span>{{ ord.formatText }}</span><span style="flex:1;border-bottom:2px dotted #D4B79B;transform:translateY(-4px)"></span><span>{{ ord.payText }}</span></div>
+<div style="display:flex;align-items:baseline;gap:6px;font:700 18px 'Oswald',sans-serif;margin-top:2px"><span>ИТОГО</span><span style="flex:1;border-bottom:2px dotted #D4B79B;transform:translateY(-5px)"></span><span style="color:#B9432A">{{ ord.totalLabel }}</span></div>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px">
+<button onClick="{{ callPhone }}" style="height:48px;border:1.5px solid #B8622B;border-radius:14px;background:transparent;color:#B8622B;font:700 15px 'Oswald',sans-serif;letter-spacing:.06em;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#B8622B" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"></path></svg>ПОЗВОНИТЬ</button>
+<button onClick="{{ ord.repeat }}" style="height:48px;border:0;border-radius:14px;background:linear-gradient(135deg,#B8622B,#D08A4E);color:#fff;font:700 15px 'Oswald',sans-serif;letter-spacing:.06em;cursor:pointer;box-shadow:0 6px 16px rgba(184,98,43,.28)">ПОВТОРИТЬ ЗАКАЗ</button>
+</div>
+</sc-if>
+</div>
+</sc-if>
+
+<sc-if value="{{ isProfile }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;inset:0;overflow-y:auto;scrollbar-width:none;padding:66px 18px 116px">
+<sc-if value="{{ profileMain }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;align-items:center;gap:14px">
+<div style="width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,#B8622B,#D08A4E);color:#fff;display:flex;align-items:center;justify-content:center;font:900 28px 'Playfair Display',serif;flex:none">{{ userInitial }}</div>
+<div style="flex:1;min-width:0"><div style="font:700 22px 'Oswald',sans-serif;line-height:1.1">{{ userName }}</div><div style="color:#7A5C48;font-size:14px;margin-top:2px">{{ userPhone }}</div></div>
+<sc-if value="{{ notLoggedIn }}" hint-placeholder-val="{{ true }}"><button onClick="{{ nav.splash }}" style="height:38px;padding:0 16px;border:1.5px solid #B8622B;border-radius:12px;background:transparent;color:#B8622B;font:700 13px 'Oswald',sans-serif;letter-spacing:.08em;cursor:pointer">ВОЙТИ</button></sc-if>
+</div>
+<div style="margin-top:20px;background:#fff;border:1px solid #D4B79B;border-radius:16px;overflow:hidden">
+<div onClick="{{ openOrders }}" style="display:flex;align-items:center;gap:12px;padding:14px;border-bottom:1px solid #F4E9DB;cursor:pointer"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#B8622B" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2zM9 8h6M9 12h6"></path></svg><span style="flex:1">Мои заказы</span><span style="color:#7A5C48;font-size:14px">{{ historyCount }}</span><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#B8622B" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"></path></svg></div>
+<div onClick="{{ openFavs }}" style="display:flex;align-items:center;gap:12px;padding:14px;border-bottom:1px solid #F4E9DB;cursor:pointer"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#B8622B" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20.5s-8-5.2-8-11.2A4.4 4.4 0 0 1 12 6.8a4.4 4.4 0 0 1 8 2.5c0 6-8 11.2-8 11.2z"></path></svg><span style="flex:1">Избранное</span><span style="color:#7A5C48;font-size:14px">{{ favCount }}</span><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#B8622B" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"></path></svg></div>
+<div onClick="{{ cycleFavFormat }}" style="display:flex;align-items:center;gap:12px;padding:14px;border-bottom:1px solid #F4E9DB;cursor:pointer"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#B8622B" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v9H6zM6 12v9M18 12v9M6 16h12"></path></svg><div style="flex:1"><div>Любимый формат</div><div style="font-size:12px;color:#7A5C48">для быстрого оформления</div></div><span style="border:1.5px solid #B8622B;border-radius:999px;padding:4px 12px;font-size:13px;color:#B8622B;white-space:nowrap">{{ favFormatText }}</span></div>
+<div style="display:flex;align-items:center;gap:12px;padding:14px;border-bottom:1px solid #F4E9DB"><svg viewBox="0 0 24 14" width="22" height="14" fill="none" stroke="#B8622B" stroke-width="1.5" stroke-linejoin="round"><path d="M3 11L2 4l5 3.5L12 2l5 5.5L22 4l-1 7z"></path><path d="M4 13.2h16"></path></svg><span style="flex:1">Бонусы</span><span style="background:#F8DCC0;border-radius:999px;padding:3px 10px;font-size:12px;font-weight:600;color:#B9432A">Скоро</span></div>
+<div onClick="{{ toggleNotif }}" style="display:flex;align-items:center;gap:12px;padding:14px;border-bottom:1px solid #F4E9DB;cursor:pointer"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#B8622B" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 17v-6a6 6 0 0 1 12 0v6l2 2H4zM10 21a2 2 0 0 0 4 0"></path></svg><div style="flex:1"><div>Уведомления</div><div style="font-size:12px;color:#7A5C48">«Ваш заказ готов!» и изменение времени</div></div><div style="width:44px;height:26px;border-radius:13px;background:{{ notifBg }};position:relative;transition:background .2s;flex:none"><div style="position:absolute;top:2px;left:{{ notifX }};width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.2);transition:left .2s"></div></div></div>
+<div onClick="{{ nav.about }}" style="display:flex;align-items:center;gap:12px;padding:14px;cursor:pointer"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#B8622B" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s7-7.5 7-13a7 7 0 0 0-14 0c0 5.5 7 13 7 13zM12 9m-2.5 0a2.5 2.5 0 1 0 5 0a2.5 2.5 0 1 0-5 0"></path></svg><span style="flex:1">О нас и контакты</span><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#B8622B" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"></path></svg></div>
+</div>
+<sc-if value="{{ loggedIn }}" hint-placeholder-val="{{ false }}"><button onClick="{{ logout }}" style="margin-top:14px;background:none;border:0;color:#7A5C48;font:500 15px 'Roboto Condensed',sans-serif;cursor:pointer;padding:8px;width:100%">Выйти</button></sc-if>
+<div onClick="{{ nav.staff }}" style="margin-top:28px;text-align:center;font-size:12px;color:#7A5C48;cursor:pointer;letter-spacing:.04em">Режим персонала →</div>
+</sc-if>
+<sc-if value="{{ profileOrders }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;align-items:center;gap:10px"><div onClick="{{ profileBack }}" style="width:38px;height:38px;border-radius:50%;background:#F4E9DB;border:1px solid #D4B79B;display:flex;align-items:center;justify-content:center;cursor:pointer"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#B8622B" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"></path></svg></div><div style="font:700 20px 'Oswald',sans-serif;letter-spacing:.06em">МОИ ЗАКАЗЫ</div></div>
+<sc-for list="{{ history }}" as="h" hint-placeholder-count="2">
+<div style="margin-top:12px;background:#fff;border:1px solid #D4B79B;border-radius:16px;padding:14px">
+<div onClick="{{ h.open }}" style="cursor:pointer">
+<div style="display:flex;justify-content:space-between;align-items:center"><div style="font:700 18px 'Oswald',sans-serif">№{{ h.no }}</div><div style="border-radius:999px;padding:3px 10px;font-size:12px;font-weight:600;background:{{ h.badgeBg }};color:{{ h.badgeFg }}">{{ h.statusText }}</div></div>
+<div style="font-size:13px;color:#7A5C48;margin-top:2px">{{ h.date }} · {{ h.formatText }}</div>
+<div style="margin-top:8px;font-size:14px;line-height:1.4">{{ h.itemsText }}</div>
+</div>
+<div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px"><span style="font:500 16px 'Roboto Condensed',sans-serif;color:#B9432A">{{ h.totalLabel }}</span><button onClick="{{ h.repeat }}" style="height:36px;padding:0 16px;border:1.5px solid #B8622B;border-radius:12px;background:transparent;color:#B8622B;font:700 13px 'Oswald',sans-serif;letter-spacing:.08em;cursor:pointer">ПОВТОРИТЬ</button></div>
+</div>
+</sc-for>
+</sc-if>
+<sc-if value="{{ profileFavs }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;align-items:center;gap:10px"><div onClick="{{ profileBack }}" style="width:38px;height:38px;border-radius:50%;background:#F4E9DB;border:1px solid #D4B79B;display:flex;align-items:center;justify-content:center;cursor:pointer"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#B8622B" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"></path></svg></div><div style="font:700 20px 'Oswald',sans-serif;letter-spacing:.06em">ИЗБРАННОЕ</div></div>
+<sc-if value="{{ noFavs }}" hint-placeholder-val="{{ true }}">
+<div style="margin-top:90px;display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center"><svg viewBox="0 0 24 24" width="56" height="56" fill="none" stroke="#B8622B" stroke-width="1" stroke-linejoin="round"><path d="M12 20.5s-8-5.2-8-11.2A4.4 4.4 0 0 1 12 6.8a4.4 4.4 0 0 1 8 2.5c0 6-8 11.2-8 11.2z"></path></svg><div style="font:600 24px 'Caveat',cursive;color:#B8622B">Нажмите ♥ на блюде — оно появится здесь</div></div>
+</sc-if>
+<div style="margin-top:12px">
+<sc-for list="{{ favList }}" as="fv" hint-placeholder-count="2">
+<div onClick="{{ fv.open }}" style="display:flex;align-items:baseline;gap:6px;padding:10px 0;cursor:pointer;border-bottom:1px solid #F4E9DB"><span style="font-size:15px">{{ fv.name }}</span><span style="flex:1;border-bottom:2px dotted #D4B79B;transform:translateY(-4px)"></span><span style="font:500 15px 'Roboto Condensed',sans-serif;color:#B9432A">{{ fv.priceLabel }}</span></div>
+</sc-for>
+</div>
+</sc-if>
+</div>
+</sc-if>
+
+<sc-if value="{{ isAbout }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;inset:0;overflow-y:auto;scrollbar-width:none;padding:66px 18px 116px">
+<div style="display:flex;align-items:center;gap:10px">
+<div onClick="{{ nav.home }}" style="width:38px;height:38px;border-radius:50%;background:#F4E9DB;border:1px solid #D4B79B;display:flex;align-items:center;justify-content:center;cursor:pointer;flex:none"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#B8622B" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"></path></svg></div>
+<sc-if value="{{ plateTitle }}" hint-placeholder-val="{{ true }}">
+<div style="display:inline-flex;align-items:center;gap:8px;background:#F4E9DB;border:1px solid #D4B79B;border-radius:12px;padding:6px 14px 6px 10px"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#B8622B" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s7-7.5 7-13a7 7 0 0 0-14 0c0 5.5 7 13 7 13zM12 9m-2.5 0a2.5 2.5 0 1 0 5 0a2.5 2.5 0 1 0-5 0"></path></svg><span style="font:700 18px 'Oswald',sans-serif;letter-spacing:.1em">О НАС</span></div>
+</sc-if>
+<sc-if value="{{ scriptTitle }}" hint-placeholder-val="{{ false }}">
+<span style="font:400 36px 'Marck Script',cursive;color:#B8622B;line-height:1">О нас</span>
+</sc-if>
+</div>
+<image-slot id="about-map" style="width:100%;height:160px;margin-top:14px" radius="16" placeholder="Карта · Чири-Юрт, [АДРЕС]"></image-slot>
+<div style="margin-top:12px;background:#F4E9DB;border:1px solid #D4B79B;border-radius:16px;padding:6px 14px">
+<div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid rgba(212,183,155,.6)"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#B8622B" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s7-7.5 7-13a7 7 0 0 0-14 0c0 5.5 7 13 7 13zM12 9m-2.5 0a2.5 2.5 0 1 0 5 0a2.5 2.5 0 1 0-5 0"></path></svg><div><div style="font-weight:500">[АДРЕС]</div><div style="font-size:13px;color:#7A5C48">Чири-Юрт, Чеченская Республика</div></div></div>
+<div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid rgba(212,183,155,.6)"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#B8622B" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0-18 0M12 7v5l3.5 2"></path></svg><div><div style="font-weight:500">[ЧАСЫ РАБОТЫ]</div><div style="font-size:13px;color:#7A5C48">ежедневно</div></div></div>
+<div style="display:flex;align-items:center;gap:12px;padding:10px 0"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#B8622B" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"></path></svg><div><div style="font-weight:500">+7 938 900-90-67</div><div style="font-size:13px;color:#7A5C48">заказ по телефону — статус увидите в приложении</div></div></div>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px">
+<button onClick="{{ callPhone }}" style="height:48px;border:0;border-radius:14px;background:linear-gradient(135deg,#B8622B,#D08A4E);color:#fff;font:700 15px 'Oswald',sans-serif;letter-spacing:.06em;cursor:pointer;box-shadow:0 6px 16px rgba(184,98,43,.28)">ПОЗВОНИТЬ</button>
+<button onClick="{{ routeTap }}" style="height:48px;border:1.5px solid #B8622B;border-radius:14px;background:transparent;color:#B8622B;font:700 15px 'Oswald',sans-serif;letter-spacing:.06em;cursor:pointer">МАРШРУТ</button>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px">
+<div><image-slot id="about-hall" style="width:100%;height:120px" radius="14" placeholder="Фото зала"></image-slot><div style="font-size:13px;color:#7A5C48;margin-top:6px;text-align:center">Зал · столики 7–14</div></div>
+<div><image-slot id="about-terrace" style="width:100%;height:120px" radius="14" placeholder="Фото террасы"></image-slot><div style="font-size:13px;color:#7A5C48;margin-top:6px;text-align:center">Терраса · столики 1–6</div></div>
+</div>
+<div style="margin-top:18px;padding:14px 4px 0;border-top:1px solid #D4B79B;display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;text-align:center;font-size:12px;color:#7A5C48;line-height:1.2">
+<div style="display:flex;flex-direction:column;align-items:center;gap:4px"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#B8622B" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 11a4 4 0 0 1 1-7.5 5 5 0 0 1 8 0A4 4 0 0 1 17 11v9H7zM7 16h10"></path></svg>Свежие продукты каждый день</div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:4px"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#B8622B" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0-18 0M12 7v5l3.5 2"></path></svg>Быстрое приготовление, без лишнего ожидания</div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:4px"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#B8622B" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20.5s-8-5.2-8-11.2A4.4 4.4 0 0 1 12 6.8a4.4 4.4 0 0 1 8 2.5c0 6-8 11.2-8 11.2z"></path></svg>С любовью для вас!</div>
+</div>
+<div style="text-align:center;font:600 22px 'Caveat',cursive;color:#B8622B;margin-top:18px">Спасибо, что выбираете нас!</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isStaff }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;inset:0;overflow-y:auto;scrollbar-width:none;padding:66px 18px 60px">
+<div style="display:flex;align-items:center;justify-content:space-between">
+<div style="display:flex;align-items:center;gap:8px">
+<svg viewBox="0 0 48 48" width="30" height="30" fill="none" stroke="#B8622B" stroke-linecap="round"><path d="M34.5 11.5A16 16 0 1 0 40 27" stroke-width="3.6"></path><path d="M40 27a8 8 0 0 0-8-8" stroke-width="3.6"></path><path d="M25 27h15" stroke-width="1.6"></path></svg>
+<div><div style="font:900 17px 'Playfair Display',serif;color:#B8622B;line-height:1">GRAFF</div><div style="font:600 8px 'Montserrat',sans-serif;letter-spacing:.28em;color:#7A5C48;margin-top:3px">КУХНЯ · ПЕРСОНАЛ</div></div>
+</div>
+<div onClick="{{ nav.home }}" style="font-size:13px;color:#B8622B;cursor:pointer;font-weight:500">← Клиент</div>
+</div>
+<div style="display:flex;gap:8px;margin-top:14px">
+<div onClick="{{ staffTabOrders }}" style="flex:1;height:40px;border-radius:12px;border:1px solid {{ staffOrdersBorder }};background:{{ staffOrdersBg }};color:{{ staffOrdersFg }};display:flex;align-items:center;justify-content:center;gap:6px;font:700 14px 'Oswald',sans-serif;letter-spacing:.08em;cursor:pointer">ЗАКАЗЫ <span style="opacity:.8">· {{ openCount }}</span></div>
+<div onClick="{{ staffTabTables }}" style="flex:1;height:40px;border-radius:12px;border:1px solid {{ staffTablesBorder }};background:{{ staffTablesBg }};color:{{ staffTablesFg }};display:flex;align-items:center;justify-content:center;font:700 14px 'Oswald',sans-serif;letter-spacing:.08em;cursor:pointer">СТОЛИКИ</div>
+</div>
+<sc-if value="{{ staffOrdersTab }}" hint-placeholder-val="{{ true }}">
+<button onClick="{{ toggleStaffForm }}" style="margin-top:12px;width:100%;height:44px;border:1.5px dashed #B8622B;border-radius:14px;background:transparent;color:#B8622B;font:700 14px 'Oswald',sans-serif;letter-spacing:.08em;cursor:pointer">+ ЗАКАЗ ПО ЗВОНКУ</button>
+<sc-if value="{{ staffFormOpen }}" hint-placeholder-val="{{ false }}">
+<div style="margin-top:10px;background:#F4E9DB;border:1px solid #D4B79B;border-radius:16px;padding:12px 14px;display:flex;flex-direction:column;gap:8px">
+<input value="{{ sf.phone }}" onChange="{{ setSfPhone }}" placeholder="Телефон клиента" style="height:44px;border:1px solid #D4B79B;border-radius:12px;padding:0 12px;font-size:15px;background:#FBF6EF;color:#2E2119;outline:none;width:100%;box-sizing:border-box">
+<input value="{{ sf.text }}" onChange="{{ setSfText }}" placeholder="Что заказали (например: 2 бургера классических, фри)" style="height:44px;border:1px solid #D4B79B;border-radius:12px;padding:0 12px;font-size:15px;background:#FBF6EF;color:#2E2119;outline:none;width:100%;box-sizing:border-box">
+<div style="display:flex;gap:8px">
+<sc-for list="{{ sfFormats }}" as="ff" hint-placeholder-count="3">
+<span onClick="{{ ff.pick }}" style="flex:1;text-align:center;border:1.5px solid #B8622B;border-radius:999px;padding:6px 0;font-size:13px;background:{{ ff.bg }};color:{{ ff.fg }};cursor:pointer">{{ ff.name }}</span>
+</sc-for>
+</div>
+<div style="display:flex;gap:8px">
+<input value="{{ sf.sum }}" onChange="{{ setSfSum }}" placeholder="Сумма, ₽" style="flex:1;height:44px;border:1px solid #D4B79B;border-radius:12px;padding:0 12px;font-size:15px;background:#FBF6EF;color:#2E2119;outline:none;box-sizing:border-box;min-width:0">
+<button onClick="{{ submitStaffForm }}" style="flex:1;height:44px;border:0;border-radius:12px;background:linear-gradient(135deg,#B8622B,#D08A4E);color:#fff;font:700 14px 'Oswald',sans-serif;letter-spacing:.08em;cursor:pointer">ДОБАВИТЬ</button>
+</div>
+<div style="font-size:12px;color:#7A5C48">Если у клиента есть профиль с этим номером — он увидит статус и время в приложении.</div>
+</div>
+</sc-if>
+<sc-for list="{{ staffOrders }}" as="o" hint-placeholder-count="3">
+<div style="margin-top:12px;background:#fff;border:1px solid #D4B79B;border-radius:16px;padding:14px;opacity:{{ o.dim }}">
+<div style="display:flex;justify-content:space-between;align-items:center"><div style="font:700 20px 'Oswald',sans-serif">№{{ o.no }}</div><div style="border-radius:999px;padding:3px 10px;font-size:12px;font-weight:600;background:{{ o.badgeBg }};color:{{ o.badgeFg }}">{{ o.statusText }}</div></div>
+<div style="font-size:13px;color:#7A5C48;margin-top:2px">{{ o.timeStr }} · {{ o.formatText }} · {{ o.who }}</div>
+<div style="margin-top:8px;font-size:14px;line-height:1.4">{{ o.itemsText }}</div>
+<sc-if value="{{ o.hasComment }}" hint-placeholder-val="{{ false }}"><div style="margin-top:4px;font-size:13px;color:#7A5C48;font-style:italic">«{{ o.comment }}»</div></sc-if>
+<div style="display:flex;justify-content:space-between;margin-top:6px;font-size:14px"><span style="color:#7A5C48">{{ o.etaText }}</span><span style="color:#B9432A;font-weight:500">{{ o.totalLabel }}</span></div>
+<sc-if value="{{ o.needsTime }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;gap:6px;margin-top:10px">
+<sc-for list="{{ o.timeChips }}" as="tc" hint-placeholder-count="4">
+<span onClick="{{ tc.pick }}" style="flex:1;text-align:center;border:1.5px solid #B8622B;border-radius:999px;padding:6px 0;font-size:13px;background:{{ tc.bg }};color:{{ tc.fg }};cursor:pointer">{{ tc.label }}</span>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{ o.hasAction }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;gap:8px;margin-top:10px">
+<button onClick="{{ o.action }}" style="flex:1;height:44px;border:0;border-radius:12px;background:{{ o.actionBg }};color:#fff;font:700 14px 'Oswald',sans-serif;letter-spacing:.08em;cursor:pointer">{{ o.actionLabel }}</button>
+<sc-if value="{{ o.canBump }}" hint-placeholder-val="{{ false }}"><button onClick="{{ o.bump }}" style="height:44px;padding:0 14px;border:1.5px solid #B8622B;border-radius:12px;background:transparent;color:#B8622B;font:700 13px 'Oswald',sans-serif;cursor:pointer;white-space:nowrap">+5 мин</button></sc-if>
+</div>
+</sc-if>
+</div>
+</sc-for>
+</sc-if>
+<sc-if value="{{ staffTablesTab }}" hint-placeholder-val="{{ false }}">
+<div style="margin-top:14px;font-size:13px;color:#7A5C48">Нажмите на столик, чтобы отметить занятость. Столики заказов освобождаются автоматически при выдаче.</div>
+<sc-for list="{{ staffZones }}" as="zn" hint-placeholder-count="2">
+<div style="margin-top:14px;background:#F4E9DB;border:1px solid #D4B79B;border-radius:16px;padding:12px 14px">
+<div style="display:flex;align-items:center;gap:6px;font:700 15px 'Roboto Condensed',sans-serif;margin-bottom:8px"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#B8622B" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="{{ zn.icon }}"></path></svg>{{ zn.name }}<span style="flex:1"></span><span style="font:400 13px 'Roboto Condensed',sans-serif;color:#7A5C48">{{ zn.freeText }}</span></div>
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">
+<sc-for list="{{ zn.tables }}" as="t" hint-placeholder-count="4">
+<div onClick="{{ t.pick }}" style="height:54px;border-radius:12px;border:1px solid {{ t.border }};background:{{ t.bg }};color:{{ t.fg }};display:flex;flex-direction:column;align-items:center;justify-content:center;font:700 17px 'Oswald',sans-serif;cursor:pointer;line-height:1.1">{{ t.n }}<span style="font:400 11px 'Roboto Condensed',sans-serif">{{ t.sub }}</span></div>
+</sc-for>
+</div>
+</div>
+</sc-for>
+</sc-if>
+</div>
+</sc-if>
+
+<sc-if value="{{ hasToast }}" hint-placeholder-val="{{ false }}">
+<div onClick="{{ toastTap }}" style="position:absolute;left:12px;right:12px;top:66px;z-index:80;background:rgba(46,33,25,.94);color:#FBF6EF;border-radius:18px;padding:12px 14px;display:flex;gap:12px;align-items:center;box-shadow:0 12px 30px rgba(0,0,0,.25);animation:gr-toast .45s cubic-bezier(.2,.8,.2,1);cursor:pointer">
+<div style="width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,#B8622B,#D08A4E);display:flex;align-items:center;justify-content:center;flex:none"><svg viewBox="0 0 48 48" width="26" height="26" fill="none" stroke="#fff" stroke-linecap="round"><path d="M34.5 11.5A16 16 0 1 0 40 27" stroke-width="3.6"></path><path d="M40 27a8 8 0 0 0-8-8" stroke-width="3.6"></path><path d="M25 27h15" stroke-width="1.6"></path></svg></div>
+<div style="flex:1;min-width:0"><div style="display:flex;justify-content:space-between;font-size:12px;opacity:.7"><span>GRAFF</span><span>сейчас</span></div><div style="font-weight:700;font-size:14px">{{ toast.title }}</div><div style="font-size:13px;opacity:.9">{{ toast.text }}</div></div>
+</div>
+</sc-if>
+
+<sc-if value="{{ showNav }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;left:0;right:0;bottom:0;height:84px;z-index:7;background:rgba(251,246,239,.96);backdrop-filter:blur(10px);border-top:1px solid #D4B79B;display:grid;grid-template-columns:repeat(4,1fr);padding:6px 8px 0">
+<sc-for list="{{ tabs }}" as="t" hint-placeholder-count="4">
+<div onClick="{{ t.go }}" style="display:flex;flex-direction:column;align-items:center;gap:3px;padding-top:4px;cursor:pointer;color:{{ t.color }};position:relative">
+<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="{{ t.color }}" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="{{ t.icon }}"></path></svg>
+<div style="font:{{ t.weight }} 11px 'Roboto Condensed',sans-serif">{{ t.name }}</div>
+<sc-if value="{{ t.badge }}" hint-placeholder-val="{{ false }}"><div style="position:absolute;top:0;left:calc(50% + 6px);min-width:16px;height:16px;border-radius:8px;background:#B9432A;color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 4px">{{ t.badgeText }}</div></sc-if>
+</div>
+</sc-for>
+</div>
+</sc-if>
+</div>
+</x-import>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;headerStyle&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;Плашка&quot;,&quot;options&quot;:[&quot;Плашка&quot;,&quot;Рукописный&quot;],&quot;tsType&quot;:&quot;'Плашка' | 'Рукописный'&quot;,&quot;section&quot;:&quot;Оформление&quot;},&quot;startScreen&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;Сплэш&quot;,&quot;options&quot;:[&quot;Сплэш&quot;,&quot;Главная&quot;,&quot;Меню&quot;,&quot;Корзина&quot;,&quot;Статус заказа&quot;,&quot;Профиль&quot;,&quot;О нас&quot;,&quot;Персонал&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Прототип&quot;},&quot;autoKitchen&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Прототип&quot;},&quot;fastTimer&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Прототип&quot;},&quot;pushBanners&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Прототип&quot;}}">
+const C = { bg:'#FBF6EF', card:'#F4E9DB', line:'#D4B79B', copper:'#B8622B', text:'#2E2119', sec:'#7A5C48', price:'#B9432A', peach:'#F8DCC0', green:'#4F8A5B', grad:'linear-gradient(135deg,#B8622B,#D08A4E)' };
+const ICON = {
+  burger:'M4 10a8 6.5 0 0 1 16 0zM3 13h18M4 16h16v1a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3z',
+  fries:'M6 10l1.2 11h9.6L18 10zM6 10h12M9 10V5.5M12 10V3.5M15 10V5.5',
+  star:'M12 3l2.7 5.8 6.3.8-4.6 4.4 1.2 6.3L12 17.3 6.4 20.3l1.2-6.3L3 9.6l6.3-.8z',
+  teapot:'M5 10h10a4 4 0 0 1 4 4v2a4 4 0 0 1-4 4H9a4 4 0 0 1-4-4zM19 12l3-3M5 13H3M9 10V8.5a3 3 0 0 1 6 0V10M11 6.5h2',
+  jar:'M7 8h10v11a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2zM8 5h8v3H8zM7 12h10',
+  glass:'M6 5h12l-1.5 15h-9zM7 10h10M13 5l4-3',
+  cup:'M4 9h12v6a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4zM16 11h2a2 2 0 0 1 0 4h-2M6 21h9',
+  bottle:'M10 2h4v4l2 3v11a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1V9l2-3zM8 13h8',
+  snow:'M12 2v20M2 12h20M5 5l14 14M19 5L5 19',
+  citrus:'M12 12m-8 0a8 8 0 1 0 16 0a8 8 0 1 0-16 0M12 4v16M4 12h16M6.3 6.3l11.4 11.4M17.7 6.3L6.3 17.7',
+  apple:'M12 7.5c-4-1.5-7 1.5-7 5.5s3 8 7 8 7-4 7-8-3-7-7-5.5zM12 7.5V4M12 4c1.5-1.5 3.5-1.5 4.5-1',
+  sauce:'M3 12h16a2 2 0 0 1 0 4h-1.2A5 5 0 0 1 13 20H8a5 5 0 0 1-5-5zM19 14l3-1.5M7 9c0-2 2-2 2-4M11 9c0-2 2-2 2-4',
+  chef:'M7 11a4 4 0 0 1 1-7.5 5 5 0 0 1 8 0A4 4 0 0 1 17 11v9H7zM7 16h10',
+  bell:'M6 17v-6a6 6 0 0 1 12 0v6l2 2H4zM10 21a2 2 0 0 0 4 0',
+  check:'M5 12.5l4.5 4.5L19 7.5',
+  hand:'M8 13V5.5a1.5 1.5 0 0 1 3 0V12M11 11V4.5a1.5 1.5 0 0 1 3 0V12M14 11.5V6a1.5 1.5 0 0 1 3 0v8a6 6 0 0 1-6 6h-1a5 5 0 0 1-4-2l-2.5-4a1.5 1.5 0 0 1 2.5-1.5L8 14',
+  home:'M4 11l8-7 8 7v9h-5v-6h-6v6H4z',
+  receipt:'M6 3h12v18l-3-2-3 2-3-2-3 2zM9 8h6M9 12h6',
+  user:'M12 11m-4 0a4 4 0 1 0 8 0a4 4 0 1 0-8 0M4 21a8 8 0 0 1 16 0',
+  chair:'M6 3h12v9H6zM6 12v9M18 12v9M6 16h12',
+  sun:'M12 3a9 9 0 0 1 9 9H3a9 9 0 0 1 9-9zM12 12v9M8 21h8',
+  bag:'M6 8h12l1 13H5zM9 8V6.5a3 3 0 0 1 6 0V8',
+};
+const rub = n => n + ' ₽';
+const S = (l, p) => ({ l, p });
+const V3 = (a, b, c) => [S('S', a), S('M', b), S('L', c)];
+const TEAS = ['Граф Орлов','Лес','Голден жасмин','Чёрный с бергамотом','Золотое Кении','Наглый фрукт','Таёжный сбор','Земляничный пудр','Дикая вишня','Улыбка гейши','1001 ночь','Арбузная свежесть','Адмирал','Чёрный принц','Персик с айвой'];
+const RAW = [
+  { id:'burgers', name:'Бургеры', icon:ICON.burger, sauces:true, photo:'Фото: двойной чизбургер', groups:[
+    { name:'Мясные', items:[['Бургер классический',330],['Бургер с халапеньо',340],['Грибной',370],['Онион',350],['Сырный',370]] },
+    { name:'Куриные', items:[['Бургер классический',230],['Бургер с халапеньо',250],['Грибной',270],['Онион',250],['Сырный',290],['Мини бургеры 5 шт',500]] } ] },
+  { id:'fastfood', name:'Фастфуд', icon:ICON.fries, sauces:true, photo:'Фото: фри в картонке GRAFF', groups:[
+    { items:[['Стрипсы',[S('5 шт',250),S('9 шт',350)]],['Крылышки острые',[S('5 шт',300),S('8 шт',420),S('16 шт',840)]],['Крылышки шашлычные',[S('5 шт',200),S('8 шт',280)]],['Наггетсы',[S('6 шт',180),S('9 шт',220)]],['Креветки',[S('6 шт',250),S('9 шт',300)]],['Сырные палочки',[S('3 шт',150),S('6 шт',300)]],['Фри',[S('маленький',120),S('большой',150)]],['Сэндвич',[S('индейка',250),S('мясной',250)]],['Деревенский',[S('малый',150),S('большой',180)]]] } ] },
+  { id:'new', name:'Новинки', icon:ICON.star, isNew:true, sauces:true, photo:'Фото: ролл / фахитас', groups:[
+    { items:[['Фахитас с мясом',400],['Фахитас мексикано мясной',400],['Филадельфия мексикано',350],['Филадельфия с курицей',350],['Гиро на тарелке',350],['Сэндвич с курицей',300]] } ] },
+  { id:'tea', name:'Чай', icon:ICON.teapot, photo:'Фото: стеклянный чайник с чашкой', groups:[ { items: TEAS.map(n => [n, [S('200 мл',200), S('300 мл',300)]]) } ] },
+  { id:'jam', name:'Варенья', icon:ICON.jar, photo:'Фото: банки варенья с ягодами', groups:[ { items:[['Айва',300],['Малиновый',300],['Белая вишня',300],['Инжир',300],['Кокосовое варенье',300]] } ] },
+  { id:'drinks', name:'Напитки', icon:ICON.glass, photo:'Фото: капучино с латте-артом', groups:[
+    { name:'Классика', icon:ICON.cup, items:[['Лунго',150],['Эспрессо',150],['Эспрессо финик',180],['Американо',150],['Флэт уайт',200],['Капучино',[S('S',200),S('M',250)]],['Латте',250],['Раф классический',250],['Раф урбеч',300],['Какао',[S('S',200),S('M',250)]]] },
+    { name:'Тоники', icon:ICON.bottle, items:[['Гранат',V3(200,300,400)],['Ананас',V3(200,300,400)],['Свежевыжатый',V3(350,450,550)]] },
+    { name:'Холодные', icon:ICON.snow, items:[['Фраппе',250],['Айс какао',250],['Айс урбеч',V3(250,350,450)]] },
+    { name:'Лимонады', icon:ICON.citrus, items:[['Манго маракуйя',V3(250,350,400)],['Ягодный',V3(250,350,400)],['Мохито клубничный',V3(250,350,400)],['Мохито классика',V3(250,350,400)],['Графин',350]] },
+    { name:'Фреши', icon:ICON.apple, items:[['Апельсин',V3(250,350,450)],['Яблоко',V3(250,350,400)],['Ананасовый',V3(350,450,550)],['Гранатовый',V3(350,450,550)],['Яблоко-апельсин',V3(250,350,400)]] } ] },
+  { id:'sauces', name:'Соусы', icon:ICON.sauce, groups:[ { items:[['Чесночный',50],['Фирменный',50],['Острый соус',50],['Сырный',30],['Томатный',30]] } ] },
+];
+const MENU = RAW.map(c => ({ id:c.id, name:c.name, icon:c.icon, isNew:!!c.isNew, hasPhoto:!!c.photo, photo:c.photo || '', plateBg:c.isNew ? C.peach : C.card,
+  groups:c.groups.map((g, gi) => ({ name:g.name || '', hasName:!!g.name, icon:g.icon || '', hasIcon:!!g.icon,
+    items:g.items.map((it, ii) => { const sizes = Array.isArray(it[1]) ? it[1] : [S('', it[1])];
+      return { id:`${c.id}-${gi}-${ii}`, name:it[0], sizes, hasSizes:sizes.length > 1, priceLabel:rub(sizes.map(z => z.p).join('/')), catId:c.id, catName:c.name, isNew:!!c.isNew, canSauce:!!c.sauces, photo:c.photo || 'Фото блюда', group:g.name || '' }; }) })) }));
+const ITEMS = {}; MENU.forEach(c => c.groups.forEach(g => g.items.forEach(it => { ITEMS[it.id] = it; })));
+const SAUCES = [{id:'garlic',name:'Чесночный',p:50},{id:'house',name:'Фирменный',p:50},{id:'hot',name:'Острый',p:50},{id:'cheese',name:'Сырный',p:30},{id:'tomato',name:'Томатный',p:30}];
+const FORMATS = [{id:'hall',name:'В зале',icon:ICON.chair},{id:'terrace',name:'На террасе',icon:ICON.sun},{id:'togo',name:'С собой',icon:ICON.bag}];
+const FORMAT_NAME = { hall:'В зале', terrace:'На террасе', togo:'С собой' };
+const ZONES = [{id:'terrace',name:'Терраса',icon:ICON.sun,tables:[1,2,3,4,5,6]},{id:'hall',name:'Зал',icon:ICON.chair,tables:[7,8,9,10,11,12,13,14]}];
+const STATUS_TEXT = { new:'Ожидает подтверждения', accepted:'Принят', cooking:'Готовится', ready:'Готов', done:'Выдан' };
+const STEP_IDX = { new:-1, accepted:0, cooking:1, ready:2, done:3 };
+const START = { 'Сплэш':'splash', 'Главная':'home', 'Меню':'menu', 'Корзина':'cart', 'Статус заказа':'status', 'Профиль':'profile', 'О нас':'about', 'Персонал':'staff' };
+const PAY_TEXT = { cash:'наличными', card:'картой', online:'онлайн' };
+const pad = n => String(n).padStart(2, '0');
+const fmtTime = ts => { const d = new Date(ts); return pad(d.getHours()) + ':' + pad(d.getMinutes()); };
+const fmtDate = ts => new Date(ts).toLocaleDateString('ru-RU', { day:'numeric', month:'long' });
+const digits = s => (s || '').replace(/\D/g, '');
+function mkLine(itemId, sizeIdx, qty, sauceIds) {
+  const it = ITEMS[itemId]; const z = it.sizes[sizeIdx] || it.sizes[0]; const ids = (sauceIds || []).slice().sort();
+  const sauces = ids.map(id => SAUCES.find(s => s.id === id)); const unit = z.p + sauces.reduce((a, s) => a + s.p, 0);
+  return { key:itemId + '|' + sizeIdx + '|' + ids.join(','), itemId, name:it.name + (it.hasSizes ? ' · ' + z.l : '') + (it.group && it.catId === 'burgers' ? ' (' + it.group.toLowerCase().replace(/ые$/, 'ый') + ')' : ''), sauceNames:sauces.map(s => s.name), unit, qty };
+}
+const zoneName = f => f === 'hall' ? 'Зал' : 'Терраса';
+const formatText = o => o.format === 'togo' ? 'С собой' + (o.pickup === 'time' && o.pickupLabel ? ' · к ' + o.pickupLabel : '') : (o.table ? `Столик ${o.table} · ${zoneName(o.format)}` : `${zoneName(o.format)} · столик назначит персонал`);
+
+class Component extends DCLogic {
+  menuScroll = React.createRef();
+  catRefs = Object.fromEntries(MENU.map(c => [c.id, React.createRef()]));
+  nav = (() => { const n = {}; ['splash','home','menu','cart','status','profile','about','staff'].forEach(k => { n[k] = () => this.go(k); }); n.order = () => this.go(this.state.cart.length ? 'cart' : 'status'); return n; })();
+  state = (() => {
+    const now = Date.now(), sp = 12;
+    const orders = [
+      { no:1245, createdAt:now - 14*60000, status:'cooking', eta:20, acceptedAt:now - 9*60000/sp, format:'hall', table:9, lines:[mkLine('burgers-0-4',0,1), mkLine('drinks-0-5',1,2)], name:'Аслан', phone:'+7 928 000-00-21', mine:false, auto:false, pendingEta:15, payment:'cash' },
+      { no:1246, createdAt:now - 4*60000, status:'new', format:'togo', table:null, lines:[mkLine('fastfood-0-0',1,1), mkLine('fastfood-0-6',1,1)], name:'Мадина', phone:'+7 963 000-00-08', mine:false, auto:false, pendingEta:15, byPhone:true, payment:'cash' },
+      { no:1198, createdAt:now - 3*86400000, status:'done', doneAt:now - 3*86400000 + 25*60000, format:'terrace', table:4, lines:[mkLine('burgers-0-0',0,2), mkLine('drinks-3-1',1,1)], mine:true, auto:false, pendingEta:15, payment:'card' },
+      { no:1173, createdAt:now - 9*86400000, status:'done', doneAt:now - 9*86400000 + 20*60000, format:'togo', table:null, lines:[mkLine('fastfood-0-1',1,1), mkLine('tea-0-0',1,1)], mine:true, auto:false, pendingEta:15, payment:'cash' },
+    ].map(o => ({ ...o, total:o.lines.reduce((a, l) => a + l.unit * l.qty, 0) }));
+    return { screen:'splash', loginStep:'phone', phoneInput:'', codeInput:'', nameInput:'', phoneErr:false, user:null,
+      cat:'burgers', dishId:null, dishSize:0, dishSauces:{}, dishQty:1, dishFrom:'menu',
+      cart:[], comment:'', format:'hall', table:'any', pickup:'asap', pickupTime:0, payment:'cash', guestName:'', guestPhone:'',
+      orders, nextNo:1247, occupied:{ 2:true, 5:true, 9:true, 12:true }, favorites:{}, favFormat:'hall', notifOn:true, toast:null, now,
+      viewOrder:null, staffTab:'orders', staffForm:null, profileSub:null };
+  })();
+
+  speed() { return (this.props.fastTimer ?? true) ? 12 : 1; }
+  go(screen) { this.setState({ screen, profileSub:null }); }
+  componentDidMount() {
+    this.timer = setInterval(() => this.tick(), 1000);
+    const st = START[this.props.startScreen]; if (st && st !== this.state.screen) this.jump(st);
+  }
+  componentDidUpdate(prev) { if (prev.startScreen !== this.props.startScreen) { const st = START[this.props.startScreen]; if (st) this.jump(st); } }
+  componentWillUnmount() { clearInterval(this.timer); clearTimeout(this.toastT); }
+
+  showToast(title, text, force) {
+    if (!force && (!(this.props.pushBanners ?? true) || !this.state.notifOn)) return;
+    clearTimeout(this.toastT);
+    this.setState({ toast:{ title, text } });
+    this.toastT = setTimeout(() => this.setState({ toast:null }), 5000);
+  }
+  toastTap = () => { clearTimeout(this.toastT); this.setState({ toast:null, screen: this.state.screen === 'staff' ? 'staff' : 'status' }); };
+  callPhone = () => this.showToast('Звонок · GRAFF', '+7 938 900-90-67', true);
+  routeTap = () => this.showToast('Маршрут', 'Откроется карта: Чири-Юрт, [АДРЕС]', true);
+
+  freeTable(format, occ) { const z = ZONES.find(z => z.id === format); return z ? (z.tables.find(n => !occ[n]) || null) : null; }
+  minutesLeft(o, now = Date.now(), sp = this.speed()) { if (!o.acceptedAt) return o.eta || 0; return Math.max(0, Math.ceil((o.eta * 60000 - (now - o.acceptedAt) * sp) / 60000)); }
+  transition(o, status, occ, extra) {
+    const now = Date.now(); let n = { ...o, status, ...(extra || {}) };
+    if (status === 'accepted') { n.acceptedAt = now; n.eta = n.eta || 15; if (n.format !== 'togo' && !n.table) { const t = this.freeTable(n.format, occ); if (t) { n.table = t; occ = { ...occ, [t]:true }; } } if (n.mine) this.showToast('Заказ принят!', `№${n.no} · готовим ~${n.eta} мин` + (n.table ? ` · столик ${n.table}` : '')); }
+    if (status === 'ready') { n.readyAt = now; if (n.mine) this.showToast(`Ваш заказ №${n.no} готов!`, n.format === 'togo' ? 'Подойдите к стойке' : `Столик ${n.table}`); }
+    if (status === 'done') { n.doneAt = now; if (n.table) occ = { ...occ, [n.table]:false }; }
+    return { order:n, occ };
+  }
+  setStatus(no, status, extra) {
+    let occ = this.state.occupied;
+    const orders = this.state.orders.map(o => { if (o.no !== no) return o; const r = this.transition(o, status, occ, extra); occ = r.occ; return r.order; });
+    this.setState({ orders, occupied:occ });
+  }
+  tick() {
+    const now = Date.now(), sp = this.speed(); let changed = false, occ = this.state.occupied;
+    const orders = this.state.orders.map(o => {
+      if (!o.auto || o.status === 'done') return o;
+      let next = null;
+      if (o.status === 'new' && now - o.createdAt > 4000) next = ['accepted', { eta:12 }];
+      else if (o.status === 'accepted' || o.status === 'cooking') { const el = (now - o.acceptedAt) * sp, tot = o.eta * 60000; if (o.status === 'accepted' && el > tot * 0.2) next = ['cooking']; else if (o.status === 'cooking' && el >= tot) next = ['ready']; }
+      else if (o.status === 'ready' && now - o.readyAt > 90000) next = ['done'];
+      if (!next) return o; changed = true; const r = this.transition(o, next[0], occ, next[1]); occ = r.occ; return r.order;
+    });
+    this.setState(changed ? { now, orders, occupied:occ } : { now });
+  }
+
+  setPhoneInput = e => this.setState({ phoneInput:e.target.value, phoneErr:false });
+  setCodeInput = e => this.setState({ codeInput:e.target.value.replace(/\D/g, '').slice(0, 4) });
+  setNameInput = e => this.setState({ nameInput:e.target.value });
+  setComment = e => this.setState({ comment:e.target.value });
+  setGuestName = e => this.setState({ guestName:e.target.value });
+  setGuestPhone = e => this.setState({ guestPhone:e.target.value });
+  sendCode = () => { if (digits(this.state.phoneInput).length >= 10) this.setState({ loginStep:'code' }); else this.setState({ phoneErr:true }); };
+  backToPhone = () => this.setState({ loginStep:'phone' });
+  confirmCode = () => { if (this.state.codeInput.length === 4) this.setState({ loginStep:'name' }); };
+  finishLogin = () => this.setState({ user:{ name:this.state.nameInput.trim() || 'Гость', phone:this.state.phoneInput }, screen:'home', loginStep:'phone' });
+  skipLogin = () => this.setState({ user:null, screen:'home' });
+  logout = () => this.setState({ user:null, screen:'splash', loginStep:'phone', phoneInput:'', codeInput:'', nameInput:'' });
+
+  selectCat(id) { this.setState({ cat:id }); this.scrollToCat(id, true); }
+  scrollToCat(id, smooth) { const sc = this.menuScroll.current, el = this.catRefs[id] && this.catRefs[id].current; if (!sc || !el) return; this.lockUntil = Date.now() + 800; sc.scrollTo({ top:Math.max(0, el.offsetTop - 130), behavior:smooth ? 'smooth' : 'auto' }); }
+  onMenuScroll = e => { if (Date.now() < (this.lockUntil || 0)) return; const top = e.currentTarget.scrollTop + 130; let cur = MENU[0].id; MENU.forEach(c => { const el = this.catRefs[c.id].current; if (el && el.offsetTop <= top) cur = c.id; }); if (cur !== this.state.cat) this.setState({ cat:cur }); };
+  openCat(id) { this.setState({ screen:'menu', cat:id, profileSub:null }, () => requestAnimationFrame(() => this.scrollToCat(id, false))); }
+
+  openDish(id, sizeIdx, from) { this.setState({ screen:'dish', dishId:id, dishSize:sizeIdx || 0, dishSauces:{}, dishQty:1, dishFrom:from || this.state.screen }); }
+  dishBack = () => this.setState({ screen:this.state.dishFrom === 'dish' ? 'menu' : this.state.dishFrom });
+  dishInc = () => this.setState({ dishQty:this.state.dishQty + 1 });
+  dishDec = () => this.setState({ dishQty:Math.max(1, this.state.dishQty - 1) });
+  toggleFav = () => { const f = { ...this.state.favorites }, id = this.state.dishId; if (f[id]) delete f[id]; else f[id] = true; this.setState({ favorites:f }); };
+  mergeLines(cart, lines) { const out = cart.map(l => ({ ...l })); lines.forEach(l => { const ex = out.find(x => x.key === l.key); if (ex) ex.qty += l.qty; else out.push({ ...l }); }); return out; }
+  addToCart = () => { const s = this.state; const line = mkLine(s.dishId, s.dishSize, s.dishQty, Object.keys(s.dishSauces).filter(k => s.dishSauces[k])); this.setState({ cart:this.mergeLines(s.cart, [line]), screen:s.dishFrom === 'dish' ? 'menu' : s.dishFrom }); };
+  changeLine(key, d) { this.setState({ cart:this.state.cart.map(l => l.key === key ? { ...l, qty:l.qty + d } : l).filter(l => l.qty > 0) }); }
+
+  pickFormat(id) { this.setState({ format:id, table:'any' }); }
+  pickTable(n, zoneId) { this.setState({ table:n, format:zoneId }); }
+  pickAnyTable = () => this.setState({ table:'any' });
+  pickAsap = () => this.setState({ pickup:'asap' });
+  placeOrder = () => {
+    const s = this.state; if (!s.cart.length) return;
+    const total = s.cart.reduce((a, l) => a + l.unit * l.qty, 0);
+    const table = s.format === 'togo' ? null : (s.table === 'any' ? null : s.table);
+    let occ = s.occupied; if (table) occ = { ...occ, [table]:true };
+    const slotTs = Math.ceil(Date.now() / 900000) * 900000 + s.pickupTime * 900000;
+    const o = { no:s.nextNo, createdAt:Date.now(), status:'new', format:s.format, table, pickup:s.pickup, pickupLabel:s.pickup === 'time' ? fmtTime(slotTs) : '', payment:s.payment, lines:s.cart, comment:s.comment, total,
+      name:s.user ? s.user.name : (s.guestName || 'Гость'), phone:s.user ? s.user.phone : s.guestPhone, mine:true, auto:this.props.autoKitchen ?? true, pendingEta:15 };
+    this.setState({ orders:[o, ...s.orders], nextNo:s.nextNo + 1, cart:[], comment:'', occupied:occ, screen:'status', viewOrder:o.no, profileSub:null });
+  };
+  repeatOrder(o) { this.setState({ cart:this.mergeLines(this.state.cart, o.lines.filter(l => l.itemId)), screen:'cart', profileSub:null, format:o.format }); }
+
+  openOrders = () => this.setState({ profileSub:'orders' });
+  openFavs = () => this.setState({ profileSub:'favs' });
+  profileBack = () => this.setState({ profileSub:null });
+  cycleFavFormat = () => { const ord = ['hall','terrace','togo']; const f = ord[(ord.indexOf(this.state.favFormat) + 1) % 3]; this.setState({ favFormat:f, format:f, table:'any' }); };
+  toggleNotif = () => this.setState({ notifOn:!this.state.notifOn });
+
+  staffTabOrders = () => this.setState({ staffTab:'orders' });
+  staffTabTables = () => this.setState({ staffTab:'tables' });
+  toggleStaffForm = () => this.setState({ staffForm:this.state.staffForm ? null : { phone:this.state.user ? this.state.user.phone : '', text:'', format:'togo', sum:'' } });
+  setSf(k) { return e => this.setState({ staffForm:{ ...this.state.staffForm, [k]:e.target.value } }); }
+  setSfPhone = this.setSf('phone'); setSfText = this.setSf('text'); setSfSum = this.setSf('sum');
+  submitStaffForm = () => {
+    const s = this.state, f = s.staffForm; if (!f) return; const sum = parseInt(f.sum, 10) || 0;
+    const mine = !!(s.user && digits(f.phone) && digits(f.phone) === digits(s.user.phone));
+    const o = { no:s.nextNo, createdAt:Date.now(), status:'new', format:f.format, table:null, payment:'cash', lines:[{ key:'manual-' + s.nextNo, name:f.text.trim() || 'Заказ по звонку', sauceNames:[], unit:sum, qty:1 }], total:sum, name:'По звонку', phone:f.phone, byPhone:true, mine, auto:false, pendingEta:15 };
+    this.setState({ orders:[o, ...s.orders], nextNo:s.nextNo + 1, staffForm:null });
+  };
+  staffAccept(no) { const o = this.state.orders.find(x => x.no === no); this.setStatus(no, 'accepted', { eta:(o && o.pendingEta) || 15 }); }
+  setPending(no, m) { this.setState({ orders:this.state.orders.map(o => o.no === no ? { ...o, pendingEta:m } : o) }); }
+  bumpEta(no) { const orders = this.state.orders.map(o => { if (o.no !== no) return o; const n = { ...o, eta:o.eta + 5 }; if (n.mine) this.showToast('Время готовности изменено', `Заказ №${n.no} будет готов через ~${this.minutesLeft(n)} мин`); return n; }); this.setState({ orders }); }
+
+  jump(k) {
+    const s = this.state;
+    if (k === 'dish') return this.openDish('burgers-0-0', 0, 'menu');
+    if (k === 'cart' && !s.cart.length) return this.setState({ screen:'cart', profileSub:null, cart:this.mergeLines([], [mkLine('burgers-0-2', 0, 1, ['house']), mkLine('fastfood-0-6', 1, 1), mkLine('drinks-3-1', 1, 2)]) });
+    if (k === 'status' && !s.orders.some(o => o.mine && o.status !== 'done')) {
+      const lines = [mkLine('burgers-0-2', 0, 1, ['house']), mkLine('drinks-0-5', 1, 1)];
+      const o = { no:s.nextNo, createdAt:Date.now(), status:'new', format:'terrace', table:null, payment:'cash', lines, total:lines.reduce((a, l) => a + l.unit * l.qty, 0), name:s.user ? s.user.name : 'Гость', phone:s.user ? s.user.phone : '', mine:true, auto:this.props.autoKitchen ?? true, pendingEta:15 };
+      return this.setState({ orders:[o, ...s.orders], nextNo:s.nextNo + 1, screen:'status', viewOrder:o.no, profileSub:null });
+    }
+    if (k === 'splash') return this.setState({ screen:'splash', loginStep:'phone', profileSub:null });
+    this.setState({ screen:k, profileSub:null });
+  }
+
+  orderView(o, now, sp) {
+    const left = this.minutesLeft(o, now, sp), tot = (o.eta || 15) * 60000, el = o.acceptedAt ? (now - o.acceptedAt) * sp : 0;
+    const prog = o.status === 'ready' || o.status === 'done' ? 1 : (o.status === 'new' ? 0 : Math.min(1, el / tot));
+    const idx = STEP_IDX[o.status];
+    const color = o.status === 'ready' ? C.green : (o.status === 'done' ? '#B8A08A' : C.copper);
+    const where = o.format === 'togo' ? 'Подойдите к стойке' : (o.table ? `Столик ${o.table}` : 'Столик назначит персонал');
+    const etaAt = o.acceptedAt ? 'к ' + fmtTime(o.acceptedAt + tot / sp) : '';
+    const ring = { new:['Ждём кухню', '—', 'время уточняет персонал'], accepted:['Будет готов через', `~${left} мин`, etaAt], cooking:['Будет готов через', `~${left} мин`, etaAt], ready:['', 'Готов!', where], done:['', 'Выдан', o.doneAt ? fmtTime(o.doneAt) : ''] }[o.status];
+    const headline = { new:'Заказ отправлен', accepted:'Заказ принят!', cooking:'Готовим…', ready:'Готово — приятного аппетита!', done:'Спасибо, что выбираете нас!' }[o.status];
+    const steps = [['Принят', ICON.check], ['Готовится', ICON.chef], ['Готов', ICON.bell], ['Выдан', ICON.hand]].map(([name, icon], i) => {
+      const done = i < idx, cur = i === idx, pending = i === 0 && idx < 0, on = done || cur;
+      return { name, icon, bg:on ? (i >= 2 && cur ? (i === 2 ? C.green : '#B8A08A') : C.copper) : 'transparent', fg:on ? '#fff' : (pending ? C.copper : '#B8A08A'), border:on ? 'transparent' : (pending ? C.copper : C.line), anim:(cur && i < 2) || pending ? 'gr-pulse 1.6s ease-in-out infinite' : 'none', textColor:on ? C.text : C.sec, weight:cur ? 700 : 400 };
+    });
+    return { no:o.no, statusText:STATUS_TEXT[o.status], formatLabel:FORMAT_NAME[o.format].toUpperCase(), ringColor:color, ringOffset:(603.2 * (1 - prog)).toFixed(1), ringTop:ring[0], ringMain:ring[1], ringSub:ring[2], headline, steps,
+      lines:o.lines.map(l => ({ qtyName:`${l.qty} × ${l.name}` + (l.sauceNames && l.sauceNames.length ? ' + ' + l.sauceNames.join(', ').toLowerCase() : ''), sumLabel:rub(l.unit * l.qty) })),
+      formatText:formatText(o), payText:PAY_TEXT[o.payment] || '', totalLabel:rub(o.total), repeat:() => this.repeatOrder(o),
+      minutesShort:o.status === 'new' ? '…' : (o.status === 'ready' ? '✓' : (o.status === 'done' ? '✓' : `${left} мин`)),
+      subline:o.status === 'new' ? 'Ждём подтверждения кухни' : (o.status === 'ready' ? where : (o.status === 'done' ? 'Выдан' : `Будет готов через ~${left} мин · ${where}`)) };
+  }
+
+  renderVals() {
+    const s = this.state, now = s.now, sp = this.speed(), scr = s.screen;
+    const hw = (this.props.headerStyle ?? 'Плашка') === 'Рукописный';
+    const user = s.user, loggedIn = !!user;
+    const mine = s.orders.filter(o => o.mine), activeMine = mine.filter(o => o.status !== 'done');
+    const cartCount = s.cart.reduce((a, l) => a + l.qty, 0), cartTotal = s.cart.reduce((a, l) => a + l.unit * l.qty, 0);
+    const cats = MENU.map(c => { const act = s.cat === c.id; return { ...c, ref:this.catRefs[c.id], select:() => this.selectCat(c.id), open:() => this.openCat(c.id), tabBg:act ? C.grad : C.card, tabFg:act ? '#fff' : C.text, tabBorder:act ? C.copper : C.line,
+      groups:c.groups.map(g => ({ ...g, items:g.items.map(it => ({ ...it, open:() => this.openDish(it.id, 0, 'menu'), sizes:it.sizes.map((z, i) => ({ ...z, pick:e => { e.stopPropagation(); this.openDish(it.id, i, 'menu'); } })) })) })) }; });
+    const newItems = MENU.find(c => c.id === 'new').groups[0].items.map(it => ({ ...it, open:() => this.openDish(it.id, 0, 'home') }));
+    let dish = { id:'', sizes:[], sauces:[], hasSizes:false, hasSauces:false, isNew:false };
+    if (s.dishId && ITEMS[s.dishId]) { const it = ITEMS[s.dishId]; const z = it.sizes[s.dishSize] || it.sizes[0]; const unit = z.p + SAUCES.reduce((a, sa) => a + (s.dishSauces[sa.id] ? sa.p : 0), 0);
+      dish = { ...it, favFill:s.favorites[it.id] ? C.copper : 'none', desc:'[Состав и описание блюда]', unitLabel:rub(unit), sizeTitle:/шт/.test(it.sizes[0].l) ? 'Порция' : (/мл|^[SML]$/.test(it.sizes[0].l) ? 'Объём' : 'Вариант'),
+        sizes:it.sizes.map((zz, i) => ({ ...zz, pLabel:rub(zz.p), bg:i === s.dishSize ? C.grad : 'transparent', fg:i === s.dishSize ? '#fff' : C.copper, pick:() => this.setState({ dishSize:i }) })),
+        hasSauces:it.canSauce, sauces:SAUCES.map(sa => ({ ...sa, bg:s.dishSauces[sa.id] ? C.copper : 'transparent', checkOp:s.dishSauces[sa.id] ? 1 : 0, toggle:() => this.setState({ dishSauces:{ ...s.dishSauces, [sa.id]:!s.dishSauces[sa.id] } }) })),
+        qty:s.dishQty, totalLabel:rub(unit * s.dishQty) }; }
+    const formats = FORMATS.map(f => { const act = s.format === f.id; return { ...f, pick:() => this.pickFormat(f.id), bg:act ? C.grad : '#fff', fg:act ? '#fff' : C.text, border:act ? C.copper : C.line }; });
+    const zones = ZONES.map(zn => { const free = zn.tables.filter(n => !s.occupied[n]).length; return { ...zn, dim:s.format === zn.id ? 1 : .45, freeText:`свободно ${free} из ${zn.tables.length}`, tables:zn.tables.map(n => { const occ = !!s.occupied[n], sel = s.table === n && s.format === zn.id; return { n, pick:() => { if (!occ) this.pickTable(n, zn.id); }, bg:occ ? '#DDD5CB' : (sel ? C.grad : C.bg), fg:occ ? '#9A8F85' : (sel ? '#fff' : C.text), border:sel ? C.copper : (occ ? '#DDD5CB' : C.line), cursor:occ ? 'default' : 'pointer' }; }) }; });
+    const staffZones = ZONES.map(zn => { const free = zn.tables.filter(n => !s.occupied[n]).length; return { ...zn, freeText:`свободно ${free} из ${zn.tables.length}`, tables:zn.tables.map(n => { const occ = !!s.occupied[n]; const ord = s.orders.find(o => o.table === n && o.status !== 'done'); return { n, sub:ord ? '№' + ord.no : (occ ? 'занят' : 'свободен'), pick:() => this.setState({ occupied:{ ...s.occupied, [n]:!occ } }), bg:occ ? '#DDD5CB' : C.bg, fg:occ ? '#7A5C48' : C.text, border:occ ? '#DDD5CB' : C.line }; }) }; });
+    const slots = [0,1,2,3].map(i => { const ts = Math.ceil(now / 900000) * 900000 + i * 900000; const act = s.pickup === 'time' && s.pickupTime === i; return { label:fmtTime(ts), pick:() => this.setState({ pickup:'time', pickupTime:i }), bg:act ? C.grad : 'transparent', fg:act ? '#fff' : C.copper }; });
+    const payments = [{id:'cash',name:'Наличными при получении'},{id:'card',name:'Картой при получении'},{id:'online',name:'Онлайн — скоро'}].map(pm => ({ ...pm, pick:() => this.setState({ payment:pm.id }), dot:s.payment === pm.id ? C.copper : 'transparent' }));
+    const cartLines = s.cart.map(l => ({ ...l, meta:[l.sauceNames.length ? 'соус: ' + l.sauceNames.join(', ').toLowerCase() : '', rub(l.unit) + ' × ' + l.qty].filter(Boolean).join(' · '), sumLabel:rub(l.unit * l.qty), inc:() => this.changeLine(l.key, 1), dec:() => this.changeLine(l.key, -1) }));
+    const ordRaw = (s.viewOrder && s.orders.find(o => o.no === s.viewOrder)) || activeMine[0] || mine[0] || null;
+    const ord = ordRaw ? this.orderView(ordRaw, now, sp) : {};
+    const activeChips = activeMine.map(o => { const act = ordRaw && ordRaw.no === o.no; return { no:o.no, pick:() => this.setState({ viewOrder:o.no }), bg:act ? C.grad : 'transparent', fg:act ? '#fff' : C.copper }; });
+    const active = activeMine[0] ? this.orderView(activeMine[0], now, sp) : {};
+    const history = mine.slice().sort((a, b) => b.createdAt - a.createdAt).map(o => ({ no:o.no, date:fmtDate(o.createdAt) + ', ' + fmtTime(o.createdAt), statusText:STATUS_TEXT[o.status], badgeBg:o.status === 'done' ? C.card : (o.status === 'ready' ? '#E3EFE4' : C.peach), badgeFg:o.status === 'done' ? C.sec : (o.status === 'ready' ? C.green : C.price), itemsText:o.lines.map(l => (l.qty > 1 ? l.qty + ' × ' : '') + l.name).join(', '), formatText:formatText(o), totalLabel:rub(o.total), repeat:() => this.repeatOrder(o), open:() => this.setState({ screen:'status', viewOrder:o.no, profileSub:null }) }));
+    const favList = Object.keys(s.favorites).map(id => ITEMS[id]).filter(Boolean).map(it => ({ ...it, open:() => this.openDish(it.id, 0, 'profile') }));
+    const staffOrders = s.orders.slice().sort((a, b) => ((a.status === 'done') - (b.status === 'done')) || (b.createdAt - a.createdAt)).map(o => {
+      const st = o.status; const badge = { new:[C.peach, C.price], accepted:[C.card, C.copper], cooking:[C.card, C.copper], ready:['#E3EFE4', C.green], done:['#EFE9E1', C.sec] }[st];
+      const act = { new:['ПРИНЯТЬ · ' + (o.pendingEta || 15) + ' МИН', () => this.staffAccept(o.no)], accepted:['ГОТОВИТСЯ', () => this.setStatus(o.no, 'cooking')], cooking:['ГОТОВ', () => this.setStatus(o.no, 'ready')], ready:['ВЫДАН', () => this.setStatus(o.no, 'done')] }[st];
+      return { no:o.no, statusText:STATUS_TEXT[st], badgeBg:badge[0], badgeFg:badge[1], timeStr:fmtTime(o.createdAt), formatText:formatText(o), who:(o.byPhone ? 'по звонку · ' : '') + (o.name || 'Гость') + (o.phone ? ' · ' + o.phone : ''), itemsText:o.lines.map(l => (l.qty > 1 ? l.qty + ' × ' : '') + l.name + (l.sauceNames && l.sauceNames.length ? ' + ' + l.sauceNames.join(', ').toLowerCase() : '')).join(', '), hasComment:!!o.comment, comment:o.comment || '',
+        etaText:st === 'accepted' || st === 'cooking' ? `Готов через ~${this.minutesLeft(o, now, sp)} мин` : (st === 'ready' ? 'Ждёт выдачи' : (st === 'done' ? 'Выдан ' + fmtTime(o.doneAt || o.createdAt) : 'Ожидает подтверждения')), totalLabel:rub(o.total), needsTime:st === 'new',
+        timeChips:[10,15,20,30].map(m => { const a = (o.pendingEta || 15) === m; return { label:m + ' мин', pick:() => this.setPending(o.no, m), bg:a ? C.grad : 'transparent', fg:a ? '#fff' : C.copper }; }),
+        hasAction:!!act, actionLabel:act ? act[0] : '', action:act ? act[1] : null, actionBg:st === 'cooking' ? C.green : C.grad, canBump:st === 'accepted' || st === 'cooking', bump:() => this.bumpEta(o.no), dim:st === 'done' ? .55 : 1 };
+    });
+    const sf = s.staffForm || { phone:'', text:'', format:'togo', sum:'' };
+    const sfFormats = FORMATS.map(f => { const a = sf.format === f.id; return { name:f.name, pick:() => this.setState({ staffForm:{ ...sf, format:f.id } }), bg:a ? C.grad : 'transparent', fg:a ? '#fff' : C.copper }; });
+    const tabs = [['home','Главная',ICON.home, scr === 'home' || scr === 'about'], ['menu','Меню',ICON.burger, scr === 'menu'], ['order','Заказ',ICON.receipt, scr === 'cart' || scr === 'status'], ['profile','Профиль',ICON.user, scr === 'profile']].map(([k, name, icon, act]) => ({ name, icon, go:this.nav[k], color:act ? C.copper : '#8C7460', weight:act ? 700 : 500, badge:k === 'order' && cartCount > 0, badgeText:String(cartCount) }));
+    const jumps = [['Сплэш / вход','splash'],['Главная','home'],['Меню','menu'],['Блюдо','dish'],['Корзина','cart'],['Статус заказа','status'],['Профиль','profile'],['О нас','about'],['Персонал','staff']].map(([label, k]) => ({ label, go:() => this.jump(k), bg:scr === k ? C.text : 'transparent', fg:scr === k ? '#fff' : C.text }));
+    return {
+      isSplash:scr === 'splash', isHome:scr === 'home', isMenu:scr === 'menu', isDish:scr === 'dish', isCart:scr === 'cart', isStatus:scr === 'status', isProfile:scr === 'profile', isAbout:scr === 'about', isStaff:scr === 'staff',
+      showNav:['home','menu','cart','status','profile','about'].includes(scr), plateTitle:!hw, scriptTitle:hw,
+      stepPhone:s.loginStep === 'phone', stepCode:s.loginStep === 'code', stepName:s.loginStep === 'name', phoneInput:s.phoneInput, codeInput:s.codeInput, nameInput:s.nameInput, phoneErr:s.phoneErr, phoneShown:s.phoneInput,
+      setPhoneInput:this.setPhoneInput, setCodeInput:this.setCodeInput, setNameInput:this.setNameInput, sendCode:this.sendCode, backToPhone:this.backToPhone, confirmCode:this.confirmCode, finishLogin:this.finishLogin, skipLogin:this.skipLogin, logout:this.logout,
+      nav:this.nav, jumps, tabs, callPhone:this.callPhone, routeTap:this.routeTap,
+      cats, newItems, menuScroll:this.menuScroll, onMenuScroll:this.onMenuScroll,
+      dish, dishBack:this.dishBack, dishInc:this.dishInc, dishDec:this.dishDec, toggleFav:this.toggleFav, addToCart:this.addToCart,
+      hasCart:s.cart.length > 0, cartEmpty:s.cart.length === 0, cartCount, cartTotalLabel:rub(cartTotal), cartLines, comment:s.comment, setComment:this.setComment,
+      formats, zones, showTables:s.format !== 'togo', showPickup:s.format === 'togo', pickAnyTable:this.pickAnyTable, anyBg:s.table === 'any' ? C.grad : 'transparent', anyFg:s.table === 'any' ? '#fff' : C.copper,
+      pickAsap:this.pickAsap, asapBg:s.pickup === 'asap' ? C.grad : 'transparent', asapFg:s.pickup === 'asap' ? '#fff' : C.copper, slots, payments, placeOrder:this.placeOrder,
+      formatSummary:s.format === 'togo' ? 'С собой' + (s.pickup === 'time' ? ' · к ' + slots[s.pickupTime].label : ' · как можно скорее') : (FORMAT_NAME[s.format] + (s.table === 'any' ? ' · любой свободный столик' : ' · столик ' + s.table)),
+      loggedIn, notLoggedIn:!loggedIn, userName:loggedIn ? user.name : 'Гость', userPhone:loggedIn ? user.phone : 'Войдите, чтобы видеть заказы по звонку', userInitial:loggedIn ? user.name.trim().charAt(0).toUpperCase() : 'G', guestName:s.guestName, guestPhone:s.guestPhone, setGuestName:this.setGuestName, setGuestPhone:this.setGuestPhone,
+      noOrders:!ordRaw, hasOrder:!!ordRaw, manyActive:activeMine.length > 1, activeChips, ord, hasActive:activeMine.length > 0, active, openActive:() => this.setState({ screen:'status', viewOrder:activeMine[0] ? activeMine[0].no : null }),
+      profileMain:!s.profileSub, profileOrders:s.profileSub === 'orders', profileFavs:s.profileSub === 'favs', openOrders:this.openOrders, openFavs:this.openFavs, profileBack:this.profileBack, history, historyCount:String(history.length), favList, favCount:String(favList.length), noFavs:favList.length === 0,
+      cycleFavFormat:this.cycleFavFormat, favFormatText:FORMAT_NAME[s.favFormat], toggleNotif:this.toggleNotif, notifBg:s.notifOn ? C.copper : C.line, notifX:s.notifOn ? '20px' : '2px',
+      staffOrdersTab:s.staffTab === 'orders', staffTablesTab:s.staffTab === 'tables', staffTabOrders:this.staffTabOrders, staffTabTables:this.staffTabTables,
+      staffOrdersBg:s.staffTab === 'orders' ? C.grad : C.card, staffOrdersFg:s.staffTab === 'orders' ? '#fff' : C.text, staffOrdersBorder:s.staffTab === 'orders' ? C.copper : C.line,
+      staffTablesBg:s.staffTab === 'tables' ? C.grad : C.card, staffTablesFg:s.staffTab === 'tables' ? '#fff' : C.text, staffTablesBorder:s.staffTab === 'tables' ? C.copper : C.line,
+      openCount:String(s.orders.filter(o => o.status !== 'done').length), staffOrders, staffZones, toggleStaffForm:this.toggleStaffForm, staffFormOpen:!!s.staffForm, sf, sfFormats, setSfPhone:this.setSfPhone, setSfText:this.setSfText, setSfSum:this.setSfSum, submitStaffForm:this.submitStaffForm,
+      hasToast:!!s.toast, toast:s.toast || {}, toastTap:this.toastTap,
+    };
+  }
+}
+</script>
+</body>
+</html>

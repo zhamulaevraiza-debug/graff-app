@@ -1,0 +1,40 @@
+/* Экран «О нас» — контакты, карта, фото зала и террасы. */
+
+.about-map { display: block; margin-top: 14px; }
+
+.about-contact { margin-top: 12px; padding: 6px 14px; }
+.about-contact__row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(212, 183, 155, .6);
+  color: var(--text);
+}
+.about-contact__row:last-child { border-bottom: 0; }
+a.about-contact__row, a.about-contact__row:hover { color: var(--text); }
+.about-contact__main { font-weight: 500; }
+
+.about-actions { margin-top: 12px; }
+.about-actions .btn { border-radius: 14px; }
+/* Кнопки — ссылки (<a>), поэтому глобальное a:hover перекрашивало бы текст в красный; держим цвета макета. */
+.about-actions .btn--primary:hover { color: #fff; }
+.about-actions .btn--secondary:hover { color: var(--copper); }
+
+.about-photos { margin-top: 16px; }
+.about-caption { font-size: 13px; color: var(--sec); margin-top: 6px; text-align: center; }
+
+.about-thanks { text-align: center; font: 600 22px var(--f-hand); color: var(--copper); margin-top: 18px; }
+
+/* Сведения об исполнителе */
+.about-legal {
+  margin-top: 18px;
+  padding: 12px 14px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--r-card);
+}
+.about-legal__list { margin: 8px 0 0; display: flex; flex-direction: column; gap: 6px; }
+.about-legal__list > div { display: flex; gap: 8px; align-items: baseline; font-size: 13px; }
+.about-legal__list dt { color: var(--sec); flex: none; }
+.about-legal__list dd { margin: 0; text-align: right; flex: 1; text-wrap: pretty; }
+.about-legal__btn { margin-top: 12px; height: 40px; }
+

@@ -1,0 +1,42 @@
+/* Экран «Правовая информация» */
+
+.legal-row {
+  background: none;
+  border: 0;
+  border-bottom: 1px solid var(--card);
+  width: 100%;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  padding: 14px;
+  -webkit-tap-highlight-color: transparent;
+}
+.legal-row:last-child { border-bottom: 0; }
+.legal-row__title { display: block; font-weight: 500; line-height: 1.25; }
+
+.legal-doc { margin-top: 14px; }
+.legal-doc__title { font: 700 22px var(--f-head); line-height: 1.2; }
+.legal-doc__block { margin-top: 14px; }
+.legal-doc__h {
+  font: 700 15px var(--f-body);
+  margin-bottom: 4px;
+}
+.legal-doc__p {
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--text);
+  text-wrap: pretty;
+  margin-bottom: 8px;
+}
+.legal-doc__p:last-child { margin-bottom: 0; }
+.legal-doc__ul {
+  margin: 0;
+  padding-left: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--sec);
+  text-wrap: pretty;
+}

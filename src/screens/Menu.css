@@ -1,0 +1,107 @@
+/* ============================================================
+   Экран «Меню» — печатное меню, перенесённое на телефон.
+   Источник: design/GRAFF App.dc.html, секция isMenu.
+   ============================================================ */
+
+/* шапка липнет к самому верху, поэтому верхний отступ экрана убираем;
+   снизу — запас, чтобы последняя категория могла подняться под шапку:
+   --menu-tail добирает скрипт (высота окна − шапка − хвост списка),
+   иначе «Варенья» и «Соусы» никогда не доезжают до верха */
+.screen.menu-screen {
+  --menu-pb: calc(var(--nav-h) + 40px);
+  --menu-tail: 0px;
+  padding-top: 0;
+  padding-bottom: max(var(--menu-pb), var(--menu-tail));
+}
+
+/* футер «три обещания» под последней категорией */
+.menu-foot { margin: 20px 18px 0; }
+
+/* ---------- липкая шапка: заголовок + табы категорий ---------- */
+.menu-head {
+  position: sticky;
+  top: 0;
+  z-index: 4;
+  background: rgba(251, 246, 239, .96);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  padding: calc(var(--sat) + 6px) 0 10px;
+  border-bottom: 1px solid var(--line);
+}
+.menu-head__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 0 18px 8px;
+}
+.menu-head__tag { text-align: right; }
+
+.menu-tabs {
+  position: relative; /* offsetParent для табов — считаем горизонтальную прокрутку */
+  gap: 8px;
+  padding: 0 18px;
+}
+.menu-tab {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  padding: 7px 12px 7px 9px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: var(--card);
+  color: var(--text);
+  font: 700 13px var(--f-head);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+  appearance: none;
+  -webkit-appearance: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform .08s ease;
+}
+.menu-tab:active { transform: scale(.97); }
+.menu-tab--on {
+  background: var(--grad);
+  border-color: var(--copper);
+  color: #fff;
+}
+
+/* ---------- секция категории ---------- */
+.menu-cat { padding: 18px 18px 6px; }
+.menu-cat__head { display: flex; align-items: center; gap: 10px; }
+.menu-cat__star { color: var(--price); font-size: 18px; margin-left: auto; line-height: 1; }
+
+.menu-group { margin-top: 12px; }
+.menu-group__title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font: 700 15px var(--f-body);
+  margin-bottom: 2px;
+}
+
+/* строка позиции «название ……… цена» (+ чипы размеров) */
+.menu-item {
+  padding: 7px 0;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.menu-item__main {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.menu-item__name { font-size: 15px; }
+.menu-sizes { display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap; }

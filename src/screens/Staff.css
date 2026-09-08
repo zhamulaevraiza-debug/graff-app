@@ -1,0 +1,38 @@
+/* Панель персонала (кухня) — локальные стили экрана */
+
+/* две пилюли-вкладки «ЗАКАЗЫ · n» / «СТОЛИКИ» */
+.staff-tab {
+  flex: 1;
+  height: 40px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: var(--card);
+  color: var(--text);
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  font: 700 14px var(--f-head);
+  letter-spacing: .08em;
+  padding: 0;
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.staff-tab--on { background: var(--grad); color: #fff; border-color: var(--copper); }
+
+/* столик как кнопка: сброс UA-стилей button */
+.staff-table { padding: 0; width: 100%; font-family: var(--f-head); }
+
+/* строка настроек демо — вся строка кликабельна (button role=switch) */
+.staff-switch {
+  display: flex;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: 0;
+  border-bottom: 1px solid var(--card);
+  font: inherit;
+  color: inherit;
+}
+.staff-switch:last-child { border-bottom: 0; }
+
+/* «+5 мин» — без капса, как в прототипе */
+.staff-bump { padding: 0 14px; white-space: nowrap; text-transform: none; font-size: 13px; letter-spacing: 0; }

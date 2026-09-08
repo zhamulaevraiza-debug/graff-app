@@ -1,0 +1,48 @@
+/* Профиль: строки списка, карточки истории и избранное — настоящие <button>, без дефолтного вида кнопки */
+.profile__btn {
+  appearance: none;
+  -webkit-appearance: none;
+  display: block;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+/* строка белого списка (.list__row задаёт flex/gap/курсор; здесь — отступы и разделитель, съеденные сбросом) */
+.list__row.profile__btn { display: flex; padding: 14px; border-bottom: 1px solid var(--card); }
+.list__row.profile__btn:last-child { border-bottom: 0; }
+/* строка избранного «название ……… цена» */
+.leader-row.profile__btn { display: flex; padding: 10px 0; border-bottom: 1px solid var(--card); }
+
+/* аватар с инициалом */
+.profile__avatar {
+  width: 64px; height: 64px; border-radius: 50%;
+  background: var(--grad);
+  color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font: 900 28px var(--f-logo);
+  flex: none;
+}
+/* заголовок под-экрана («МОИ ЗАКАЗЫ», «ИЗБРАННОЕ») */
+.profile__sub-title { font: 700 20px var(--f-head); letter-spacing: .06em; }
+
+/* карточка истории: цвета статуса по правилу прототипа для «Мои заказы» (renderVals, history):
+   done → card/sec, ready → зелёный, всё остальное (new/accepted/cooking) → peach/price.
+   Глобальные .badge--* следуют раскладке персонала, поэтому здесь локальное переопределение. */
+.profile__hist .badge--accepted,
+.profile__hist .badge--cooking { background: var(--peach); color: var(--price); }
+.profile__hist .badge--done { background: var(--card); color: var(--sec); }
+
+/* Удаление аккаунта — действие с последствиями, поэтому отдельным цветом и без заливки */
+.profile__delete {
+  margin-top: 6px;
+  padding: 8px;
+  color: var(--price);
+}
+

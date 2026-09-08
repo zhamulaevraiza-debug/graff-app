@@ -1,0 +1,99 @@
+/* Корзина и оформление: локальные элементы, которых нет в global.css */
+
+/* круглые − / + у позиции корзины */
+.cart-qty {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  border: 1.5px solid var(--copper);
+  background: transparent;
+  color: var(--copper);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; line-height: 1;
+  padding: 0;
+  flex: none;
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* строка корзины — как .list__row, но с отступами прототипа */
+.list__row.cart-line { padding: 12px 14px; gap: 10px; cursor: default; }
+.cart-line__name { font-size: 15px; }
+.cart-line__qty { font: 700 16px var(--f-head); min-width: 16px; text-align: center; }
+.cart-line__sum { min-width: 58px; text-align: right; }
+
+/* ячейка столика как <button> */
+.cart-table { padding: 0; width: 100%; appearance: none; -webkit-appearance: none; }
+
+/* тонкая пунктирная линия в строке зоны */
+.cart-zone-leader { flex: 1; border-bottom: 1px dashed var(--line); }
+
+/* строка оплаты как <button> */
+.list__row.cart-pay {
+  width: 100%;
+  background: none;
+  border: 0;
+  border-bottom: 1px solid var(--card);
+  padding: 12px 14px;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+}
+.list__row.cart-pay:last-child { border-bottom: 0; }
+.cart-radio {
+  width: 20px; height: 20px;
+  border-radius: 50%;
+  border: 1.5px solid var(--copper);
+  display: flex; align-items: center; justify-content: center;
+  flex: none;
+}
+.cart-radio__dot { width: 10px; height: 10px; border-radius: 50%; background: transparent; }
+.cart-radio--on .cart-radio__dot { background: var(--copper); }
+
+/* аватар-инициал из профиля */
+.cart-avatar {
+  width: 38px; height: 38px;
+  border-radius: 50%;
+  background: var(--grad);
+  color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font: 900 17px var(--f-logo);
+  flex: none;
+}
+
+/* Согласие и правовые ссылки перед оформлением заказа */
+.cart-consent {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-top: 16px;
+  font-size: 13px;
+  line-height: 1.35;
+  color: var(--sec);
+}
+.cart-consent__box {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  margin: 0;
+  accent-color: var(--copper);
+}
+.cart-consent label { cursor: pointer; text-wrap: pretty; }
+.cart-legal-note {
+  margin-top: 10px;
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--sec);
+  text-align: center;
+  text-wrap: pretty;
+}
+.cart-legal-link {
+  background: none;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  color: var(--copper);
+  cursor: pointer;
+  text-decoration: underline;
+}
+
