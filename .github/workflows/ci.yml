@@ -64,8 +64,8 @@ jobs:
         # Уведомления никуда не уходят: проверяем подписку, адресность и удаление данных.
         run: |
           npx --yes web-push generate-vapid-keys --json > vapid.json
-          echo "VAPID_PUBLIC_KEY=$(node -p \"require('./vapid.json').publicKey\")" >> $GITHUB_ENV
-          echo "VAPID_PRIVATE_KEY=$(node -p \"require('./vapid.json').privateKey\")" >> $GITHUB_ENV
+          echo "VAPID_PUBLIC_KEY=$(jq -r .publicKey vapid.json)" >> $GITHUB_ENV
+          echo "VAPID_PRIVATE_KEY=$(jq -r .privateKey vapid.json)" >> $GITHUB_ENV
           echo "VAPID_SUBJECT=mailto:ci@graff.local" >> $GITHUB_ENV
           echo "JWT_SECRET=ci-secret-$RANDOM" >> $GITHUB_ENV
           echo "DB_FILE=data/ci.db" >> $GITHUB_ENV

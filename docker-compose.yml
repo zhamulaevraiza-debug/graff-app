@@ -22,15 +22,23 @@ services:
       dockerfile: Dockerfile
       target: app
       args:
-        # Клиент собирается с относительным адресом API: всё идёт через nginx того же домена.
-        VITE_API_URL: /api
+        # Значение попадает в копию статики внутри образа app, а её никто не раздаёт
+        # (см. комментарий в Dockerfile). Адрес API для браузера задаётся у сервиса nginx —
+        # менять нужно именно там. Здесь аргумент оставлен, чтобы обе стадии собирались
+        # с одним значением и статика в двух образах не расходилась.
+        VITE_API_URL: ${VITE_API_URL:-/api}
     # Все настройки — в server/.env (пример со всеми переменными: server/.env.example).
     env_file:
       - ./server/.env
     environment:
+      # Задано жёстко и намеренно перекрывает значение из server/.env: боевой контейнер
+      # всегда должен работать в режиме production. В нём сервер требует JWT_SECRET,
+      # не пишет тела запросов в журнал и не отдаёт код входа в ответе.
+      # Опечатка в .env (NODE_ENV=prodction) здесь ни на что не влияет — и это хорошо.
       NODE_ENV: production
-      # Путь относительно рабочего каталога /app/server, то есть /app/server/data/graff.db.
-      DB_FILE: data/graff.db
+      # DB_FILE тут не задаём: путь берётся из server/.env, значение по умолчанию —
+      # data/graff.db относительно /app/server, то есть внутри тома graff-data.
+      # Менять его можно, но только на путь внутри /app/server/data: остальное не в томе.
     volumes:
       # База с персональными данными. Том живёт на диске виртуальной машины в России.
       - graff-data:/app/server/data
@@ -47,16 +55,26 @@ services:
       start_period: 20s
     logging:
       # Журналы не должны съесть диск: телефоны в них не пишутся, но объём растёт.
+      # 10 файлов по 10 МБ = 100 МБ на сервис. При инциденте основное доказательство —
+      # таблица audit в базе, журнал контейнера к ней вспомогательный (см. server/README.md).
       driver: json-file
       options:
         max-size: "10m"
-        max-file: "5"
+        max-file: "10"
 
   nginx:
     build:
       context: .
       dockerfile: Dockerfile
       target: web
+      args:
+        # Именно этот образ раздаёт браузеру собранное приложение, поэтому адрес API
+        # для клиента задаётся ЗДЕСЬ. По умолчанию относительный /api: приложение и API
+        # на одном домене, префикс срезает nginx. Если API выносится на отдельный домен,
+        # задайте переменную окружения перед сборкой, например:
+        #   VITE_API_URL=https://api.graff.example.ru docker compose build
+        # и не забудьте про CORS_ORIGINS в server/.env.
+        VITE_API_URL: ${VITE_API_URL:-/api}
     ports:
       - "80:80"
       - "443:443"
@@ -72,10 +90,15 @@ services:
         condition: service_healthy
     restart: unless-stopped
     logging:
+      # nginx пишет строку на каждый запрос HTML и API (статика, поток событий и /health
+      # исключены в deploy/nginx.conf), поэтому предел выше, чем у сервера:
+      # 20 файлов по 20 МБ = 400 МБ. Вместе с журналом app это около полугигабайта
+      # при рекомендованном диске в 20 ГБ. Нужен более долгий срок хранения —
+      # выгружайте журналы отдельно: docker compose logs --since 720h nginx > nginx.log
       driver: json-file
       options:
-        max-size: "10m"
-        max-file: "5"
+        max-size: "20m"
+        max-file: "20"
 
 volumes:
   # Именованный том с базой. Резервная копия делается из него, см. server/README.md.
