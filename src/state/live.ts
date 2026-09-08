@@ -234,10 +234,19 @@ export async function confirmCode(): Promise<boolean> {
   const st = s.get();
   const reply = await run(() => api.verifyCode(st.phoneInput, st.codeInput, st.nameInput || undefined));
   if (!reply) return false;
+
+  // Согласие на рекламу гость отмечает до входа, а сервер узнаёт о профиле только сейчас.
+  // Досылаем отметку, если она стоит, но на сервере её нет: иначе выбор пропал бы молча.
+  let marketing = reply.user.marketingConsent;
+  if (st.marketingConsent && !marketing) {
+    const updated = await api.updateMe({ marketing: true }).catch(() => undefined);
+    if (updated) marketing = updated.marketingConsent;
+  }
+
   const named = reply.user.name.trim().length > 0;
   s.set({
     user: { name: reply.user.name, phone: reply.user.phone },
-    marketingConsent: reply.user.marketingConsent,
+    marketingConsent: marketing,
     // имя ещё не известно — спросим на следующем шаге
     loginStep: named ? 'phone' : 'name',
     screen: named ? 'home' : 'splash',
