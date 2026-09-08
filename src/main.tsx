@@ -13,6 +13,7 @@ createRoot(document.getElementById('root')!).render(
 // (и мешал бы горячей перезагрузке), поэтому регистрируем только в собранной версии.
 if (import.meta.env.PROD && 'serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js').catch(() => undefined);
+    const base = import.meta.env.BASE_URL;
+    navigator.serviceWorker.register(`${base}sw.js`, { scope: base }).catch(() => undefined);
   });
 }

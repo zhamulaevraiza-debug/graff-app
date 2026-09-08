@@ -4,9 +4,14 @@
  * Задача — чтобы установленное приложение открывалось без сети (меню, цены, свои заказы лежат на устройстве).
  * Стратегия: сеть в приоритете, кэш как запасной вариант; всё успешно загруженное складываем в кэш во время работы,
  * поэтому список файлов сборки (с хэшами в именах) заранее знать не нужно.
+ *
+ * Пути считаются от области действия воркера, поэтому приложение работает и в корне домена,
+ * и в подпапке (например, на GitHub Pages по адресу /graff-app/).
  */
-const CACHE = 'graff-v1';
-const OFFLINE_URLS = ['/', '/index.html', '/manifest.webmanifest', '/icon.svg', '/icon-192.png', '/apple-touch-icon.png'];
+const CACHE = 'graff-v2';
+const BASE = new URL(self.registration.scope).pathname;
+const INDEX = BASE + 'index.html';
+const OFFLINE_URLS = [BASE, INDEX, BASE + 'manifest.webmanifest', BASE + 'icon.svg', BASE + 'icon-192.png', BASE + 'apple-touch-icon.png'];
 
 self.addEventListener('install', event => {
   event.waitUntil(
@@ -42,8 +47,11 @@ self.addEventListener('fetch', event => {
     event.respondWith(
       fetch(req)
         .then(res => { cachePut(req, res.clone()); return res; })
-        .catch(() => caches.match('/index.html').then(r => r || caches.match('/'))
-          .then(r => r || new Response('<h1>GRAFF</h1><p>Нет сети. Откройте приложение, когда появится интернет, или позвоните: +7 938 900-90-67.</p>', { headers: { 'Content-Type': 'text/html; charset=utf-8' } }))),
+        .catch(() => caches.match(INDEX).then(r => r || caches.match(BASE))
+          .then(r => r || new Response(
+            '<h1>GRAFF</h1><p>Нет сети. Откройте приложение, когда появится интернет, или позвоните: +7 938 900-90-67.</p>',
+            { headers: { 'Content-Type': 'text/html; charset=utf-8' } },
+          ))),
     );
     return;
   }
