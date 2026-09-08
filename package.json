@@ -6,9 +6,12 @@
   "description": "GRAFF (Граф) — мобильное приложение кафе: меню, заказ, статус готовности, профиль, панель персонала",
   "scripts": {
     "dev": "vite --host",
+    "dev:live": "vite --host --mode live",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview --host",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "server:dev": "npm --prefix server run dev",
+    "server:install": "npm --prefix server install"
   },
   "dependencies": {
     "react": "^19.2.0",

@@ -2,3 +2,9 @@ node_modules
 dist
 .DS_Store
 *.log
+
+# локальные настройки
+.env
+.env.local
+server/data
+server/node_modules

@@ -1,0 +1,25 @@
+{
+  "name": "graff-server",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Сервер приложения кафе GRAFF: заказы, статусы, вход по SMS, панель персонала",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "dev": "node --watch --experimental-strip-types src/server.ts",
+    "start": "node --experimental-strip-types src/server.ts",
+    "typecheck": "tsc --noEmit",
+    "seed:staff": "node --experimental-strip-types scripts/add-staff.ts"
+  },
+  "dependencies": {
+    "@fastify/cors": "^11.0.0",
+    "@fastify/rate-limit": "^10.2.0",
+    "better-sqlite3": "^11.8.0",
+    "fastify": "^5.2.0"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.12",
+    "@types/node": "^22.10.0",
+    "typescript": "^5.9.0"
+  }
+}

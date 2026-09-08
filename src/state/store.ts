@@ -40,7 +40,18 @@ export interface Toast extends ToastMsg { id: number; target: Screen }
 export interface StaffForm { phone: string; text: string; format: Format; sum: string }
 
 export const speedOf = (s: Settings) => (s.fastTimer ? 12 : 1);
-export const DEFAULT_SETTINGS: Settings = { autoKitchen: true, fastTimer: true, pushBanners: true, headerStyle: 'plate' };
+
+/**
+ * Боевой режим включается адресом сервера в переменной сборки VITE_API_URL.
+ * Без сервера приложение работает как демонстрация: заказы живут на устройстве,
+ * кухня-автопилот сама двигает статусы, время ускорено.
+ */
+export const LIVE = !!(import.meta.env.VITE_API_URL || '').trim();
+
+export const DEFAULT_SETTINGS: Settings = LIVE
+  // на боевом сервере статусы ведёт кухня, а время идёт по-настоящему
+  ? { autoKitchen: false, fastTimer: false, pushBanners: true, headerStyle: 'plate' }
+  : { autoKitchen: true, fastTimer: true, pushBanners: true, headerStyle: 'plate' };
 
 export interface AppState {
   // навигация
@@ -204,7 +215,8 @@ function initialState(): AppState {
     user: null, loginStep: 'phone', phoneInput: '', codeInput: '', nameInput: '', phoneErr: false,
     cat: 'burgers', dishId: null, dishSize: 0, dishSauces: {}, dishQty: 1, dishFrom: 'menu',
     cart: [], comment: '', format: 'hall', table: 'any', pickup: 'asap', pickupTime: 0, payment: 'cash', guestName: '', guestPhone: '',
-    orders: seedOrders(now, speedOf(DEFAULT_SETTINGS)), nextNo: SEED_NEXT_NO, occupied: { ...SEED_OCCUPIED }, viewOrder: null,
+    // демо-заказы нужны только для показа приложения без сервера
+    orders: LIVE ? [] : seedOrders(now, speedOf(DEFAULT_SETTINGS)), nextNo: SEED_NEXT_NO, occupied: LIVE ? {} : { ...SEED_OCCUPIED }, viewOrder: null,
     favorites: {}, favFormat: 'hall', notifOn: true,
     consentAt: null, consentVersion: null, marketingConsent: false, marketingConsentAt: null, legalDoc: null,
     staffForm: null,
@@ -418,7 +430,11 @@ export const useStore = create<Store>()(
       setSetting: (key, value) => set({ settings: { ...get().settings, [key]: value } }),
       resetDemo: () => {
         const now = Date.now();
-        set({ orders: seedOrders(now, speedOf(get().settings)), nextNo: SEED_NEXT_NO, occupied: { ...SEED_OCCUPIED }, cart: [], comment: '', viewOrder: null, staffForm: null, favorites: {} });
+        set({
+          orders: LIVE ? [] : seedOrders(now, speedOf(get().settings)),
+          nextNo: SEED_NEXT_NO, occupied: LIVE ? {} : { ...SEED_OCCUPIED },
+          cart: [], comment: '', viewOrder: null, staffForm: null, favorites: {},
+        });
       },
     }),
     {
