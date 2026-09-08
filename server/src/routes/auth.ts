@@ -12,6 +12,7 @@ import type { FastifyError, FastifyInstance, FastifyRequest } from 'fastify';
 import type {} from '@fastify/rate-limit';
 import { config, isProd } from '../config.ts';
 import { audit, codes, orders, users } from '../db.ts';
+import { removeSubscriptionsFor } from '../push.ts';
 import {
   bearer,
   codeMatches,
@@ -336,6 +337,9 @@ export async function authRoutes(app: FastifyInstance) {
     const user = currentUser(req);
     // Отзыв согласия фиксируем отдельной записью: сам users.remove пишет только факт удаления.
     audit('user:' + user.id, 'consent.revoked', { version: LEGAL_VERSION });
+    // Подписки на уведомления — это адреса устройств человека: удаляем вместе с профилем,
+    // иначе они остались бы в базе после отзыва согласия.
+    removeSubscriptionsFor({ userId: user.id, phone: user.phone });
     users.remove(user.id);
     return { ok: true };
   });

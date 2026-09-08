@@ -15,7 +15,8 @@
     "seed:staff": "node --experimental-strip-types scripts/add-staff.ts",
     "test:smoke": "node --experimental-strip-types scripts/smoke-test.ts",
     "test:stream": "node --experimental-strip-types scripts/stream-test.ts",
-    "test:security": "node --experimental-strip-types scripts/security-test.ts"
+    "test:security": "node --experimental-strip-types scripts/security-test.ts",
+    "test:push": "node --experimental-strip-types scripts/push-test.ts"
   },
   "dependencies": {
     "@fastify/cors": "^11.0.0",

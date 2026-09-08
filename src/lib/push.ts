@@ -53,6 +53,52 @@ export function pushSupported(): boolean {
 /** Push имеет смысл: браузер умеет и адрес сервера задан при сборке. */
 const usable = () => pushSupported() && isLive();
 
+/**
+ * Что браузер решил насчёт уведомлений: 'granted' — разрешил, 'denied' — запретил,
+ * 'default' — ещё не спрашивали или окно запроса закрыли без ответа.
+ *
+ * Экраны берут разрешение отсюда, а не из результата enablePush: подсказку «запрещено
+ * в настройках браузера» можно показывать только при настоящем запрете.
+ */
+export function pushPermission(): NotificationPermission {
+  return pushSupported() ? Notification.permission : 'default';
+}
+
+/**
+ * Следит за ответом на вопрос браузера об уведомлениях и зовёт onChange при каждой смене.
+ *
+ * Зачем: вопрос показывает переключатель уведомлений в сторе (toggleNotif), а подписаться
+ * нужно уже после ответа — второй такой же вопрос браузеры не показывают и отвечают на него
+ * пустым 'default'. О смене решения сообщает Permissions API; где его нет — сверяемся,
+ * когда человек возвращается к вкладке (окно запроса и настройки браузера уводят фокус).
+ *
+ * Возвращает функцию отписки.
+ */
+export function watchPushPermission(onChange: (permission: NotificationPermission) => void): () => void {
+  if (!pushSupported()) return () => undefined;
+  let alive = true;
+  let status: PermissionStatus | null = null;
+  const read = () => { if (alive) onChange(Notification.permission); };
+  try {
+    navigator.permissions?.query({ name: 'notifications' }).then(s => {
+      if (!alive) return;
+      status = s;
+      s.addEventListener('change', read);
+      read();
+    }).catch(() => undefined);
+  } catch {
+    /* браузер не знает такого разрешения — обойдёмся возвратом к вкладке */
+  }
+  document.addEventListener('visibilitychange', read);
+  window.addEventListener('focus', read);
+  return () => {
+    alive = false;
+    if (status) status.removeEventListener('change', read);
+    document.removeEventListener('visibilitychange', read);
+    window.removeEventListener('focus', read);
+  };
+}
+
 /* ======================= запросы к серверу ======================= */
 
 /** Ответ сервера: ok — дошло и принято, data — разобранное тело (может быть пустым). */
@@ -151,15 +197,24 @@ function decodeKey(base64url: string): ArrayBuffer | null {
   }
 }
 
-/** Подписка сделана этим же ключом? Сервер мог сменить пару VAPID — тогда её надо пересоздать. */
-function sameKey(sub: PushSubscription, key: ArrayBuffer): boolean {
+/**
+ * Каким ключом сделана существующая подписка:
+ * 'same'    — тем же, что у сервера: подписка годится;
+ * 'other'   — другим: сервер сменил пару VAPID, подписку придётся пересоздать;
+ * 'unknown' — браузер не отдаёт applicationServerKey (так делают некоторые версии Safari).
+ *
+ * «Не отдаёт» и «не совпал» нарочно разведены: если считать пустой ключ несовпадением,
+ * каждое включение уведомлений пересоздаёт подписку и оставляет на сервере мёртвые записи.
+ * При 'unknown' подписку не трогаем — просто переотправляем серверу.
+ */
+function keyState(sub: PushSubscription, key: ArrayBuffer): 'same' | 'other' | 'unknown' {
   const raw = sub.options?.applicationServerKey;
-  if (!raw) return false;
+  if (!raw || raw.byteLength === 0) return 'unknown';
   const has = new Uint8Array(raw);
   const want = new Uint8Array(key);
-  if (has.length !== want.length) return false;
-  for (let i = 0; i < has.length; i++) if (has[i] !== want[i]) return false;
-  return true;
+  if (has.length !== want.length) return 'other';
+  for (let i = 0; i < has.length; i++) if (has[i] !== want[i]) return 'other';
+  return 'same';
 }
 
 /**
@@ -187,13 +242,17 @@ async function swReady(): Promise<ServiceWorkerRegistration | null> {
 /**
  * Включение push: спрашиваем разрешение, подписываемся и отдаём подписку серверу.
  *
- * 'denied'      — человек (или настройки браузера) запретил уведомления;
+ * 'denied'      — человек (или настройки браузера) запретил уведомления: только он может
+ *                 это отменить, поэтому здесь уместна подсказка про настройки браузера;
  * 'unsupported' — браузер не умеет web-push, это демо-сборка без сервера либо на сервере
  *                 не заданы ключи VAPID: повторять нечего;
- * 'error'       — сервер не ответил, прислал негодный ключ или не принял подписку
- *                 (например, вход не выполнен); попытку можно повторить.
+ * 'error'       — сервер не ответил, прислал негодный ключ, не принял подписку (например,
+ *                 вход не выполнен) либо окно запроса закрыли, ничего не выбрав;
+ *                 попытку можно повторить.
  *
- * Вызывать безопасно повторно: существующая подписка переиспользуется, лишней она не станет.
+ * Вызывать безопасно повторно: существующая подписка переиспользуется, лишней она не станет,
+ * а серверу она уходит каждый раз — так связка «адрес браузера → гость» остаётся верной
+ * после смены человека на общем устройстве.
  * Разрешение браузер спрашивает только в ответ на действие человека, поэтому вызов должен
  * идти из обработчика нажатия.
  */
@@ -202,7 +261,10 @@ export async function enablePush(): Promise<PushResult> {
   try {
     let permission = Notification.permission;
     if (permission === 'default') permission = await Notification.requestPermission();
-    if (permission !== 'granted') return 'denied';
+    if (permission === 'denied') return 'denied';
+    // Остался 'default' — окно запроса просто закрыли, ничего не выбрав (или его в этот
+    // момент показывал кто-то ещё). Это не запрет: достаточно нажать переключатель снова.
+    if (permission !== 'granted') return 'error';
 
     const reg = await swReady();
     if (!reg) return 'unsupported';
@@ -214,10 +276,14 @@ export async function enablePush(): Promise<PushResult> {
     if (!key) return 'error';
 
     let sub = await reg.pushManager.getSubscription();
-    if (sub && !sameKey(sub, key)) {
-      // ключ сервера сменился — старая подписка уже не расшифруется
+    if (sub && keyState(sub, key) === 'other') {
+      // Ключ сервера сменился — старая подписка уже не расшифруется. Её адрес запоминаем
+      // до отписки и просим сервер убрать запись: сам он узнал бы о ней, только получив
+      // от push-службы отказ, а до тех пор копил бы мёртвые подписки.
+      const stale = sub.endpoint;
       await sub.unsubscribe().catch(() => false);
       sub = null;
+      await call(PUSH_ROUTES.unsubscribe, { endpoint: stale });
     }
     if (!sub) {
       sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: key });

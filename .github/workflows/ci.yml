@@ -60,14 +60,22 @@ jobs:
       - name: Проверка типов
         run: npm run typecheck
 
+      - name: Ключи для push
+        # Уведомления никуда не уходят: проверяем подписку, адресность и удаление данных.
+        run: |
+          npx --yes web-push generate-vapid-keys --json > vapid.json
+          echo "VAPID_PUBLIC_KEY=$(node -p \"require('./vapid.json').publicKey\")" >> $GITHUB_ENV
+          echo "VAPID_PRIVATE_KEY=$(node -p \"require('./vapid.json').privateKey\")" >> $GITHUB_ENV
+          echo "VAPID_SUBJECT=mailto:ci@graff.local" >> $GITHUB_ENV
+          echo "JWT_SECRET=ci-secret-$RANDOM" >> $GITHUB_ENV
+          echo "DB_FILE=data/ci.db" >> $GITHUB_ENV
+
       - name: Запуск сервера
         # SMS не отправляются: код входа пишется в журнал и возвращается тестам.
         run: |
-          JWT_SECRET=ci-secret-$RANDOM \
           SMS_PROVIDER=log \
           STAFF_LOGIN=kitchen \
           STAFF_PIN=1234 \
-          DB_FILE=data/ci.db \
           npm start > server.log 2>&1 &
           for i in $(seq 1 30); do
             if curl -sf http://localhost:3000/health > /dev/null; then echo "сервер поднялся"; exit 0; fi
@@ -80,6 +88,9 @@ jobs:
 
       - name: Живые обновления
         run: npm run test:stream
+
+      - name: Push-уведомления
+        run: npm run test:push
 
       # Проверка защиты идёт последней: она намеренно упирается в ограничения частоты,
       # после чего вход сотрудника ненадолго блокируется.

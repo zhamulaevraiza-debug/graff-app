@@ -109,6 +109,10 @@ async function run<T>(fn: () => Promise<T>): Promise<T | undefined> {
   try {
     return await fn();
   } catch (e) {
+    // Сервер отказал в доступе: вход больше не действует (например, аккаунт удалён
+    // или срок токена вышел). Показываем гостя, чтобы человек мог войти заново,
+    // а не смотрел на своё имя в приложении, которое ничего не может сделать.
+    if (e instanceof api.ApiError && e.status === 401 && !api.hasToken()) s.set({ user: null });
     s.set({ netError: errorText(e) });
     return undefined;
   } finally {
@@ -185,16 +189,24 @@ export async function bootstrap() {
   const tables = await api.getTables().catch(() => undefined);
   if (tables) applyTables(tables);
 
+  // Профиль без токена в боевом режиме означает, что вход уже недействителен
+  // (например, аккаунт удалён на другом устройстве). Показываем гостя.
+  if (!api.hasToken() && s.get().user) s.set({ user: null });
+
   if (api.hasToken()) {
-    const user = await api.me().catch(() => undefined);
-    if (user) {
+    try {
+      const user = await api.me();
       s.set({ user: { name: user.name, phone: user.phone }, marketingConsent: user.marketingConsent });
       const list = await api.myOrders().catch(() => undefined);
       if (list) s.set({ orders: list.map(fromApi) });
-    } else {
-      // токен протух — возвращаем гостя ко входу, данные не теряем
-      api.clearToken();
-      s.set({ user: null });
+    } catch (e) {
+      if (e instanceof api.ApiError && e.status === 401) {
+        // Сервер не признаёт вход: срок токена вышел или аккаунт удалён.
+        api.clearToken();
+        s.set({ user: null });
+      }
+      // Нет связи — профиль и вход сохраняем: интернет вернётся, а заказы
+      // с устройства всё это время видны. Выкидывать человека из аккаунта нельзя.
     }
   }
 

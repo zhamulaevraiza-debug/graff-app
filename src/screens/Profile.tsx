@@ -7,7 +7,7 @@ import { useEffect, useState } from 'react';
 import { ITEMS, FORMAT_NAME, STATUS_TEXT } from '../data/menu';
 import { rub, fmtDate, fmtTime } from '../lib/format';
 import { formatText, itemsText, type Order } from '../lib/orders';
-import { enablePush, disablePush, pushSupported, pushSubscribed } from '../lib/push';
+import { enablePush, disablePush, pushSupported, pushPermission, watchPushPermission } from '../lib/push';
 import { useStore, selUserInitial } from '../state/store';
 import { Icon, Crown } from '../components/Icon';
 import { BackButton } from '../components/Titles';
@@ -50,34 +50,43 @@ function MainSub() {
      для свёрнутого приложения. Ошибки подписки на экран не выводим: показываем только
      то, что человек может исправить сам. */
   const pushOk = pushSupported();
-  // Разрешение могли запретить раньше — тогда подсказка нужна сразу, без нажатия.
-  const [pushDenied, setPushDenied] = useState(() => pushSupported() && Notification.permission === 'denied');
+  // Решение браузера об уведомлениях. Могли запретить раньше — тогда подсказка нужна сразу,
+  // без нажатия. Сам вопрос задаёт стор (toggleNotif), здесь только следим за ответом:
+  // второй такой же вопрос браузер не покажет и ответит на него пустым 'default'.
+  const [perm, setPerm] = useState<NotificationPermission>(pushPermission);
+  useEffect(() => watchPushPermission(setPerm), []);
 
-  // Разрешение уже дано, а подписки нет (новое устройство, очистка данных сайта,
-  // сервер сменил ключ) — восстанавливаем её молча, без вопросов.
+  /* Подписка на push. Отправляем её серверу при каждом открытии профиля и при смене гостя:
+     на сервере адрес браузера связан с конкретным человеком, и когда один гость вышел, а на
+     том же устройстве вошёл другой, эту связку нужно переписать — иначе придут уведомления
+     о чужих заказах, а свои не придут вовсе. Заодно так восстанавливается подписка, которую не приняли раньше
+     (переключатель включили до входа) или которой нет вовсе (очистка данных сайта, новый
+     ключ сервера). enablePush идемпотентна: готовую подписку она переиспользует. */
   useEffect(() => {
-    if (!notifOn || !pushOk || Notification.permission !== 'granted') return;
-    let alive = true;
-    void pushSubscribed().then(has => { if (alive && !has) void enablePush(); });
-    return () => { alive = false; };
-  }, [notifOn, pushOk]);
+    if (!notifOn || !pushOk || perm !== 'granted') return;
+    void enablePush();
+  }, [notifOn, pushOk, perm, user?.phone]);
 
   const onNotif = () => {
     const on = !notifOn;
     toggleNotif();
-    if (!on) {
-      setPushDenied(false);
-      void disablePush();
-      return;
-    }
-    void enablePush().then(r => setPushDenied(r === 'denied'));
+    // Выключаем сразу; включение делает эффект выше — как только разрешение окажется
+    // полученным (сейчас или после ответа на вопрос браузера, который показывает стор).
+    if (!on) void disablePush();
+  };
+
+  // Выход из аккаунта: снимаем подписку, чтобы в промежутке до входа следующего гостя
+  // на это устройство не приходили уведомления о заказах прежнего.
+  const onLogout = () => {
+    void disablePush();
+    logout();
   };
 
   // Подсказка под строкой: сначала про запрет, затем про установку на главный экран
   // (на iPhone web-push работает только у приложения с домашнего экрана).
   const notifHint = !notifOn ? ''
     : !pushOk ? 'Чтобы получать уведомления, добавьте приложение на главный экран'
-      : pushDenied ? 'Уведомления запрещены в настройках браузера' : '';
+      : perm === 'denied' ? 'Уведомления запрещены в настройках браузера' : '';
 
   return (
     <div className="screen screen--gutter">
@@ -180,7 +189,7 @@ function MainSub() {
       </div>
 
       {loggedIn && (
-        <button type="button" className="btn btn--ghost btn--block" style={{ marginTop: 14, color: 'var(--sec)', padding: 8 }} onClick={logout}>
+        <button type="button" className="btn btn--ghost btn--block" style={{ marginTop: 14, color: 'var(--sec)', padding: 8 }} onClick={onLogout}>
           Выйти
         </button>
       )}
@@ -194,7 +203,10 @@ function MainSub() {
             'Удалить аккаунт и все данные? Будут удалены профиль, история заказов и избранное на этом устройстве, '
             + 'а согласие на обработку персональных данных — отозвано. Отменить действие нельзя.',
           );
-          if (ok) deleteAccount();
+          // Подписку снимаем первой: она отписывает браузер и убирает с сервера адрес
+          // вместе с номером телефона — иначе после «удаления всех данных» уведомления
+          // о заказе на этот номер продолжали бы приходить на удалённый профиль.
+          if (ok) { void disablePush(); deleteAccount(); }
         }}
       >
         Удалить аккаунт и данные

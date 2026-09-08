@@ -128,14 +128,18 @@ function safeUrl(url) {
 
 /**
  * Нажатие на уведомление: если приложение уже открыто в какой-то вкладке — переводим фокус
- * туда и сообщаем адрес сообщением (перезагружать вкладку не нужно, приложение одностраничное),
- * иначе открываем новую вкладку.
+ * туда и открываем нужный экран, иначе открываем новую вкладку.
+ *
+ * Экран переключаем сами, через client.navigate: адрес отличается только хэшем («#/status»),
+ * поэтому вкладка не перезагружается — приложение ловит смену адреса и показывает заказ.
+ * Так переход не зависит от того, слушает ли приложение сообщения воркера; сообщение всё
+ * равно шлём — оно пригодится приложению, которое хочет обработать нажатие по-своему.
  */
 self.addEventListener('notificationclick', event => {
   event.notification.close();
   const url = safeUrl(event.notification.data && event.notification.data.url);
   event.waitUntil(
-    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(list => {
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(async list => {
       for (const client of list) {
         let mine = false;
         try {
@@ -144,8 +148,14 @@ self.addEventListener('notificationclick', event => {
           mine = false;
         }
         if (!mine) continue;
-        client.postMessage({ type: 'push-click', url });
-        return 'focus' in client ? client.focus() : undefined;
+        // Фокус запрашиваем первым: право на него даёт само нажатие и оно быстро сгорает.
+        let target = client;
+        if ('focus' in client) target = (await client.focus().catch(() => null)) || client;
+        target.postMessage({ type: 'push-click', url });
+        // navigate доступен только для вкладок под управлением этого воркера — остальным
+        // остаётся сообщение выше, поэтому отказ просто пропускаем.
+        if ('navigate' in target) await target.navigate(url).catch(() => undefined);
+        return undefined;
       }
       return self.clients.openWindow(url);
     }).catch(() => undefined),
