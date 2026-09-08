@@ -1,6 +1,7 @@
+import { useEffect } from 'react';
 import { ZONES, PAYMENTS, FORMAT_NAME } from '../data/menu';
-import { rub } from '../lib/format';
-import { useStore, selCartCount, selCartTotal, selUserInitial, pickupSlots } from '../state/store';
+import { rub, isPhoneComplete } from '../lib/format';
+import { useStore, selCartCount, selCartTotal, selUserInitial, pickupSlots, LIVE } from '../state/store';
 import { Icon, Crown } from '../components/Icon';
 import { ScreenTitle, SectionLabel } from '../components/Titles';
 import { FormatPicker } from '../components/FormatPicker';
@@ -24,6 +25,10 @@ export function Cart() {
   const initial = useStore(selUserInitial);
   const count = useStore(selCartCount);
   const total = useStore(selCartTotal);
+  // связь с сервером: идёт отправка и текст последней ошибки (в демонстрации всегда пусто)
+  const sending = useStore(s => s.busy);
+  const netError = useStore(s => s.netError);
+  const setNetError = useStore(s => s.setNetError);
 
   const go = useStore(s => s.go);
   const changeLine = useStore(s => s.changeLine);
@@ -39,6 +44,12 @@ export function Cart() {
   const consentGiven = useStore(s => !!s.consentAt);
   const setConsent = useStore(s => s.setConsent);
   const openLegal = useStore(s => s.openLegal);
+
+  // ошибка сервера относится к прошлой попытке: как только гость меняет состав или формат получения — убираем её
+  useEffect(() => { setNetError(null); }, [cart, format, setNetError]);
+
+  // на боевом сервере кухня связывается с гостем по телефону: без него заказ не оформить
+  const needPhone = LIVE && !user && !isPhoneComplete(guestPhone);
 
   // ближайшие слоты по 15 минут: подписка на границу слота (не на секундный таймер), чтобы чипы и итог
   // не расходились со временем, которое placeOrder посчитает в момент нажатия
@@ -266,11 +277,18 @@ export function Cart() {
             type="button"
             className="btn btn--primary btn--lg btn--block"
             style={{ marginTop: 16 }}
-            disabled={!consentGiven}
+            disabled={!consentGiven || sending || needPhone}
             onClick={() => placeOrder()}
           >
-            ОФОРМИТЬ ЗАКАЗ · {totalLabel}
+            {sending ? 'ОТПРАВЛЯЕМ…' : `ОФОРМИТЬ ЗАКАЗ · ${totalLabel}`}
           </button>
+
+          {needPhone && (
+            <div className="cart-note t-small">Укажите телефон: по нему кухня свяжется с вами</div>
+          )}
+          {netError && (
+            <div className="cart-note field-err" role="alert">{netError}</div>
+          )}
 
           <div className="cart-legal-note">
             {OFFER_NOTE}. Оплата — при получении в кафе, там же выдаётся кассовый чек.{' '}

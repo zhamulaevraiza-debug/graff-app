@@ -7,8 +7,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
-    name: Проверка типов и сборка
+  app:
+    name: "Приложение: типы и сборка"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -24,8 +24,13 @@ jobs:
       - name: Проверка типов
         run: npm run typecheck
 
-      - name: Сборка
+      - name: Сборка (демонстрационный режим)
         run: npm run build
+
+      - name: Сборка (боевой режим)
+        run: npm run build
+        env:
+          VITE_API_URL: /api
 
       - name: Артефакт сборки
         uses: actions/upload-artifact@v4
@@ -33,3 +38,62 @@ jobs:
           name: dist
           path: dist
           retention-days: 7
+
+  server:
+    name: "Сервер: типы и сквозные проверки"
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: server
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: server/package-lock.json
+
+      - name: Установка зависимостей
+        run: npm ci
+
+      - name: Проверка типов
+        run: npm run typecheck
+
+      - name: Запуск сервера
+        # SMS не отправляются: код входа пишется в журнал и возвращается тестам.
+        run: |
+          JWT_SECRET=ci-secret-$RANDOM \
+          SMS_PROVIDER=log \
+          STAFF_LOGIN=kitchen \
+          STAFF_PIN=1234 \
+          DB_FILE=data/ci.db \
+          npm start > server.log 2>&1 &
+          for i in $(seq 1 30); do
+            if curl -sf http://localhost:3000/health > /dev/null; then echo "сервер поднялся"; exit 0; fi
+            sleep 1
+          done
+          echo "сервер не запустился"; cat server.log; exit 1
+
+      - name: Заказ, кухня, удаление данных
+        run: npm run test:smoke
+
+      - name: Живые обновления
+        run: npm run test:stream
+
+      # Проверка защиты идёт последней: она намеренно упирается в ограничения частоты,
+      # после чего вход сотрудника ненадолго блокируется.
+      - name: Защита данных и ограничения частоты
+        run: npm run test:security
+
+      - name: Журнал сервера при ошибке
+        if: failure()
+        run: cat server.log
+
+  docker:
+    name: Сборка боевых образов
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: docker compose build
+        run: docker compose build

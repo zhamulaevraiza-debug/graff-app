@@ -3,9 +3,11 @@
  * Источник: design/GRAFF App.dc.html, секция isProfile (строки 448–492) и history/favList в renderVals().
  * Нижняя навигация рендерится в App.
  */
+import { useEffect, useState } from 'react';
 import { ITEMS, FORMAT_NAME, STATUS_TEXT } from '../data/menu';
 import { rub, fmtDate, fmtTime } from '../lib/format';
 import { formatText, itemsText, type Order } from '../lib/orders';
+import { enablePush, disablePush, pushSupported, pushSubscribed } from '../lib/push';
 import { useStore, selUserInitial } from '../state/store';
 import { Icon, Crown } from '../components/Icon';
 import { BackButton } from '../components/Titles';
@@ -42,6 +44,40 @@ function MainSub() {
   const loggedIn = !!user;
   const historyCount = orders.filter(o => o.mine).length;
   const favCount = Object.keys(favorites).filter(id => favorites[id] && ITEMS[id]).length;
+
+  /* ---- push-уведомления (src/lib/push.ts) ----
+     notifOn остаётся выключателем баннеров внутри приложения; push — дополнение к нему
+     для свёрнутого приложения. Ошибки подписки на экран не выводим: показываем только
+     то, что человек может исправить сам. */
+  const pushOk = pushSupported();
+  // Разрешение могли запретить раньше — тогда подсказка нужна сразу, без нажатия.
+  const [pushDenied, setPushDenied] = useState(() => pushSupported() && Notification.permission === 'denied');
+
+  // Разрешение уже дано, а подписки нет (новое устройство, очистка данных сайта,
+  // сервер сменил ключ) — восстанавливаем её молча, без вопросов.
+  useEffect(() => {
+    if (!notifOn || !pushOk || Notification.permission !== 'granted') return;
+    let alive = true;
+    void pushSubscribed().then(has => { if (alive && !has) void enablePush(); });
+    return () => { alive = false; };
+  }, [notifOn, pushOk]);
+
+  const onNotif = () => {
+    const on = !notifOn;
+    toggleNotif();
+    if (!on) {
+      setPushDenied(false);
+      void disablePush();
+      return;
+    }
+    void enablePush().then(r => setPushDenied(r === 'denied'));
+  };
+
+  // Подсказка под строкой: сначала про запрет, затем про установку на главный экран
+  // (на iPhone web-push работает только у приложения с домашнего экрана).
+  const notifHint = !notifOn ? ''
+    : !pushOk ? 'Чтобы получать уведомления, добавьте приложение на главный экран'
+      : pushDenied ? 'Уведомления запрещены в настройках браузера' : '';
 
   return (
     <div className="screen screen--gutter">
@@ -89,7 +125,16 @@ function MainSub() {
           <span className="badge badge--new">Скоро</span>
         </div>
 
-        <button type="button" className="list__row profile__btn" role="switch" aria-checked={notifOn} onClick={toggleNotif}>
+        <button
+          type="button"
+          className="list__row profile__btn"
+          role="switch"
+          aria-checked={notifOn}
+          aria-describedby={notifHint ? 'notif-hint' : undefined}
+          // подсказка идёт отдельной строкой ниже — черту между ними убираем
+          style={notifHint ? { borderBottom: 0, paddingBottom: 8 } : undefined}
+          onClick={onNotif}
+        >
           <Icon name="bell" size={22} />
           <span className="list__grow">
             <span style={{ display: 'block' }}>Уведомления</span>
@@ -99,6 +144,12 @@ function MainSub() {
             <span className="toggle__knob" />
           </span>
         </button>
+
+        {notifHint && (
+          <div className="list__row list__row--static" style={{ paddingTop: 0 }}>
+            <span id="notif-hint" className="list__sub">{notifHint}</span>
+          </div>
+        )}
 
         {/* Рекламные рассылки — отдельное согласие, ФЗ «О рекламе», ст. 18 */}
         <button type="button" className="list__row profile__btn" role="switch" aria-checked={marketingConsent} onClick={() => setMarketing(!marketingConsent)}>

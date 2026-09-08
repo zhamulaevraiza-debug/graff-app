@@ -3,8 +3,9 @@
  * Источник: design/GRAFF App.dc.html, секция isStatus (строки 393–446) и orderView() прототипа.
  * Нижняя навигация рендерится в App.
  */
+import { useEffect } from 'react';
 import { COMPANY } from '../data/legal';
-import { useStore, selSpeed, selViewedOrder } from '../state/store';
+import { useStore, selSpeed, selViewedOrder, LIVE } from '../state/store';
 import { orderView } from '../lib/orders';
 import { fmtDate, fmtTime } from '../lib/format';
 import { Icon, Crown } from '../components/Icon';
@@ -21,6 +22,19 @@ export function Status() {
   const go = useStore(s => s.go);
   const viewOrderNo = useStore(s => s.viewOrderNo);
   const repeatOrder = useStore(s => s.repeatOrder);
+  // отменять заказ можно только из своего профиля: у гостя без входа нет токена для сервера
+  const user = useStore(s => s.user);
+  // номер показываемого заказа берём из стора (а не из viewed) — хук объявлен выше раннего выхода
+  const viewOrder = useStore(s => s.viewOrder);
+  // связь с сервером: отмена заказа, занятость и текст ошибки (в демонстрации всегда пусто)
+  const cancelOrder = useStore(s => s.cancelOrder);
+  const busy = useStore(s => s.busy);
+  const netError = useStore(s => s.netError);
+  const setNetError = useStore(s => s.setNetError);
+
+  // netError общий на всё приложение: чужую ошибку (вход, панель персонала) и ответ по прошлому заказу
+  // сбрасываем при открытии экрана и при переключении на другой заказ
+  useEffect(() => { setNetError(null); }, [viewOrder, setNetError]);
 
   if (!viewed) {
     return (
@@ -45,8 +59,17 @@ export function Status() {
   }
 
   // активные заказы этого устройства — чипы переключения, если их больше одного
-  const activeMine = orders.filter(o => o.mine && o.status !== 'done');
+  // (выданные и отменённые заказы активными не считаем: из 'cancelled' заказ уже никуда не перейдёт)
+  const activeMine = orders.filter(o => o.mine && o.status !== 'done' && o.status !== 'cancelled');
   const v = orderView(viewed, now, speed);
+  const cancelled = v.status === 'cancelled';
+  // отменить можно только свой заказ, только пока кухня не начала готовить
+  // и только из профиля: сервер принимает отмену лишь с токеном входа по телефону
+  const canCancel = LIVE && !!user && viewed.mine && (v.status === 'new' || v.status === 'accepted');
+  const askCancel = () => {
+    if (!window.confirm(`Отменить заказ №${viewed.no}?`)) return;
+    void cancelOrder(viewed.no);
+  };
 
   return (
     <div className="screen screen--gutter">
@@ -72,31 +95,41 @@ export function Status() {
         <div style={{ font: '700 34px/1.1 var(--f-head)' }}>Заказ №{v.no}</div>
       </div>
 
-      <TimerRing offset={v.ringOffset} color={v.ringColor} top={v.ringTop} main={v.ringMain} sub={v.ringSub} />
+      {cancelled ? (
+        /* отменённому заказу таймер и шаги приготовления не нужны */
+        <div className="status-cancelled">
+          <div className="status-cancelled__title">Заказ отменён</div>
+          <div className="status-cancelled__note">Если это ошибка, позвоните нам</div>
+        </div>
+      ) : (
+        <>
+          <TimerRing offset={v.ringOffset} color={v.ringColor} top={v.ringTop} main={v.ringMain} sub={v.ringSub} />
 
-      <div className="t-center" style={{ marginTop: 12, font: '600 24px var(--f-hand)', color: 'var(--copper)' }}>
-        {v.headline}
-      </div>
-
-      {/* пошаговый статус: Принят → Готовится → Готов → Выдан */}
-      <div className="grid-4" style={{ gap: 0, marginTop: 16, position: 'relative' }} role="list" aria-label="Этапы заказа">
-        <div aria-hidden="true" style={{ position: 'absolute', left: '13%', right: '13%', top: 19, borderTop: '2px dotted var(--line)' }} />
-        {v.steps.map(st => (
-          <div key={st.name} role="listitem" aria-current={st.current ? 'step' : undefined} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, position: 'relative' }}>
-            <div
-              style={{
-                width: 40, height: 40, borderRadius: '50%',
-                background: st.bg, border: `1.5px solid ${st.border}`,
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                animation: st.anim,
-              }}
-            >
-              <Icon d={st.icon} size={20} color={st.fg} strokeWidth={1.8} />
-            </div>
-            <div style={{ fontSize: 12, color: st.textColor, fontWeight: st.weight }}>{st.name}</div>
+          <div className="t-center" style={{ marginTop: 12, font: '600 24px var(--f-hand)', color: 'var(--copper)' }}>
+            {v.headline}
           </div>
-        ))}
-      </div>
+
+          {/* пошаговый статус: Принят → Готовится → Готов → Выдан */}
+          <div className="grid-4" style={{ gap: 0, marginTop: 16, position: 'relative' }} role="list" aria-label="Этапы заказа">
+            <div aria-hidden="true" style={{ position: 'absolute', left: '13%', right: '13%', top: 19, borderTop: '2px dotted var(--line)' }} />
+            {v.steps.map(st => (
+              <div key={st.name} role="listitem" aria-current={st.current ? 'step' : undefined} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, position: 'relative' }}>
+                <div
+                  style={{
+                    width: 40, height: 40, borderRadius: '50%',
+                    background: st.bg, border: `1.5px solid ${st.border}`,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    animation: st.anim,
+                  }}
+                >
+                  <Icon d={st.icon} size={20} color={st.fg} strokeWidth={1.8} />
+                </div>
+                <div style={{ fontSize: 12, color: st.textColor, fontWeight: st.weight }}>{st.name}</div>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
 
       {/* состав заказа */}
       <div className="card card--beige card--pad stack gap-6" style={{ marginTop: 20 }}>
@@ -131,6 +164,19 @@ export function Status() {
           ПОВТОРИТЬ ЗАКАЗ
         </button>
       </div>
+
+      {canCancel && (
+        <button
+          type="button"
+          className="btn btn--ghost btn--block status-cancel"
+          disabled={busy}
+          onClick={askCancel}
+        >
+          Отменить заказ
+        </button>
+      )}
+
+      {netError && <div className="field-err status-net-err" role="alert">{netError}</div>}
 
       {/* Подтверждение предварительного заказа: п. 14 Правил оказания услуг общественного питания */}
       <section className="status-doc" aria-label="Подтверждение предварительного заказа">

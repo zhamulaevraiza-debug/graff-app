@@ -20,6 +20,8 @@
 
 /* столик как кнопка: сброс UA-стилей button */
 .staff-table { padding: 0; width: 100%; font-family: var(--f-head); }
+/* пока идёт запрос к серверу — столик не нажимается (в демо запросов нет, вид прежний) */
+.staff-table:disabled { opacity: .6; cursor: default; }
 
 /* строка настроек демо — вся строка кликабельна (button role=switch) */
 .staff-switch {
@@ -36,3 +38,14 @@
 
 /* «+5 мин» — без капса, как в прототипе */
 .staff-bump { padding: 0 14px; white-space: nowrap; text-transform: none; font-size: 13px; letter-spacing: 0; }
+
+/* полоса «нет связи с сервером» — спокойное сообщение, а не тревога */
+.staff-offline { font-size: 13px; line-height: 1.35; color: var(--sec); }
+
+/* отказ сервера по последнему действию персонала */
+.staff-err { line-height: 1.35; border-color: var(--price); }
+
+/* Отменённый заказ — приглушённый бейдж, как у выданного.
+   ВРЕМЕННО здесь: класс общий (его же рисует история заказов в профиле), место ему в global.css
+   рядом с остальными .badge--*, например `.badge--done, .badge--cancelled { … }`. */
+.badge--cancelled { background: #EFE9E1; color: var(--sec); }

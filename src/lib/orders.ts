@@ -123,7 +123,7 @@ export function kitchenTick(orders: Order[], occ: Occupied, now: number, speed: 
   let changed = false;
   const toasts: ToastMsg[] = [];
   const out = orders.map(o => {
-    if (!o.auto || o.status === 'done') return o;
+    if (!o.auto || o.status === 'done' || o.status === 'cancelled') return o;
     let next: [OrderStatus, Partial<Order>?] | null = null;
     if (o.status === 'new' && now - o.createdAt > 4000) next = ['accepted', { eta: 12 }];
     else if (o.status === 'accepted' || o.status === 'cooking') {
@@ -158,9 +158,9 @@ export function orderView(o: Order, now: number, speed: number): OrderView {
   const left = minutesLeft(o, now, speed);
   const tot = (o.eta || 15) * 60000;
   const el = o.acceptedAt ? (now - o.acceptedAt) * speed : 0;
-  const prog = o.status === 'ready' || o.status === 'done' ? 1 : (o.status === 'new' ? 0 : Math.min(1, el / tot));
+  const prog = o.status === 'ready' || o.status === 'done' ? 1 : (o.status === 'new' || o.status === 'cancelled' ? 0 : Math.min(1, el / tot));
   const idx = STEP_IDX[o.status];
-  const color = o.status === 'ready' ? C.green : (o.status === 'done' ? C.muted : C.copper);
+  const color = o.status === 'ready' ? C.green : (o.status === 'done' || o.status === 'cancelled' ? C.muted : C.copper);
   const where = o.format === 'togo' ? 'Подойдите к стойке' : (o.table ? `Столик ${o.table}` : 'Столик назначит персонал');
   const etaAt = o.acceptedAt ? 'к ' + fmtTime(o.acceptedAt + tot / speed) : '';
   const ring: Record<OrderStatus, [string, string, string]> = {
@@ -169,9 +169,11 @@ export function orderView(o: Order, now: number, speed: number): OrderView {
     cooking: ['Будет готов через', `~${left} мин`, etaAt],
     ready: ['', 'Готов!', where],
     done: ['', 'Выдан', o.doneAt ? fmtTime(o.doneAt) : ''],
+    cancelled: ['', 'Отменён', o.doneAt ? fmtTime(o.doneAt) : ''],
   };
   const headline: Record<OrderStatus, string> = {
-    new: 'Заказ отправлен', accepted: 'Заказ принят!', cooking: 'Готовим…', ready: 'Готово — приятного аппетита!', done: 'Спасибо, что выбираете нас!',
+    new: 'Заказ отправлен', accepted: 'Заказ принят!', cooking: 'Готовим…', ready: 'Готово — приятного аппетита!',
+    done: 'Спасибо, что выбираете нас!', cancelled: 'Заказ отменён',
   };
   const steps: StepView[] = ([['Принят', ICON.check], ['Готовится', ICON.chef], ['Готов', ICON.bell], ['Выдан', ICON.hand]] as [string, string][]).map(([name, icon], i) => {
     const done = i < idx, cur = i === idx, pending = i === 0 && idx < 0, on = done || cur;
@@ -195,8 +197,12 @@ export function orderView(o: Order, now: number, speed: number): OrderView {
       sumLabel: rub(l.unit * l.qty),
     })),
     formatText: formatText(o), payText: PAY_TEXT[o.payment] || '', totalLabel: rub(o.total),
-    minutesShort: o.status === 'new' ? '…' : (o.status === 'ready' || o.status === 'done' ? '✓' : `${left} мин`),
-    subline: o.status === 'new' ? 'Ждём подтверждения кухни' : (o.status === 'ready' ? where : (o.status === 'done' ? 'Выдан' : `Будет готов через ~${left} мин · ${where}`)),
+    minutesShort: o.status === 'new' ? '…' : (o.status === 'cancelled' ? '×' : (o.status === 'ready' || o.status === 'done' ? '✓' : `${left} мин`)),
+    subline: o.status === 'new' ? 'Ждём подтверждения кухни'
+      : o.status === 'cancelled' ? 'Заказ отменён'
+      : o.status === 'ready' ? where
+      : o.status === 'done' ? 'Выдан'
+      : `Будет готов через ~${left} мин · ${where}`,
     where, left,
   };
 }

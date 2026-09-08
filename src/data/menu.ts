@@ -234,9 +234,9 @@ export const PAYMENTS: { id: PaymentId; name: string }[] = [
 ];
 export const PAY_TEXT: Record<PaymentId, string> = { cash: 'наличными', card: 'картой', online: 'онлайн' };
 
-export type OrderStatus = 'new' | 'accepted' | 'cooking' | 'ready' | 'done';
+export type OrderStatus = 'new' | 'accepted' | 'cooking' | 'ready' | 'done' | 'cancelled';
 export const STATUS_TEXT: Record<OrderStatus, string> = {
-  new: 'Ожидает подтверждения', accepted: 'Принят', cooking: 'Готовится', ready: 'Готов', done: 'Выдан',
+  new: 'Ожидает подтверждения', accepted: 'Принят', cooking: 'Готовится', ready: 'Готов', done: 'Выдан', cancelled: 'Отменён',
 };
-export const STEP_IDX: Record<OrderStatus, number> = { new: -1, accepted: 0, cooking: 1, ready: 2, done: 3 };
+export const STEP_IDX: Record<OrderStatus, number> = { new: -1, accepted: 0, cooking: 1, ready: 2, done: 3, cancelled: -1 };
 export const ETA_CHOICES = [10, 15, 20, 30];

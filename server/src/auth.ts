@@ -5,7 +5,7 @@
  * PIN сотрудника хранится как scrypt-хэш, код из SMS — как HMAC, чтобы в базе не было
  * ни PIN-кодов, ни кодов подтверждения в открытом виде.
  */
-import { createHmac, randomInt, scryptSync, timingSafeEqual } from 'node:crypto';
+import { createHmac, randomBytes, randomInt, scryptSync, timingSafeEqual } from 'node:crypto';
 import { config } from './config.ts';
 
 const b64url = (buf: Buffer | string) =>
@@ -70,7 +70,7 @@ export function codeMatches(phone: string, code: string, hash: string): boolean 
 /* ---------- PIN сотрудника ---------- */
 
 export function hashPin(pin: string): string {
-  const salt = randomInt(0, 2 ** 48).toString(36) + randomInt(0, 2 ** 48).toString(36);
+  const salt = randomBytes(16).toString('hex');
   const hash = scryptSync(pin, salt, 32).toString('hex');
   return `${salt}:${hash}`;
 }

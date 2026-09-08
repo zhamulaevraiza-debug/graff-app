@@ -1,0 +1,82 @@
+# Боевой запуск GRAFF на одной виртуальной машине (Yandex Cloud, VK Cloud, Selectel, Timeweb).
+#
+# Два контейнера:
+#   app   — сервер API на Node 22, база SQLite в томе graff-data;
+#   nginx — TLS, статика приложения и прокси /api на app.
+#
+# Схема раздачи статики: собранное приложение лежит внутри образа nginx (стадия web
+# в Dockerfile). Общий том не нужен, а `docker compose build` всегда обновляет
+# и клиент, и сервер из одного исходного дерева. Конфигурация nginx и сертификаты
+# монтируются с диска — их можно править без пересборки.
+#
+# Первый запуск:
+#   cp server/.env.example server/.env   # и заполнить JWT_SECRET, SMS_*, STAFF_*
+#   docker compose build
+#   docker compose up -d
+# Сертификат должен быть выпущен ДО первого старта nginx (см. server/README.md).
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: app
+      args:
+        # Клиент собирается с относительным адресом API: всё идёт через nginx того же домена.
+        VITE_API_URL: /api
+    # Все настройки — в server/.env (пример со всеми переменными: server/.env.example).
+    env_file:
+      - ./server/.env
+    environment:
+      NODE_ENV: production
+      # Путь относительно рабочего каталога /app/server, то есть /app/server/data/graff.db.
+      DB_FILE: data/graff.db
+    volumes:
+      # База с персональными данными. Том живёт на диске виртуальной машины в России.
+      - graff-data:/app/server/data
+    # Порт наружу не публикуем: к серверу ходит только nginx по внутренней сети Docker.
+    expose:
+      - "3000"
+    restart: unless-stopped
+    healthcheck:
+      # /health отвечает без обращения к базе и без персональных данных.
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+    logging:
+      # Журналы не должны съесть диск: телефоны в них не пишутся, но объём растёт.
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "5"
+
+  nginx:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: web
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      # Конфигурация подключается как conf.d/default.conf: внутри только upstream и server-блоки.
+      - ./deploy/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      # Сертификаты Let's Encrypt с хоста (их выпускает certbot, установленный на машине).
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+      # Каталог для проверки домена по HTTP (certbot --webroot) при продлении.
+      - ./deploy/certbot-www:/var/www/certbot
+    depends_on:
+      app:
+        condition: service_healthy
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "5"
+
+volumes:
+  # Именованный том с базой. Резервная копия делается из него, см. server/README.md.
+  graff-data:

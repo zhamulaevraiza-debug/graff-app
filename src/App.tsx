@@ -86,6 +86,11 @@ function useAppEffects() {
   const firstHash = useRef(true);
   const prevScreen = useRef<Screen>(screen);
 
+  // Боевой режим: при старте забираем профиль, свои заказы и столики, подписываемся на живые события.
+  useEffect(() => {
+    void useStore.getState().bootstrap();
+  }, []);
+
   useEffect(() => {
     tick();
     const t = setInterval(tick, 1000);

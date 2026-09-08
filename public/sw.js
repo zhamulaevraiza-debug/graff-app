@@ -66,3 +66,88 @@ self.addEventListener('fetch', event => {
 function cachePut(req, res) {
   caches.open(CACHE).then(c => c.put(req, res)).catch(() => undefined);
 }
+
+/* ======================= push-уведомления ======================= */
+
+/**
+ * Сообщение от сервера кафе (web-push, VAPID). Тело — JSON {title, body, tag, url}:
+ * title и body показываем, tag склеивает повторные сообщения об одном заказе,
+ * url — куда открыть приложение по нажатию.
+ *
+ * Показать уведомление обязательно: браузеры разрешают «тихий» push лишь несколько раз подряд,
+ * дальше отзывают подписку. Поэтому даже на пустое или испорченное тело выводим общий текст.
+ */
+self.addEventListener('push', event => {
+  const data = readPush(event.data);
+  const title = typeof data.title === 'string' && data.title ? data.title : 'GRAFF';
+  const tag = typeof data.tag === 'string' && data.tag ? data.tag : 'graff';
+  event.waitUntil(self.registration.showNotification(title, {
+    body: typeof data.body === 'string' ? data.body : '',
+    icon: BASE + 'icon-192.png',
+    badge: BASE + 'icon-192.png',
+    tag,
+    // сообщение о том же заказе заменяет предыдущее, но телефон снова подаёт сигнал
+    renotify: true,
+    vibrate: [80, 40, 80],
+    lang: 'ru',
+    data: { url: safeUrl(data.url) },
+  }));
+});
+
+/** Разбор тела push: JSON, иначе простой текст, иначе пусто. */
+function readPush(payload) {
+  if (!payload) return {};
+  try {
+    const data = payload.json();
+    if (data && typeof data === 'object') return data;
+  } catch {
+    /* не JSON — пробуем как текст */
+  }
+  try {
+    const text = payload.text();
+    return text ? { body: text } : {};
+  } catch {
+    return {};
+  }
+}
+
+/**
+ * Адрес из push приводим к своему сайту: чужой домен в уведомлении кафе означает
+ * либо ошибку сервера, либо подмену — в обоих случаях открываем главный экран.
+ */
+function safeUrl(url) {
+  const home = new URL(BASE, self.location.origin).href;
+  if (typeof url !== 'string' || !url) return home;
+  try {
+    const full = new URL(url, self.registration.scope);
+    return full.origin === self.location.origin && full.pathname.startsWith(BASE) ? full.href : home;
+  } catch {
+    return home;
+  }
+}
+
+/**
+ * Нажатие на уведомление: если приложение уже открыто в какой-то вкладке — переводим фокус
+ * туда и сообщаем адрес сообщением (перезагружать вкладку не нужно, приложение одностраничное),
+ * иначе открываем новую вкладку.
+ */
+self.addEventListener('notificationclick', event => {
+  event.notification.close();
+  const url = safeUrl(event.notification.data && event.notification.data.url);
+  event.waitUntil(
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(list => {
+      for (const client of list) {
+        let mine = false;
+        try {
+          mine = new URL(client.url).pathname.startsWith(BASE);
+        } catch {
+          mine = false;
+        }
+        if (!mine) continue;
+        client.postMessage({ type: 'push-click', url });
+        return 'focus' in client ? client.focus() : undefined;
+      }
+      return self.clients.openWindow(url);
+    }).catch(() => undefined),
+  );
+});

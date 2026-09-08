@@ -4,13 +4,21 @@
     {
       "name": "graff-dev",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "dev"],
+      "runtimeArgs": [
+        "run",
+        "dev"
+      ],
       "port": 5173
     },
     {
       "name": "graff-preview",
       "url": "http://localhost:4173",
       "port": 4173
+    },
+    {
+      "name": "graff-live",
+      "url": "http://localhost:5174",
+      "port": 5174
     }
   ]
 }

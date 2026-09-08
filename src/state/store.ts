@@ -11,6 +11,8 @@ import { persist, createJSONStorage } from 'zustand/middleware';
 import { ITEMS, SAUCES, type Format, type PaymentId, type OrderStatus } from '../data/menu';
 import { formatPhone, isPhoneComplete, phoneKey, fmtTime } from '../lib/format';
 import { LEGAL_VERSION, type LegalDocId } from '../data/legal';
+import * as api from '../lib/api';
+import * as live from './live';
 import {
   mkLine, mergeLines, orderTotal, transition, kitchenTick, minutesLeft,
   seedOrders, SEED_OCCUPIED, SEED_NEXT_NO,
@@ -46,7 +48,7 @@ export const speedOf = (s: Settings) => (s.fastTimer ? 12 : 1);
  * Без сервера приложение работает как демонстрация: заказы живут на устройстве,
  * кухня-автопилот сама двигает статусы, время ускорено.
  */
-export const LIVE = !!(import.meta.env.VITE_API_URL || '').trim();
+export const LIVE = api.isLive();
 
 export const DEFAULT_SETTINGS: Settings = LIVE
   // на боевом сервере статусы ведёт кухня, а время идёт по-настоящему
@@ -108,6 +110,15 @@ export interface AppState {
   toast: Toast | null;
   now: number;
   settings: Settings;
+  // связь с сервером (боевой режим)
+  /** текст последней ошибки сервера или связи */
+  netError: string | null;
+  /** идёт запрос: кнопки блокируются, чтобы не отправить заказ дважды */
+  busy: boolean;
+  /** открыт поток живых обновлений */
+  online: boolean;
+  /** сотрудник вошёл в панель; в демонстрации вход не нужен */
+  staffAuthed: boolean;
 }
 
 export interface AppActions {
@@ -176,6 +187,15 @@ export interface AppActions {
   tick: () => void;
   setSetting: <K extends keyof Settings>(key: K, value: Settings[K]) => void;
   resetDemo: () => void;
+  // связь с сервером
+  /** загрузка профиля, заказов и столиков при старте, подписка на живые события */
+  bootstrap: () => Promise<void>;
+  setNetError: (msg: string | null) => void;
+  /** вход сотрудника в панель по логину и PIN */
+  staffLogin: (login: string, pin: string) => Promise<boolean>;
+  staffLogout: () => void;
+  /** отмена своего заказа, пока кухня не начала готовить */
+  cancelOrder: (no: number) => Promise<void>;
 }
 
 export type Store = AppState & AppActions;
@@ -221,6 +241,7 @@ function initialState(): AppState {
     consentAt: null, consentVersion: null, marketingConsent: false, marketingConsentAt: null, legalDoc: null,
     staffForm: null,
     toast: null, now, settings: { ...DEFAULT_SETTINGS },
+    netError: null, busy: false, online: false, staffAuthed: !LIVE || api.hasStaffToken(),
   };
 }
 
@@ -237,16 +258,28 @@ export const useStore = create<Store>()(
       setPhoneInput: v => set({ phoneInput: formatPhone(v), phoneErr: false }),
       setCodeInput: v => set({ codeInput: v.replace(/\D/g, '').slice(0, 4) }),
       setNameInput: v => set({ nameInput: v }),
-      sendCode: () => { if (isPhoneComplete(get().phoneInput)) set({ loginStep: 'code', codeInput: '' }); else set({ phoneErr: true }); },
+      sendCode: () => {
+        if (!isPhoneComplete(get().phoneInput)) { set({ phoneErr: true }); return; }
+        if (LIVE) { void live.sendCode(); return; }
+        set({ loginStep: 'code', codeInput: '' });
+      },
       backToPhone: () => set({ loginStep: 'phone' }),
-      confirmCode: () => { if (get().codeInput.length === 4) set({ loginStep: 'name' }); },
+      confirmCode: () => {
+        const code = get().codeInput;
+        if (LIVE) { if (code.length >= 4) void live.confirmCode(); return; }
+        if (code.length === 4) set({ loginStep: 'name' });
+      },
       finishLogin: () => {
         const s = get();
+        if (LIVE) { void live.saveName(); return; }
         set({ user: { name: s.nameInput.trim() || 'Гость', phone: s.phoneInput }, screen: 'home', loginStep: 'phone', codeInput: '', nameInput: '',
           consentAt: s.consentAt || Date.now(), consentVersion: s.consentVersion || LEGAL_VERSION });
       },
       skipLogin: () => set({ user: null, screen: 'home', loginStep: 'phone' }),
-      logout: () => set({ user: null, screen: 'splash', loginStep: 'phone', phoneInput: '', codeInput: '', nameInput: '', profileSub: null }),
+      logout: () => {
+        if (LIVE) live.logout();
+        set({ user: null, screen: 'splash', loginStep: 'phone', phoneInput: '', codeInput: '', nameInput: '', profileSub: null });
+      },
 
       // ---- меню / блюдо ----
       selectCat: id => set({ cat: id }),
@@ -281,6 +314,7 @@ export const useStore = create<Store>()(
       setGuestPhone: v => set({ guestPhone: formatPhone(v) }),
       placeOrder: () => {
         const s = get(); if (!s.cart.length) return false;
+        if (LIVE) { void live.placeOrder(); return true; }
         const now = Date.now();
         const total = orderTotal(s.cart);
         const table = s.format === 'togo' ? null : (s.table === 'any' ? null : s.table);
@@ -327,7 +361,10 @@ export const useStore = create<Store>()(
       setConsent: accepted => set(accepted
         ? { consentAt: Date.now(), consentVersion: LEGAL_VERSION }
         : { consentAt: null, consentVersion: null, marketingConsent: false, marketingConsentAt: null }),
-      setMarketing: accepted => set({ marketingConsent: accepted, marketingConsentAt: accepted ? Date.now() : null }),
+      setMarketing: accepted => {
+        set({ marketingConsent: accepted, marketingConsentAt: accepted ? Date.now() : null });
+        if (LIVE) void live.setMarketing(accepted);
+      },
       openLegal: doc => set({ screen: 'legal', legalDoc: doc, profileSub: null }),
       /**
        * Отзыв согласия и удаление аккаунта (152-ФЗ ст. 9 ч. 2, требования Google Play и App Store).
@@ -336,6 +373,7 @@ export const useStore = create<Store>()(
        */
       deleteAccount: () => {
         const s = get();
+        if (LIVE) void live.deleteAccount();
         set({
           user: null, orders: s.orders.filter(o => !o.mine), cart: [], comment: '', favorites: {},
           consentAt: null, consentVersion: null, marketingConsent: false, marketingConsentAt: null, notifOn: true,
@@ -359,6 +397,10 @@ export const useStore = create<Store>()(
       submitStaffForm: () => {
         const s = get(); const f = s.staffForm; if (!f) return;
         const sum = parseInt(f.sum, 10) || 0;
+        if (LIVE) {
+          void live.staffCreateOrder(f.phone, f.text, f.format, sum).then(ok => { if (ok) set({ staffForm: null }); });
+          return;
+        }
         const mine = !!(s.user && phoneKey(f.phone) && phoneKey(f.phone) === phoneKey(s.user.phone));
         const o: Order = {
           no: s.nextNo, createdAt: Date.now(), status: 'new', format: f.format, table: null, payment: 'cash',
@@ -367,10 +409,17 @@ export const useStore = create<Store>()(
         };
         set({ orders: [o, ...s.orders], nextNo: s.nextNo + 1, staffForm: null });
       },
-      staffAccept: no => { const o = get().orders.find(x => x.no === no); get().setStatus(no, 'accepted', { eta: (o && o.pendingEta) || 15 }); },
+      staffAccept: no => {
+        const o = get().orders.find(x => x.no === no);
+        const eta = (o && o.pendingEta) || 15;
+        if (LIVE) { void live.staffAccept(no, eta); return; }
+        get().setStatus(no, 'accepted', { eta });
+      },
       setPending: (no, m) => set({ orders: get().orders.map(o => (o.no === no ? { ...o, pendingEta: m } : o)) }),
       setStatus: (no, status, extra) => {
-        const s = get(); const now = Date.now(); let occ = s.occupied; let toast: ToastMsg | undefined;
+        const s = get();
+        if (LIVE) { void live.staffStatus(no, status); return; }
+        const now = Date.now(); let occ = s.occupied; let toast: ToastMsg | undefined;
         const orders = s.orders.map(o => {
           if (o.no !== no) return o;
           const r = transition(o, status, occ, now, extra); occ = r.occ; toast = r.toast; return r.order;
@@ -379,7 +428,13 @@ export const useStore = create<Store>()(
         if (toast) get().showToast(toast.title, toast.text);
       },
       bumpEta: no => {
-        const s = get(); const speed = speedOf(s.settings); let toast: ToastMsg | undefined;
+        const s = get();
+        if (LIVE) {
+          const o = s.orders.find(x => x.no === no);
+          void live.staffEta(no, ((o && o.eta) || 15) + 5);
+          return;
+        }
+        const speed = speedOf(s.settings); let toast: ToastMsg | undefined;
         const orders = s.orders.map(o => {
           if (o.no !== no) return o;
           const n = { ...o, eta: (o.eta || 15) + 5 };
@@ -389,7 +444,10 @@ export const useStore = create<Store>()(
         set({ orders });
         if (toast) get().showToast(toast.title, toast.text);
       },
-      toggleOccupied: n => { const occ = { ...get().occupied }; occ[n] = !occ[n]; set({ occupied: occ }); },
+      toggleOccupied: n => {
+        if (LIVE) { void live.staffToggleTable(n); return; }
+        const occ = { ...get().occupied }; occ[n] = !occ[n]; set({ occupied: occ });
+      },
 
       // ---- push-баннер ----
       showToast: (title, text, opts) => {
@@ -420,7 +478,7 @@ export const useStore = create<Store>()(
         const s = get(); const now = Date.now();
         // Кухня-автопилот работает и в свёрнутой вкладке: статусы считаются от меток времени заказа,
         // поэтому две вкладки приходят к одинаковому результату, а уведомление «Заказ готов» успевает прийти.
-        if (!s.settings.autoKitchen) { set({ now }); return; }
+        if (LIVE || !s.settings.autoKitchen) { set({ now }); return; }
         const r = kitchenTick(s.orders, s.occupied, now, speedOf(s.settings));
         if (r.changed) {
           set({ now, orders: r.orders, occupied: r.occ });
@@ -428,6 +486,20 @@ export const useStore = create<Store>()(
         } else set({ now });
       },
       setSetting: (key, value) => set({ settings: { ...get().settings, [key]: value } }),
+      // ---- связь с сервером ----
+      bootstrap: async () => { if (LIVE) await live.bootstrap(); },
+      setNetError: msg => set({ netError: msg }),
+      staffLogin: async (login, pin) => {
+        if (LIVE) return live.staffLogin(login, pin);
+        set({ staffAuthed: true });
+        return true;
+      },
+      staffLogout: () => { if (LIVE) live.staffLogout(); else set({ staffAuthed: false }); },
+      cancelOrder: async no => {
+        if (LIVE) { await live.cancelOrder(no); return; }
+        get().setStatus(no, 'cancelled');
+      },
+
       resetDemo: () => {
         const now = Date.now();
         set({
@@ -448,6 +520,7 @@ export const useStore = create<Store>()(
         orders: s.orders, nextNo: s.nextNo, occupied: s.occupied, viewOrder: s.viewOrder,
         favorites: s.favorites, favFormat: s.favFormat, notifOn: s.notifOn, settings: s.settings,
         consentAt: s.consentAt, consentVersion: s.consentVersion, marketingConsent: s.marketingConsent, marketingConsentAt: s.marketingConsentAt,
+        staffAuthed: s.staffAuthed,
       }),
       merge: (persisted, current) => {
         const p = (persisted || {}) as Partial<AppState>;
@@ -463,6 +536,13 @@ export const useStore = create<Store>()(
 // Dev: стор — синглтон с таймером и подписчиками; при горячей замене модуля (HMR) Vite создал бы второй экземпляр,
 // и таймер старого продолжал бы писать в localStorage. Поэтому любое изменение стора или его зависимостей — полная перезагрузка.
 if (import.meta.hot) import.meta.hot.accept(() => window.location.reload());
+
+// Боевой слой работает со стором через мостик: так между файлами нет кольцевой зависимости.
+live.bindStore({
+  get: () => useStore.getState() as never,
+  set: patch => useStore.setState(patch as never),
+  toast: (title, text) => useStore.getState().showToast(title, text),
+});
 
 /* ---------- селекторы / хелперы для экранов ---------- */
 export const selSpeed = (s: Store) => speedOf(s.settings);

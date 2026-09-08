@@ -14,6 +14,34 @@
   color: var(--copper);
 }
 
+/* Отменённый заказ: вместо кольца таймера и шагов приготовления (боевой режим) */
+.status-cancelled {
+  text-align: center;
+  margin-top: 28px;
+}
+.status-cancelled__title {
+  font: 700 34px/1.1 var(--f-head);
+  color: var(--muted);
+}
+.status-cancelled__note {
+  margin-top: 8px;
+  font-size: 14px;
+  color: var(--sec);
+}
+
+/* Отмена заказа и ответ сервера — под основными кнопками (боевой режим) */
+.status-cancel {
+  margin-top: 10px;
+  color: var(--sec);
+  padding: 8px;
+}
+.status-cancel:disabled { opacity: .5; }
+.status-net-err {
+  margin-top: 10px;
+  text-align: center;
+  text-wrap: pretty;
+}
+
 /* Подтверждение предварительного заказа */
 .status-doc {
   margin-top: 18px;

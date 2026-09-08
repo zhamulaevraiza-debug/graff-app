@@ -1,11 +1,13 @@
-import type { FormEvent } from 'react';
-import { useStore } from '../state/store';
+import { useEffect, useRef, useState, type FormEvent } from 'react';
+import { useStore, LIVE } from '../state/store';
 import { CONSENT_SHORT, OFFER_NOTE, MARKETING_CONSENT } from '../data/legal';
 import { Branch, Crown } from '../components/Icon';
 import { Monogram } from '../components/Logo';
 import './Splash.css';
 
 const BRANCH_TOP = 'calc(var(--sat) + 60px)';
+/** сколько секунд ждать до повторной отправки кода */
+const RESEND_SEC = 60;
 
 /** Сплэш / вход: логотип, слоган и карточка «вход по номеру → код из SMS → имя». */
 export function Splash() {
@@ -27,13 +29,72 @@ export function Splash() {
   const openLegal = useStore(s => s.openLegal);
   const marketing = useStore(s => s.marketingConsent);
   const setMarketing = useStore(s => s.setMarketing);
+  const netError = useStore(s => s.netError);
+  const busy = useStore(s => s.busy);
+  const setNetError = useStore(s => s.setNetError);
+
+  // секунды до повторной отправки кода; resendTick перезапускает отсчёт после нажатия
+  const [resendLeft, setResendLeft] = useState(0);
+  const [resendTick, setResendTick] = useState(0);
+  // момент отправки кода: отсчёт ведём по часам, а не счётчиком
+  const sentAt = useRef(0);
+  // идёт повторная отправка кода (а не проверка введённого)
+  const resendPending = useRef(false);
+  const prevBusy = useRef(busy);
+
+  // ошибка сервера относится к прошлому шагу входа — на новом шаге её не показываем
+  useEffect(() => { setNetError(null); }, [loginStep, setNetError]);
+
+  // отсчёт «Отправить ещё раз через N с»: 60 секунд после каждой отправки кода
+  useEffect(() => {
+    if (!LIVE || loginStep !== 'code') { setResendLeft(0); return; }
+    sentAt.current = Date.now();
+    setResendLeft(RESEND_SEC);
+    // считаем от метки времени: в свёрнутом приложении таймер притормаживают, а часы идут
+    const left = () => Math.max(0, RESEND_SEC - Math.floor((Date.now() - sentAt.current) / 1000));
+    const step = () => {
+      const v = left();
+      setResendLeft(v);
+      if (v === 0) clearInterval(id); // отсчёт кончился — тикать больше незачем
+    };
+    const id = setInterval(step, 1000);
+    // гость уходил читать SMS — на возврате пересчитываем остаток
+    const onVis = () => { if (document.visibilityState === 'visible') step(); };
+    document.addEventListener('visibilitychange', onVis);
+    return () => { clearInterval(id); document.removeEventListener('visibilitychange', onVis); };
+  }, [loginStep, resendTick]);
+
+  // повторная отправка не удалась — SMS не ушла, значит и ждать минуту незачем
+  useEffect(() => {
+    const was = prevBusy.current;
+    prevBusy.current = busy;
+    if (!was || busy || !resendPending.current) return;
+    resendPending.current = false;
+    if (netError) { sentAt.current = 0; setResendLeft(0); }
+  }, [busy, netError]);
 
   // Enter в поле = кнопка текущего шага
   const onSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (busy) return;
     if (loginStep === 'phone') { if (consentGiven) sendCode(); }
     else if (loginStep === 'code') confirmCode();
     else finishLogin();
+  };
+
+  // ввод номера: старая ошибка сервера уже не про этот номер
+  const onPhoneChange = (v: string) => {
+    if (netError) setNetError(null);
+    setPhoneInput(v);
+  };
+
+  // повторная отправка кода (только боевой режим)
+  const onResend = () => {
+    if (busy || resendLeft > 0) return;
+    setNetError(null);
+    resendPending.current = true;
+    setResendTick(t => t + 1);
+    sendCode();
   };
 
   return (
@@ -65,7 +126,7 @@ export function Splash() {
                 aria-label="Номер телефона"
                 aria-invalid={phoneErr || undefined}
                 value={phoneInput}
-                onChange={e => setPhoneInput(e.target.value)}
+                onChange={e => onPhoneChange(e.target.value)}
               />
               {phoneErr && <div className="field-err" role="alert">Введите номер полностью — 10 цифр после +7</div>}
 
@@ -100,7 +161,10 @@ export function Splash() {
                 <button type="button" className="splash__link" onClick={() => openLegal('terms')}>Оферта</button>
               </div>
 
-              <button type="submit" className="btn btn--primary btn--block" disabled={!consentGiven}>ПОЛУЧИТЬ КОД</button>
+              <button type="submit" className="btn btn--primary btn--block" disabled={!consentGiven || busy}>
+                {busy ? 'ОТПРАВЛЯЕМ…' : 'ПОЛУЧИТЬ КОД'}
+              </button>
+              {netError && <div className="field-err" role="alert">{netError}</div>}
               <div className="splash__note">{OFFER_NOTE}</div>
               <button type="button" className="btn btn--ghost" onClick={skipLogin}>Продолжить без входа</button>
             </>
@@ -127,8 +191,24 @@ export function Splash() {
                 onChange={e => setCodeInput(e.target.value)}
                 autoFocus
               />
-              <button type="submit" className="btn btn--primary btn--block">ПОДТВЕРДИТЬ</button>
-              <div className="splash__note">Пока подходит любой код из 4 цифр</div>
+              {netError && <div className="field-err" role="alert">{netError}</div>}
+              <button type="submit" className="btn btn--primary btn--block" disabled={busy}>
+                {busy && !resendPending.current ? 'ПРОВЕРЯЕМ…' : 'ПОДТВЕРДИТЬ'}
+              </button>
+              <div className="splash__note">
+                {LIVE ? `Код придёт в SMS на ${phoneInput}` : 'Пока подходит любой код из 4 цифр'}
+              </div>
+              {/* повторная отправка — только в боевом режиме, не чаще раза в минуту */}
+              {LIVE && (
+                <button
+                  type="button"
+                  className="splash__resend"
+                  onClick={onResend}
+                  disabled={busy || resendLeft > 0}
+                >
+                  {resendLeft > 0 ? `Отправить ещё раз через ${resendLeft} с` : 'Отправить код ещё раз'}
+                </button>
+              )}
             </>
           )}
 
@@ -146,7 +226,8 @@ export function Splash() {
                 onChange={e => setNameInput(e.target.value)}
                 autoFocus
               />
-              <button type="submit" className="btn btn--primary btn--block">ГОТОВО</button>
+              {netError && <div className="field-err" role="alert">{netError}</div>}
+              <button type="submit" className="btn btn--primary btn--block" disabled={busy}>ГОТОВО</button>
             </>
           )}
         </form>

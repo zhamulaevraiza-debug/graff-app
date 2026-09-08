@@ -5,6 +5,7 @@
  * Маршруты разложены по файлам в src/routes.
  */
 import Fastify from 'fastify';
+import type { FastifyError } from 'fastify';
 import cors from '@fastify/cors';
 import rateLimit from '@fastify/rate-limit';
 import { config, isProd } from './config.ts';
@@ -13,6 +14,7 @@ import { hub } from './events.ts';
 import { hashPin } from './auth.ts';
 import { authRoutes } from './routes/auth.ts';
 import { orderRoutes } from './routes/orders.ts';
+import { pushRoutes } from './routes/push.ts';
 import { staffRoutes } from './routes/staff.ts';
 import { streamRoutes } from './routes/stream.ts';
 
@@ -31,6 +33,12 @@ const app = Fastify({
 await app.register(cors, {
   origin: config.corsOrigins.length ? config.corsOrigins : true,
   credentials: false,
+  // Методы перечисляем явно: без PATCH и DELETE браузер не пропустит сохранение имени
+  // и удаление аккаунта — они уходят предварительным запросом OPTIONS.
+  methods: ['GET', 'HEAD', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  // Сутки не переспрашивать разрешение на каждый запрос.
+  maxAge: 86400,
 });
 
 // Общий предел на все запросы; на отправку кода в routes/auth.ts стоит отдельный, более строгий.
@@ -39,6 +47,20 @@ await app.register(rateLimit, {
   max: 300,
   timeWindow: '1 minute',
   keyGenerator: req => req.ip,
+});
+
+// Некоторые клиенты и прокси шлют заголовок JSON без тела (например, при DELETE).
+// Считаем пустое тело пустым объектом, чтобы это не превращалось в ошибку разбора.
+app.addContentTypeParser('application/json', { parseAs: 'string' }, (_req, body, done) => {
+  const raw = typeof body === 'string' ? body.trim() : '';
+  if (!raw) return done(null, {});
+  try {
+    done(null, JSON.parse(raw));
+  } catch {
+    const err = new Error('Тело запроса не является корректным JSON') as Error & { statusCode?: number };
+    err.statusCode = 400;
+    done(err);
+  }
 });
 
 app.get('/health', async () => ({
@@ -50,10 +72,11 @@ app.get('/health', async () => ({
 
 await app.register(authRoutes);
 await app.register(orderRoutes);
+await app.register(pushRoutes);
 await app.register(staffRoutes);
 await app.register(streamRoutes);
 
-app.setErrorHandler((err, req, reply) => {
+app.setErrorHandler((err: FastifyError, req, reply) => {
   const status = err.statusCode && err.statusCode >= 400 ? err.statusCode : 500;
   if (status >= 500) app.log.error({ err, url: req.url }, 'ошибка сервера');
   reply.status(status).send({

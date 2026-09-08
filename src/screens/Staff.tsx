@@ -1,9 +1,13 @@
 /**
- * Панель персонала (кухня): заказы и столики + настройки демо.
+ * Панель персонала (кухня): заказы и столики + настройки.
  * Прототип: design/GRAFF App.dc.html, секция isStaff (строки 528–596), логика staffOrders/staffZones.
+ *
+ * В боевом режиме панель открывается только после входа сотрудника (логин + PIN),
+ * а блок настроек демонстрации не показывается: статусы ведёт кухня, время идёт по-настоящему.
  */
-import type { ReactNode } from 'react';
-import { useStore, selSpeed, type Settings } from '../state/store';
+import { useEffect, useState, type FormEvent, type ReactNode } from 'react';
+import { useStore, selSpeed, LIVE, type Settings } from '../state/store';
+import { hasStaffToken } from '../lib/api';
 import { FORMATS, ZONES, STATUS_TEXT, ETA_CHOICES } from '../data/menu';
 import { rub, fmtTime } from '../lib/format';
 import { formatText, itemsText, minutesLeft, type Order } from '../lib/orders';
@@ -16,18 +20,108 @@ const cx = (...a: (string | false | null | undefined)[]) => a.filter(Boolean).jo
 /** Телефон в поле хранится уже в маске «+7 …»; перед форматированием убираем префикс, иначе «7» дублируется. */
 const stripPrefix = (v: string) => (v.startsWith('+7') ? v.slice(2) : v);
 
+/** Заказ закрыт: выдан или отменён — такие уходят вниз списка и показываются бледнее. */
+const isClosed = (o: Order) => o.status === 'done' || o.status === 'cancelled';
+
 function etaText(o: Order, now: number, speed: number): string {
   switch (o.status) {
     case 'accepted':
     case 'cooking': return `Готов через ~${minutesLeft(o, now, speed)} мин`;
     case 'ready': return 'Ждёт выдачи';
     case 'done': return 'Выдан ' + fmtTime(o.doneAt || o.createdAt);
+    case 'cancelled': return 'Отменён';
     default: return 'Ожидает подтверждения';
   }
 }
 
 function whoText(o: Order): string {
   return (o.byPhone ? 'по звонку · ' : '') + (o.name || 'Гость') + (o.phone ? ' · ' + o.phone : '');
+}
+
+/** Шапка панели: логотип и место для кнопок справа. */
+function StaffHead({ children }: { children?: ReactNode }) {
+  return (
+    <div className="row between">
+      <div className="row gap-8">
+        <Monogram size={30} gradient={false} />
+        <div>
+          <div style={{ font: '900 17px/1 var(--f-logo)', color: 'var(--copper)' }}>GRAFF</div>
+          <div style={{ font: '600 8px var(--f-caps)', letterSpacing: '.28em', color: 'var(--sec)', marginTop: 3 }}>КУХНЯ · ПЕРСОНАЛ</div>
+        </div>
+      </div>
+      {children}
+    </div>
+  );
+}
+
+/** Вход для персонала: показывается вместо панели, пока сотрудник не вошёл (только в боевом режиме). */
+function StaffLogin() {
+  const netError = useStore(s => s.netError);
+  const staffLogin = useStore(s => s.staffLogin);
+  const setNetError = useStore(s => s.setNetError);
+  const go = useStore(s => s.go);
+
+  const [login, setLogin] = useState('');
+  const [pin, setPin] = useState('');
+  // занятость только своя: чужой запрос не должен гасить кнопку входа
+  const [sending, setSending] = useState(false);
+
+  // netError общий на всё приложение: чужую ошибку (например, «Слишком часто» с экрана гостя)
+  // гасим при открытии формы, иначе она читается как «не подошёл PIN»
+  useEffect(() => { setNetError(null); }, [setNetError]);
+
+  const ready = !sending && login.trim() !== '' && pin !== '';
+
+  // ошибку прошлой попытки убираем, как только сотрудник начал править поля
+  const clearErr = () => { if (netError) setNetError(null); };
+
+  const onSubmit = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!ready) return;
+    setSending(true);
+    void staffLogin(login.trim(), pin)
+      .then(ok => { if (!ok) setPin(''); })
+      .finally(() => setSending(false));
+  };
+
+  return (
+    <div className="screen screen--gutter screen--nonav">
+      <StaffHead />
+
+      <form className="card card--pad stack gap-10 mt-16" onSubmit={onSubmit} noValidate>
+        <h2 className="t-head">ВХОД ДЛЯ ПЕРСОНАЛА</h2>
+        <div className="t-sec">Панель кухни доступна сотрудникам кафе.</div>
+
+        <input
+          className="input input--white"
+          placeholder="Логин"
+          aria-label="Логин"
+          autoCapitalize="none"
+          autoCorrect="off"
+          autoComplete="username"
+          enterKeyHint="next"
+          value={login}
+          onChange={e => { setLogin(e.target.value); clearErr(); }}
+        />
+        <input
+          className={cx('input', 'input--white', netError && 'input--err')}
+          type="password"
+          placeholder="PIN"
+          aria-label="PIN"
+          inputMode="numeric"
+          autoComplete="current-password"
+          enterKeyHint="go"
+          aria-invalid={netError ? true : undefined}
+          value={pin}
+          onChange={e => { setPin(e.target.value); clearErr(); }}
+        />
+        {netError && <div className="field-err" role="alert">{netError}</div>}
+
+        <button type="submit" className="btn btn--primary btn--block" disabled={!ready}>{sending ? 'ВХОДИМ…' : 'ВОЙТИ'}</button>
+        <button type="button" className="btn btn--ghost" onClick={() => go('home')}>← Клиент</button>
+      </form>
+    </div>
+  );
 }
 
 export function Staff() {
@@ -38,6 +132,10 @@ export function Staff() {
   const staffTab = useStore(s => s.staffTab);
   const staffForm = useStore(s => s.staffForm);
   const settings = useStore(s => s.settings);
+  const busy = useStore(s => s.busy);
+  const netError = useStore(s => s.netError);
+  const online = useStore(s => s.online);
+  const staffAuthed = useStore(s => s.staffAuthed);
 
   const go = useStore(s => s.go);
   const setStaffTab = useStore(s => s.setStaffTab);
@@ -51,9 +149,10 @@ export function Staff() {
   const toggleOccupied = useStore(s => s.toggleOccupied);
   const setSetting = useStore(s => s.setSetting);
   const resetDemo = useStore(s => s.resetDemo);
+  const staffLogout = useStore(s => s.staffLogout);
 
-  const openCount = orders.filter(o => o.status !== 'done').length;
-  const sorted = orders.slice().sort((a, b) => (Number(a.status === 'done') - Number(b.status === 'done')) || (b.createdAt - a.createdAt));
+  const openCount = orders.filter(o => !isClosed(o)).length;
+  const sorted = orders.slice().sort((a, b) => (Number(isClosed(a)) - Number(isClosed(b))) || (b.createdAt - a.createdAt));
 
   const actionFor = (o: Order): { label: string; onClick: () => void } | null => {
     switch (o.status) {
@@ -68,19 +167,31 @@ export function Staff() {
   const onReset = () => { if (window.confirm('Сбросить заказы и столики к демо-данным?')) resetDemo(); };
   const flip = (key: 'autoKitchen' | 'fastTimer' | 'pushBanners') => () => setSetting(key, !settings[key]);
 
+  // В боевом режиме кухня открыта только сотруднику. Одного staffAuthed мало: он переживает перезагрузку,
+  // а токен смены стирается сам при ответе 401 — без проверки токена панель осталась бы открытой и нерабочей.
+  if (LIVE && !(staffAuthed && hasStaffToken())) return <StaffLogin />;
+
   return (
     <div className="screen screen--gutter screen--nonav" style={{ paddingBottom: 60 }}>
       {/* шапка */}
-      <div className="row between">
-        <div className="row gap-8">
-          <Monogram size={30} gradient={false} />
-          <div>
-            <div style={{ font: '900 17px/1 var(--f-logo)', color: 'var(--copper)' }}>GRAFF</div>
-            <div style={{ font: '600 8px var(--f-caps)', letterSpacing: '.28em', color: 'var(--sec)', marginTop: 3 }}>КУХНЯ · ПЕРСОНАЛ</div>
-          </div>
+      <StaffHead>
+        <div className="row gap-12">
+          <button type="button" className="btn btn--ghost" style={{ fontSize: 13, fontWeight: 500, padding: 0 }} onClick={() => go('home')}>← Клиент</button>
+          {LIVE && (
+            <button type="button" className="btn btn--ghost" style={{ fontSize: 13, fontWeight: 500, padding: 0 }} onClick={staffLogout}>Выйти</button>
+          )}
         </div>
-        <button type="button" className="btn btn--ghost" style={{ fontSize: 13, fontWeight: 500, padding: 0 }} onClick={() => go('home')}>← Клиент</button>
-      </div>
+      </StaffHead>
+
+      {/* связь с сервером: молча пропадать нельзя — статусы могут отставать */}
+      {LIVE && !online && (
+        <div className="card card--beige card--pad-sm mt-10 staff-offline" role="status">Нет связи с сервером, статусы могут отставать</div>
+      )}
+
+      {/* отказ сервера по последнему действию: иначе кнопка просто разблокируется и сотрудник жмёт снова */}
+      {LIVE && netError && (
+        <div className="card card--pad-sm mt-10 field-err staff-err" role="alert">{netError}</div>
+      )}
 
       {/* вкладки */}
       <div className="row gap-8 mt-14" role="tablist">
@@ -138,7 +249,8 @@ export function Staff() {
                   value={staffForm.sum}
                   onChange={e => setStaffForm({ sum: e.target.value })}
                 />
-                <button type="button" className="btn btn--primary btn--md" style={{ flex: 1 }} onClick={submitStaffForm}>ДОБАВИТЬ</button>
+                {/* форма закрывается только после ответа сервера — без блокировки второй тап создаст дубль заказа */}
+                <button type="button" className="btn btn--primary btn--md" style={{ flex: 1 }} disabled={busy} onClick={submitStaffForm}>ДОБАВИТЬ</button>
               </div>
               <div style={{ fontSize: 12, color: 'var(--sec)' }}>Если у клиента есть профиль с этим номером — он увидит статус и время в приложении.</div>
             </div>
@@ -148,7 +260,7 @@ export function Staff() {
             const action = actionFor(o);
             const canBump = o.status === 'accepted' || o.status === 'cooking';
             return (
-              <div key={o.no} className="card card--pad mt-12" style={{ opacity: o.status === 'done' ? .55 : 1 }}>
+              <div key={o.no} className="card card--pad mt-12" style={{ opacity: isClosed(o) ? .55 : 1 }}>
                 <div className="row between">
                   <div style={{ font: '700 20px var(--f-head)' }}>№{o.no}</div>
                   <span className={`badge badge--${o.status}`}>{STATUS_TEXT[o.status]}</span>
@@ -176,11 +288,11 @@ export function Staff() {
 
                 {action && (
                   <div className="row gap-8 mt-10">
-                    <button type="button" className={cx('btn', 'btn--md', o.status === 'cooking' ? 'btn--green' : 'btn--primary')} style={{ flex: 1 }} onClick={action.onClick}>
+                    <button type="button" className={cx('btn', 'btn--md', o.status === 'cooking' ? 'btn--green' : 'btn--primary')} style={{ flex: 1 }} disabled={busy} onClick={action.onClick}>
                       {action.label}
                     </button>
                     {canBump && (
-                      <button type="button" className="btn btn--secondary btn--md staff-bump" onClick={() => bumpEta(o.no)} aria-label={`Заказ №${o.no}: добавить 5 минут`}>+5 мин</button>
+                      <button type="button" className="btn btn--secondary btn--md staff-bump" disabled={busy} onClick={() => bumpEta(o.no)} aria-label={`Заказ №${o.no}: добавить 5 минут`}>+5 мин</button>
                     )}
                   </div>
                 )}
@@ -207,8 +319,9 @@ export function Staff() {
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
                   {zn.tables.map(n => {
                     const occ = !!occupied[n];
-                    const ord = orders.find(o => o.table === n && o.status !== 'done');
+                    const ord = orders.find(o => o.table === n && !isClosed(o));
                     const sub = ord ? '№' + ord.no : (occ ? 'занят' : 'свободен');
+                    // занятость именно переключается: два быстрых тапа вернули бы столик в исходное состояние
                     return (
                       <button
                         key={n}
@@ -216,6 +329,7 @@ export function Staff() {
                         className={cx('table-cell', 'table-cell--lg', 'staff-table', occ && 'table-cell--busy')}
                         aria-pressed={occ}
                         aria-label={`Столик ${n}: ${sub}`}
+                        disabled={LIVE && busy}
                         onClick={() => toggleOccupied(n)}
                       >
                         {n}
@@ -230,11 +344,12 @@ export function Staff() {
         </>
       )}
 
-      {/* ---------- НАСТРОЙКИ ДЕМО ---------- */}
-      <div className="t-caps" style={{ marginTop: 24 }}>НАСТРОЙКИ ДЕМО</div>
+      {/* ---------- НАСТРОЙКИ ---------- */}
+      {/* кухня-автопилот, ускоренное время и сброс — только для демонстрации без сервера */}
+      <div className="t-caps" style={{ marginTop: 24 }}>{LIVE ? 'НАСТРОЙКИ' : 'НАСТРОЙКИ ДЕМО'}</div>
       <div className="list mt-8">
-        <SwitchRow title="Кухня-автопилот" sub="заказы сами проходят статусы" on={settings.autoKitchen} onToggle={flip('autoKitchen')} />
-        <SwitchRow title="Ускоренное время" sub="1 мин = 5 с" on={settings.fastTimer} onToggle={flip('fastTimer')} />
+        {!LIVE && <SwitchRow title="Кухня-автопилот" sub="заказы сами проходят статусы" on={settings.autoKitchen} onToggle={flip('autoKitchen')} />}
+        {!LIVE && <SwitchRow title="Ускоренное время" sub="1 мин = 5 с" on={settings.fastTimer} onToggle={flip('fastTimer')} />}
         <SwitchRow title="Push-баннеры" on={settings.pushBanners} onToggle={flip('pushBanners')} />
         <div className="list__row list__row--static">
           <div className="list__grow">Заголовки экранов</div>
@@ -242,7 +357,9 @@ export function Staff() {
           <HeaderChip value="script" current={settings.headerStyle} onPick={v => setSetting('headerStyle', v)}>Рукописный</HeaderChip>
         </div>
       </div>
-      <button type="button" className="btn btn--ghost btn--block mt-10" style={{ color: 'var(--sec)' }} onClick={onReset}>Сбросить демо-данные</button>
+      {!LIVE && (
+        <button type="button" className="btn btn--ghost btn--block mt-10" style={{ color: 'var(--sec)' }} onClick={onReset}>Сбросить демо-данные</button>
+      )}
     </div>
   );
 }
