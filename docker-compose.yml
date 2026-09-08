@@ -10,10 +10,16 @@
 # монтируются с диска — их можно править без пересборки.
 #
 # Первый запуск:
-#   cp server/.env.example server/.env   # и заполнить JWT_SECRET, SMS_*, STAFF_*
+#   cp server/.env.example server/.env   # и заполнить JWT_SECRET, SMS_*, STAFF_*, VAPID_*
 #   docker compose build
 #   docker compose up -d
 # Сертификат должен быть выпущен ДО первого старта nginx (см. server/README.md).
+# SMS_PROVIDER обязателен: с пустым значением (равно «log») сервер в режиме production
+# не стартует, healthcheck не проходит — и nginx из-за depends_on тоже не поднимется.
+#
+# Обновление:
+#   docker compose build && docker compose up -d && docker compose restart nginx
+# Последний шаг обязателен: nginx кэширует IP контейнера app с момента своего старта.
 
 services:
   app:
