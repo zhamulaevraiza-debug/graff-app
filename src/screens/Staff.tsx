@@ -168,7 +168,7 @@ export function Staff() {
     }
   };
 
-  const onReset = () => { if (window.confirm('Сбросить заказы и столики к демо-данным?')) resetDemo(); };
+  const onReset = () => { if (window.confirm('Сбросить заказы, столики и корзину к демо-данным? Избранное останется.')) resetDemo(); };
   const flip = (key: 'autoKitchen' | 'fastTimer' | 'pushBanners' | 'heroPhotos') => () => setSetting(key, !settings[key]);
 
   // В боевом режиме кухня открыта только сотруднику. Одного staffAuthed мало: он переживает перезагрузку,

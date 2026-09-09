@@ -351,7 +351,7 @@ export const useStore = create<Store>()(
       // ---- статус ----
       viewOrderNo: no => set({ viewOrder: no }),
       openActive: () => {
-        const s = get(); const a = selActiveMine(s as Store)[0];
+        const s = get(); const a = selActiveMine(s)[0];
         set({ screen: 'status', viewOrder: a ? a.no : null, profileSub: null });
       },
 
