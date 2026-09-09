@@ -22,7 +22,8 @@
  * если сервер отвечает 401, переподключаться бессмысленно — нужен новый вход.
  */
 import {
-  API_URL, ROUTES, isLive, getToken, getStaffToken, me, staffTables, ApiError,
+  API_URL, ROUTES, isLive, getToken, getStaffToken, orderToken, watchedOrderNo,
+  me, getOrder, staffTables, ApiError,
   type ApiOrder, type StreamEvent, type TablesState,
 } from './api';
 
@@ -31,6 +32,8 @@ export type StreamState = 'connecting' | 'online' | 'offline';
 export interface StreamOptions {
   /** true — поток кухни (все заказы), иначе поток текущего гостя */
   staff?: boolean;
+  /** Ключ вместо обычного: так гость без регистрации следит за своим единственным заказом. */
+  token?: string;
   onOrder(order: ApiOrder): void;
   onTables(tables: TablesState): void;
   onState?(state: StreamState): void;
@@ -63,7 +66,9 @@ export function connectStream(opts: StreamOptions): () => void {
     onState?.(s);
   };
 
-  const token = staff ? getStaffToken() : getToken();
+  /** Ключ, на котором держится поток: у гостя — ключ на его заказ, иначе вход или смена. */
+  const readToken = () => (opts.token !== undefined ? orderToken() : staff ? getStaffToken() : getToken());
+  const token = opts.token || (staff ? getStaffToken() : getToken());
   if (!isLive() || !token || typeof EventSource === 'undefined') {
     // Демо-режим, гость не вошёл или браузер без EventSource — живых обновлений нет.
     state('offline');
@@ -143,7 +148,11 @@ export function connectStream(opts: StreamOptions): () => void {
     checking = true;
     try {
       if (staff) await staffTables();
-      else await me();
+      // У гостя нет профиля: проверяем ключ тем единственным заказом, который он открывает.
+      else if (opts.token !== undefined) {
+        const no = watchedOrderNo();
+        if (no != null) await getOrder(no);
+      } else await me();
     } catch (e) {
       if (e instanceof ApiError && e.status === 401) {
         authLost();
@@ -205,8 +214,9 @@ export function connectStream(opts: StreamOptions): () => void {
   // Выход из аккаунта в соседней вкладке: наш токен стёрли или заменили — поток уже не наш.
   const onStorage = () => {
     if (stopped) return;
-    const now = staff ? getStaffToken() : getToken();
-    if (now !== token) authLost();
+    // Сравнивать надо с тем же ключом, на котором открыт поток: у гостя это ключ на заказ,
+    // а не вход по телефону, которого у него и нет.
+    if (readToken() !== token) authLost();
   };
 
   function detach() {

@@ -62,8 +62,8 @@ const isStatus = (v: unknown): v is OrderStatus =>
 const NEXT_STATUS: Record<OrderStatus, OrderStatus[]> = {
   new: ['cancelled'],
   accepted: ['cooking', 'cancelled'],
-  cooking: ['ready'],
-  ready: ['done'],
+  cooking: ['ready', 'cancelled'],
+  ready: ['done', 'cancelled'],
   done: [],
   cancelled: [],
 };

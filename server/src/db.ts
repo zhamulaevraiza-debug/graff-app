@@ -293,8 +293,8 @@ export const orders = {
   /** Всё, что нужно кухне: незакрытые заказы и недавно выданные. */
   forStaff(limit = 100): ApiOrder[] {
     const rows = db.prepare(`SELECT * FROM orders
-                             WHERE status != 'done' OR done_at > ?
-                             ORDER BY (status = 'done'), created_at DESC LIMIT ?`)
+                             WHERE status NOT IN ('done', 'cancelled') OR done_at > ?
+                             ORDER BY (status IN ('done', 'cancelled')), created_at DESC LIMIT ?`)
       .all(now() - 6 * 3600_000, limit) as OrderRow[];
     return rows.map(r => rowToOrder(r, { withPhone: true }));
   },

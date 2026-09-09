@@ -355,7 +355,8 @@ export async function authRoutes(app: FastifyInstance) {
         marketing: !!user.marketing,
         marketingAt: user.marketing_at,
       },
-      orders: orders.byUser(user.id),
+      // выгрузка по 152-ФЗ должна быть полной, поэтому предел ставим заведомо больше любой истории
+      orders: orders.byUser(user.id, 10_000),
       exportedAt: Date.now(),
     };
   });

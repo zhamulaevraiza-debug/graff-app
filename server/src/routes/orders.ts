@@ -21,7 +21,7 @@ import { hub } from '../events.ts';
 import type { ApiError, ApiLine, ApiOrder, Format, PaymentId } from '../types.ts';
 
 /** Версия текста согласия, под которым клиент оформляет заказ. Пишется в журнал. */
-const CONSENT_VERSION = '1';
+const CONSENT_VERSION = '1.0';
 
 /**
  * Ключ гостя на один заказ: субъект токена выглядит как «order:1005».

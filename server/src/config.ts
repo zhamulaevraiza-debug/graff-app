@@ -6,7 +6,6 @@ import { randomBytes } from 'node:crypto';
 
 const env = process.env;
 const num = (v: string | undefined, def: number) => (v && Number.isFinite(Number(v)) ? Number(v) : def);
-const bool = (v: string | undefined, def = false) => (v === undefined ? def : v === '1' || v.toLowerCase() === 'true');
 const list = (v: string | undefined) => (v ? v.split(',').map(s => s.trim()).filter(Boolean) : []);
 
 export const isProd = env.NODE_ENV === 'production';
@@ -74,8 +73,13 @@ export const config = {
     to: env.WORK_TO || '',
   },
 
-  /** Логировать тело запросов (в бою выключено: в них персональные данные). */
-  logBodies: bool(env.LOG_BODIES, !isProd),
+  /**
+   * Сколько прокси стоит перед сервером. Нужно для req.ip, по которому считаются ограничения
+   * частоты запросов. При нашей схеме (nginx перед приложением) — 1: берётся адрес, который
+   * дописал наш же nginx. Значение 0 отключает доверие заголовкам, «true» доверять нельзя:
+   * тогда клиент подставляет любой X-Forwarded-For и обходит ограничения.
+   */
+  trustProxyHops: Math.max(0, num(env.TRUST_PROXY_HOPS, 1)),
 } as const;
 
 export const DEFAULT_TABLES = {

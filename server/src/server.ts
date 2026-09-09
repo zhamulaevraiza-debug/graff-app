@@ -26,7 +26,10 @@ const app = Fastify({
       req: r => ({ method: r.method, url: r.url, ip: r.ip }),
     },
   },
-  trustProxy: true,
+  // Доверяем ровно тому числу прокси, что стоит перед сервером (см. config.trustProxyHops):
+  // при trustProxy: true клиент подделал бы X-Forwarded-For и обошёл ограничения частоты.
+  // hop считается от ближайшего к серверу узла, поэтому условие повторяет числовую форму.
+  trustProxy: (_address: string, hop: number) => hop < config.trustProxyHops,
   bodyLimit: 256 * 1024,
 });
 

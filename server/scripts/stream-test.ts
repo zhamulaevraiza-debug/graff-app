@@ -126,6 +126,36 @@ await sleep(800);
 check('чужой заказ клиенту не приходит',
   !client.events.some(e => e.type === 'order' && e.order.no === otherOrder.body?.no), `чужой заказ №${otherOrder.body?.no}`);
 
+/* Гость без входа: ключ на заказ открывает поток только по этому заказу */
+const guestOrder = await call('/orders', {
+  method: 'POST',
+  body: JSON.stringify({
+    consent: true, format: 'togo', table: null, payment: 'cash',
+    name: 'Гость', phone: '9990000001',
+    lines: [{ name: 'Наггетсы', unit: 180, qty: 1 }],
+  }),
+});
+const guestNo: number = guestOrder.body?.no;
+const guestToken: string = guestOrder.body?.orderToken || '';
+check('гостю выдан ключ на его заказ', !!guestToken, `заказ №${guestNo}`);
+
+if (guestToken) {
+  const guest = await listen(guestToken);
+  await sleep(700);
+  check('гость сразу видит свой заказ', guest.events.some(e => e.type === 'order' && e.order.no === guestNo));
+  check('телефон в потоке гостя не отдаётся',
+    guest.events.filter(e => e.type === 'order').every(e => e.order.phone === undefined));
+
+  await call(`/staff/orders/${guestNo}/accept`, { method: 'POST', token: staffToken, body: JSON.stringify({ eta: 15 }) });
+  await sleep(800);
+  check('гость получил статус «принят»',
+    guest.events.some(e => e.type === 'order' && e.order.no === guestNo && e.order.status === 'accepted'));
+  check('чужой заказ по ключу на заказ не приходит',
+    !guest.events.some(e => e.type === 'order' && e.order.no === no), `заказ вошедшего клиента №${no}`);
+  guest.stop();
+  await sleep(200);
+}
+
 client.stop();
 kitchen.stop();
 await sleep(200);

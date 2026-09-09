@@ -25,6 +25,13 @@ import { orders, staff, tables, users } from '../db.ts';
 import { hub } from '../events.ts';
 import type { ApiOrder, StreamEvent } from '../types.ts';
 
+/**
+ * Гость без регистрации получает при оформлении ключ на свой заказ: субъект токена «order:1005».
+ * Тот же ключ принимает GET /orders/:no (см. caller в orders.ts), и без него заказ,
+ * оформленный без входа, навсегда остался бы в статусе «ждём кухню».
+ */
+const ORDER_SUB = 'order:';
+
 /** Через сколько миллисекунд браузеру пробовать переподключиться после обрыва. */
 const RETRY_MS = 3000;
 
@@ -64,9 +71,12 @@ function tokenFrom(req: FastifyRequest): string | undefined {
 /**
  * Активные заказы клиента: и оформленные им самим, и внесённые персоналом
  * по его телефону (заказ по звонку). Телефон клиенту не отдаём.
+ *
+ * По телефону берём только заказы персонала (byPhone): в гостевом заказе номер набирает
+ * кто угодно, и по совпадению номера человек увидел бы чужой заказ.
  */
 function activeForUser(userId: string, phone: string | null): ApiOrder[] {
-  const found = [...orders.byUser(userId), ...(phone ? orders.byPhone(phone) : [])];
+  const found = [...orders.byUser(userId), ...(phone ? orders.byPhone(phone).filter(o => o.byPhone === true) : [])];
   const uniq = new Map<number, ApiOrder>();
   for (const o of found) {
     if (o.status === 'done' || o.status === 'cancelled') continue;
@@ -159,6 +169,8 @@ export async function streamRoutes(app: FastifyInstance) {
 
       // Сотрудник видит все заказы и не привязан к телефону, клиент — только свои.
       const isStaff = payload.role === 'staff' || payload.role === 'admin';
+      const watchedNo = payload.sub.startsWith(ORDER_SUB) ? Number(payload.sub.slice(ORDER_SUB.length)) : NaN;
+      const guestOrderNo = !isStaff && Number.isInteger(watchedNo) ? watchedNo : null;
 
       /*
        * Роль и телефон из токена не принимаем на веру, как и остальные маршруты
@@ -168,9 +180,12 @@ export async function streamRoutes(app: FastifyInstance) {
       if (isStaff && !staff.byId(payload.sub)) {
         return reply.status(401).send({ error: 'unauthorized', message: 'Доступ сотрудника отозван, войдите заново' });
       }
-      const viewer = isStaff ? null : users.byId(payload.sub);
-      if (!isStaff && !viewer) {
+      const viewer = isStaff || guestOrderNo !== null ? null : users.byId(payload.sub);
+      if (!isStaff && guestOrderNo === null && !viewer) {
         return reply.status(401).send({ error: 'unauthorized', message: 'Профиль не найден, войдите заново' });
+      }
+      if (guestOrderNo !== null && !orders.byNo(guestOrderNo, { withPhone: false })) {
+        return reply.status(404).send({ error: 'not_found', message: 'Заказ не найден' });
       }
 
       const userId = viewer ? viewer.id : null;
@@ -213,7 +228,10 @@ export async function streamRoutes(app: FastifyInstance) {
         if (payload.exp * 1000 <= t) return false;
         if (t - checkedAt < RECHECK_MS) return true;
         checkedAt = t;
-        return isStaff ? !!staff.byId(payload.sub) : !!users.byId(payload.sub);
+        if (isStaff) return !!staff.byId(payload.sub);
+        // Гостевой ключ не привязан к профилю: проверяем, что заказ ещё существует.
+        if (guestOrderNo !== null) return !!orders.byNo(guestOrderNo, { withPhone: false });
+        return !!users.byId(payload.sub);
       };
 
       // Смена кончилась — поток закрываем сам: клиент переподключится и получит честный 401.
@@ -253,14 +271,18 @@ export async function streamRoutes(app: FastifyInstance) {
       // Снимок текущего состояния: столики всем, дальше заказы — по одному событию на заказ.
       try {
         send({ type: 'tables', tables: tables.state() });
-        const snapshot = viewer ? activeForUser(viewer.id, viewer.phone) : orders.forStaff();
+        const snapshot = viewer
+          ? activeForUser(viewer.id, viewer.phone)
+          : guestOrderNo !== null
+            ? [orders.byNo(guestOrderNo, { withPhone: false })].filter((o): o is ApiOrder => !!o).map(o => ({ ...o, mine: true }))
+            : orders.forStaff();
         for (const order of snapshot) send({ type: 'order', order });
       } catch (err) {
         app.log.error({ err }, 'не удалось отдать снимок состояния в поток');
       }
 
       if (open) {
-        subId = hub.add({ userId, phone, staff: isStaff, send, close });
+        subId = hub.add({ userId, phone, orderNo: guestOrderNo, staff: isStaff, send, close });
       } else {
         close();
       }

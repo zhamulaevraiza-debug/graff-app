@@ -16,6 +16,8 @@ export interface Subscriber {
   /** null — подписчик видит все заказы (кухня) */
   userId: string | null;
   phone: string | null;
+  /** гость без регистрации следит за одним своим заказом по ключу, выданному при оформлении */
+  orderNo: number | null;
   staff: boolean;
   send: (event: StreamEvent) => void;
   close: () => void;
@@ -39,7 +41,11 @@ export const hub = {
   /** Рассылает заказ кухне и тому клиенту, которому он принадлежит. */
   publishOrder(order: ApiOrder, owner: { userId: string | null; phone: string | null }) {
     for (const sub of subscribers.values()) {
-      const mine = (owner.userId && sub.userId === owner.userId) || (owner.phone && sub.phone === owner.phone);
+      // По телефону заказ считаем своим только если его внёс персонал по звонку: номер
+      // в гостевом заказе никем не подтверждён, и по совпадению пришёл бы чужой заказ.
+      const mine = (owner.userId && sub.userId === owner.userId)
+        || (owner.phone && sub.phone === owner.phone && order.byPhone === true)
+        || sub.orderNo === order.no;
       if (!sub.staff && !mine) continue;
       // клиенту не отдаём телефон из заказа
       const payload = sub.staff ? order : { ...order, phone: undefined, mine: true };

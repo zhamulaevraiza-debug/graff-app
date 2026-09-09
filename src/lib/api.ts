@@ -65,6 +65,14 @@ export interface ApiOrder {
   byPhone?: boolean;
 }
 
+/**
+ * Ответ на оформление заказа. Гостю без регистрации сервер добавляет сюда ключ на этот заказ:
+ * по нему приложение обновляет статус и подписывается на живые события.
+ */
+export interface CreatedOrder extends ApiOrder {
+  orderToken?: string;
+}
+
 export interface ApiUser {
   id: string;
   name: string;
@@ -91,6 +99,8 @@ export interface VerifyCodeBody {
   phone: string;
   code: string;
   name?: string;
+  /** отметка «Акции и новинки» со сплэша: сервер и включает, и выключает её по этому полю */
+  marketing?: boolean;
 }
 export interface VerifyCodeReply {
   token: string;
@@ -207,6 +217,8 @@ export const ROUTES = {
 
 const TOKEN_KEY = 'graff-token';
 const STAFF_TOKEN_KEY = 'graff-staff-token';
+/** Ключ на один заказ для гостя без регистрации: «<номер>:<токен>». */
+const ORDER_TOKEN_KEY = 'graff-order-token';
 
 /**
  * Запасное хранилище: в приватном окне localStorage может быть недоступен.
@@ -253,6 +265,31 @@ function dropKey(key: string) {
 export const getToken = () => readKey(TOKEN_KEY);
 export const setToken = (token: string) => writeKey(TOKEN_KEY, token);
 export const clearToken = () => dropKey(TOKEN_KEY);
+
+/**
+ * Ключ гостя на его заказ. Сервер выдаёт его в ответе на оформление, когда входа не было,
+ * и принимает в GET /orders/:no и в потоке событий. Без него заказ, оформленный без входа,
+ * навсегда застыл бы на «ждём кухню».
+ */
+export function setOrderToken(no: number, token: string) {
+  writeKey(ORDER_TOKEN_KEY, `${no}:${token}`);
+}
+export const clearOrderToken = () => dropKey(ORDER_TOKEN_KEY);
+/** Ключ на заказ: без номера — любой сохранённый, с номером — только если он про этот заказ. */
+export function orderToken(no?: number): string {
+  const raw = readKey(ORDER_TOKEN_KEY);
+  const at = raw.indexOf(':');
+  if (at < 1) return '';
+  if (no !== undefined && Number(raw.slice(0, at)) !== no) return '';
+  return raw.slice(at + 1);
+}
+/** Номер заказа, за которым следит гость без регистрации. */
+export function watchedOrderNo(): number | null {
+  const raw = readKey(ORDER_TOKEN_KEY);
+  const at = raw.indexOf(':');
+  const no = at > 0 ? Number(raw.slice(0, at)) : NaN;
+  return Number.isInteger(no) ? no : null;
+}
 
 export const getStaffToken = () => readKey(STAFF_TOKEN_KEY);
 export const setStaffToken = (token: string) => writeKey(STAFF_TOKEN_KEY, token);
@@ -512,8 +549,8 @@ export async function requestCode(
 }
 
 /** Проверка кода. При успехе токен клиента сразу сохраняется. */
-export async function verifyCode(phone: string, code: string, name?: string, signal?: AbortSignal) {
-  const body: VerifyCodeBody = { phone: phoneDigits10(phone), code: code.trim(), name: name?.trim() || undefined };
+export async function verifyCode(phone: string, code: string, name?: string, marketing?: boolean, signal?: AbortSignal) {
+  const body: VerifyCodeBody = { phone: phoneDigits10(phone), code: code.trim(), name: name?.trim() || undefined, marketing };
   const reply = await request<VerifyCodeReply>(ROUTES.verifyCode, { method: 'POST', body, signal });
   if (reply?.token) setToken(reply.token);
   return reply;
@@ -571,7 +608,7 @@ export async function exportMyData(signal?: AbortSignal) {
  */
 export async function createOrder(body: CreateOrderBody, signal?: AbortSignal) {
   const payload: CreateOrderBody = { ...body, phone: body.phone ? phoneDigits10(body.phone) : undefined };
-  return request<ApiOrder>(ROUTES.orders, { method: 'POST', body: payload, token: getToken() || null, signal });
+  return request<CreatedOrder>(ROUTES.orders, { method: 'POST', body: payload, token: getToken() || null, signal });
 }
 
 /** История своих заказов. */
@@ -580,16 +617,12 @@ export async function myOrders(signal?: AbortSignal) {
 }
 
 /**
- * Один заказ по номеру. Вход обязателен: GET /orders/:no без токена всегда отвечает 401,
- * поэтому спрашиваем токен здесь — так ошибка понятная и приходит сразу.
- *
- * Из-за этого гость, оформивший заказ без регистрации, после оформления не может ни обновить
- * статус, ни увидеть готовность (живого потока у него тоже нет). Чтобы это закрыть, серверу
- * нужно возвращать в ответе POST /orders короткий токен наблюдения за гостевым заказом —
- * тогда он подойдёт и сюда, и в connectStream.
+ * Один заказ по номеру. Годится и вход по телефону, и ключ на заказ, который сервер выдаёт
+ * гостю при оформлении без регистрации, — иначе такой заказ нельзя было бы даже обновить.
  */
 export async function getOrder(no: number, signal?: AbortSignal) {
-  return request<ApiOrder>(ROUTES.order(no), { token: userToken(), signal });
+  const guest = orderToken(no);
+  return request<ApiOrder>(ROUTES.order(no), { token: guest || userToken(), signal });
 }
 
 /** Отмена своего заказа, пока кухня его не приняла. */
