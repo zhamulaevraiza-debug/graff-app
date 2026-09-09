@@ -1,7 +1,9 @@
 import { useEffect, useRef, type ComponentType } from 'react';
 import { useStore, NAV_SCREENS, SCREENS, speedOf, forgetLastWrite, type Screen, type ProfileSub, type AppState } from './state/store';
-import { minutesLeft, type Order } from './lib/orders';
+import { minutesLeft, whereText, type Order } from './lib/orders';
 import { LEGAL_DOCS, type LegalDocId } from './data/legal';
+import { ITEMS } from './data/menu';
+import { takeReplaceHistoryEntry } from './lib/nav';
 import { BottomNav } from './components/BottomNav';
 import { Toast } from './components/Toast';
 import { Splash } from './screens/Splash';
@@ -28,12 +30,13 @@ type SharedKey = (typeof SHARED_KEYS)[number];
 // Список берём из самих документов: иначе новый документ не открывался бы по ссылке.
 const LEGAL_IDS: string[] = LEGAL_DOCS.map(d => d.id);
 const hashFor = (screen: Screen, sub: string | null) => '#/' + screen + (sub ? '/' + sub : '');
-/** Под-страница текущего экрана: раздел профиля или открытый документ. */
-const subOf = (s: Pick<AppState, 'screen' | 'profileSub' | 'legalDoc'>) =>
-  s.screen === 'profile' ? s.profileSub : s.screen === 'legal' ? s.legalDoc : null;
+/** Под-страница текущего экрана: раздел профиля, открытый документ или блюдо. */
+const subOf = (s: Pick<AppState, 'screen' | 'profileSub' | 'legalDoc' | 'dishId'>) =>
+  s.screen === 'profile' ? s.profileSub : s.screen === 'legal' ? s.legalDoc : s.screen === 'dish' ? s.dishId : null;
 
-function parseHash(): { screen: Screen; profileSub: ProfileSub; legalDoc: LegalDocId | null } | null {
-  const m = location.hash.match(/^#\/([a-z]+)(?:\/([a-z]+))?/);
+function parseHash(): { screen: Screen; profileSub: ProfileSub; legalDoc: LegalDocId | null; dishId: string | null } | null {
+  // Идентификатор блюда — вида burgers-0-0, поэтому в под-адресе допустимы цифры и дефисы.
+  const m = location.hash.match(/^#\/([a-z]+)(?:\/([a-z0-9-]+))?/);
   if (!m) return null;
   const screen = m[1] as Screen;
   if (!SCREENS.includes(screen)) return null;
@@ -42,6 +45,7 @@ function parseHash(): { screen: Screen; profileSub: ProfileSub; legalDoc: LegalD
     screen,
     profileSub: screen === 'profile' && (sub === 'orders' || sub === 'favs') ? sub : null,
     legalDoc: screen === 'legal' && sub && LEGAL_IDS.includes(sub) ? (sub as LegalDocId) : null,
+    dishId: screen === 'dish' && sub && ITEMS[sub] ? sub : null,
   };
 }
 // Экран из адреса применяем до первого рендера: ссылка «#/staff» открывает панель персонала,
@@ -50,8 +54,12 @@ function parseHash(): { screen: Screen; profileSub: ProfileSub; legalDoc: LegalD
   const initial = parseHash();
   if (initial) {
     const s = useStore.getState();
-    if (initial.screen !== s.screen || initial.profileSub !== s.profileSub || initial.legalDoc !== s.legalDoc) {
-      useStore.setState({ screen: initial.screen, profileSub: initial.profileSub, legalDoc: initial.legalDoc });
+    if (initial.screen !== s.screen || initial.profileSub !== s.profileSub || initial.legalDoc !== s.legalDoc
+        || (initial.dishId && initial.dishId !== s.dishId)) {
+      useStore.setState({
+        screen: initial.screen, profileSub: initial.profileSub, legalDoc: initial.legalDoc,
+        ...(initial.dishId ? { dishId: initial.dishId } : {}),
+      });
     }
   }
 }
@@ -70,10 +78,10 @@ function notifyOrderChanges(prev: Order[], next: Order[], speed: number) {
     const p = prev.find(x => x.no === o.no);
     if (!p) continue;
     if (p.status !== o.status) {
-      if (o.status === 'accepted') showToast('Заказ принят!', `№${o.no} · готовим ~${o.eta} мин` + (o.table ? ` · столик ${o.table}` : ''));
-      else if (o.status === 'ready') showToast(`Ваш заказ №${o.no} готов!`, o.format === 'togo' ? 'Подойдите к стойке' : `Столик ${o.table}`);
+      if (o.status === 'accepted') showToast('Заказ принят!', `№${o.no} · готовим ~${o.eta} мин` + (o.table ? ` · столик ${o.table}` : ''), { order: o.no });
+      else if (o.status === 'ready') showToast(`Ваш заказ №${o.no} готов!`, whereText(o), { order: o.no });
     } else if (p.eta !== o.eta && (o.status === 'accepted' || o.status === 'cooking')) {
-      showToast('Время готовности изменено', `Заказ №${o.no} будет готов через ~${minutesLeft(o, Date.now(), speed)} мин`);
+      showToast('Время готовности изменено', `Заказ №${o.no} будет готов через ~${minutesLeft(o, Date.now(), speed)} мин`, { order: o.no });
     }
   }
 }
@@ -84,6 +92,7 @@ function useAppEffects() {
   const screen = useStore(s => s.screen);
   const profileSub = useStore(s => s.profileSub);
   const legalDocId = useStore(s => s.legalDoc);
+  const dishId = useStore(s => s.dishId);
   const firstHash = useRef(true);
   const prevScreen = useRef<Screen>(screen);
 
@@ -124,8 +133,12 @@ function useAppEffects() {
       const p = parseHash();
       if (!p) return;
       const s = useStore.getState();
-      if (p.screen !== s.screen || p.profileSub !== s.profileSub || p.legalDoc !== s.legalDoc) {
-        useStore.setState({ screen: p.screen, profileSub: p.profileSub, legalDoc: p.legalDoc });
+      if (p.screen !== s.screen || p.profileSub !== s.profileSub || p.legalDoc !== s.legalDoc
+          || (p.dishId && p.dishId !== s.dishId)) {
+        useStore.setState({
+          screen: p.screen, profileSub: p.profileSub, legalDoc: p.legalDoc,
+          ...(p.dishId ? { dishId: p.dishId } : {}),
+        });
       }
     };
     window.addEventListener('popstate', onPop);
@@ -133,17 +146,20 @@ function useAppEffects() {
   }, []);
 
   useEffect(() => {
-    const h = hashFor(screen, subOf({ screen, profileSub, legalDoc: legalDocId }));
+    const h = hashFor(screen, subOf({ screen, profileSub, legalDoc: legalDocId, dishId }));
+    const forceReplace = takeReplaceHistoryEntry();
     if (location.hash !== h) {
       // Экран входа не оставляем в истории: после «Продолжить без входа» или SMS-кода
       // системная кнопка «назад» не должна возвращать вошедшего пользователя на сплэш.
-      const replace = firstHash.current || (prevScreen.current === 'splash' && screen === 'home');
-      if (replace) history.replaceState({ graff: !firstHash.current }, '', h);
+      const replace = forceReplace || firstHash.current || (prevScreen.current === 'splash' && screen === 'home');
+      // graff говорит, что позади в истории наш же экран. При замене записи позади — то, что было
+      // до приложения, поэтому «назад» дальше должно уходить из приложения, а не крутиться в нём.
+      if (replace) history.replaceState({ graff: !(forceReplace || firstHash.current) }, '', h);
       else history.pushState({ graff: true }, '', h);
     }
     firstHash.current = false;
     prevScreen.current = screen;
-  }, [screen, profileSub, legalDocId]);
+  }, [screen, profileSub, legalDocId, dishId]);
 }
 
 export default function App() {

@@ -29,3 +29,9 @@ export const photoCredit = (slot: string): PhotoCredit | undefined => CREDITS[sl
 /** Список для документа «Фотографии»: один и тот же снимок в разных слотах показывается один раз. */
 export const PHOTO_CREDITS: PhotoCredit[] = Object.values(CREDITS)
   .filter((c, i, all) => all.findIndex(x => x.id === c.id) === i);
+
+/** Лицензии, встретившиеся среди снимков, — со ссылкой на текст: этого требуют сами лицензии. */
+export const PHOTO_LICENSES: { name: string; url: string }[] =
+  [...new Map(PHOTO_CREDITS.filter(c => c.licenseUrl).map(c => [c.license, c.licenseUrl])).entries()]
+    .map(([name, url]) => ({ name, url }))
+    .sort((a, b) => a.name.localeCompare(b.name, 'ru'));

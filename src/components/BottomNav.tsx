@@ -14,6 +14,7 @@ const TABS: Tab[] = [
 export function BottomNav() {
   const screen = useStore(s => s.screen);
   const go = useStore(s => s.go);
+  const openActive = useStore(s => s.openActive);
   const cartCount = useStore(selCartCount);
   const hasCart = cartCount > 0;
   return (
@@ -22,8 +23,10 @@ export function BottomNav() {
         const on = t.active(screen);
         const color = on ? 'var(--copper)' : 'var(--nav-inactive)';
         const target: Screen = t.key === 'order' ? (hasCart ? 'cart' : 'status') : t.key;
+        // «Заказ» без корзины ведёт к активному заказу: иначе показывался тот, что открыли из истории.
+        const open = target === 'status' ? openActive : () => go(target);
         return (
-          <button key={t.key} type="button" className={['bottom-nav__tab', on ? 'bottom-nav__tab--on' : ''].join(' ').trim()} onClick={() => go(target)} aria-current={on ? 'page' : undefined}>
+          <button key={t.key} type="button" className={['bottom-nav__tab', on ? 'bottom-nav__tab--on' : ''].join(' ').trim()} onClick={open} aria-current={on ? 'page' : undefined}>
             <Icon name={t.icon} size={24} color={color} strokeWidth={1.7} />
             <span className="bottom-nav__label">{t.name}</span>
             {t.key === 'order' && hasCart && <span className="bottom-nav__badge" aria-hidden="true">{cartCount}</span>}

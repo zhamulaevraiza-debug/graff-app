@@ -105,3 +105,14 @@
   text-decoration: underline;
 }
 
+
+/* Способ оплаты, который ещё не работает: виден, но недоступен. */
+.cart-pay--soon { opacity: .5; cursor: default; }
+.cart-pay__soon {
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  font: 600 11px var(--f-body);
+  color: var(--sec);
+  letter-spacing: .04em;
+}

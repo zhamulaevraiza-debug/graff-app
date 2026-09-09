@@ -48,9 +48,35 @@ export interface Order {
 }
 
 export type Occupied = Record<number, boolean>;
-export interface ToastMsg { title: string; text: string }
+/** order — какой заказ открыть по тапу на баннер */
+export interface ToastMsg { title: string; text: string; order?: number }
+
+/**
+ * Где гость получает заказ. Столик назначает персонал, и до этого момента table пуст —
+ * без этой проверки в баннере и в уведомлении получалось «Столик null».
+ */
+export const whereText = (o: Pick<Order, 'format' | 'table'>): string =>
+  o.format === 'togo' ? 'Подойдите к стойке' : (o.table ? `Столик ${o.table}` : 'Столик назначит персонал');
 
 export const orderTotal = (lines: Line[]) => lines.reduce((a, l) => a + l.unit * l.qty, 0);
+
+/** Заказ по звонку персонал вводит строками от руки — повторять в таком нечего. */
+export const canRepeat = (o: Order): boolean => o.lines.some(l => !!l.itemId && !!ITEMS[l.itemId]);
+
+/**
+ * Пересобирает строку заказа так, как её делает корзина. У заказа с сервера ключи строк
+ * другие, и без пересборки «повторить» клало бы то же блюдо в корзину второй строкой.
+ */
+export function relineForCart(l: Line): Line | null {
+  const it = l.itemId ? ITEMS[l.itemId] : undefined;
+  if (!it) return null;
+  const bySize = it.hasSizes ? it.sizes.findIndex(z => l.name.includes(' · ' + z.l)) : 0;
+  const ids = (l.sauceNames || [])
+    .map(n => SAUCES.find(x => x.name.toLowerCase() === n.trim().toLowerCase()))
+    .filter((x): x is (typeof SAUCES)[number] => !!x)
+    .map(x => x.id);
+  return mkLine(it.id, bySize < 0 ? 0 : bySize, l.qty, ids);
+}
 
 export function mkLine(itemId: string, sizeIdx: number, qty: number, sauceIds: string[] = []): Line {
   const it = ITEMS[itemId];
@@ -58,11 +84,10 @@ export function mkLine(itemId: string, sizeIdx: number, qty: number, sauceIds: s
   const ids = sauceIds.slice().sort();
   const sauces = ids.map(id => SAUCES.find(s => s.id === id)!).filter(Boolean);
   const unit = z.p + sauces.reduce((a, s) => a + s.p, 0);
-  const groupNote = it.group && it.catId === 'burgers' ? ' (' + it.group.toLowerCase().replace(/ые$/, 'ый') + ')' : '';
   return {
     key: itemId + '|' + sizeIdx + '|' + ids.join(','),
     itemId,
-    name: it.name + (it.hasSizes ? ' · ' + z.l : '') + groupNote,
+    name: it.name + (it.hasSizes ? ' · ' + z.l : '') + it.groupNote,
     sauceNames: sauces.map(s => s.name),
     unit,
     qty,
@@ -105,11 +130,11 @@ export function transition(o: Order, status: OrderStatus, occ: Occupied, now: nu
       const t = freeTable(n.format, occ);
       if (t) { n.table = t; occ = { ...occ, [t]: true }; }
     }
-    if (n.mine) toast = { title: 'Заказ принят!', text: `№${n.no} · готовим ~${n.eta} мин` + (n.table ? ` · столик ${n.table}` : '') };
+    if (n.mine) toast = { title: 'Заказ принят!', text: `№${n.no} · готовим ~${n.eta} мин` + (n.table ? ` · столик ${n.table}` : ''), order: n.no };
   }
   if (status === 'ready') {
     n.readyAt = now;
-    if (n.mine) toast = { title: `Ваш заказ №${n.no} готов!`, text: n.format === 'togo' ? 'Подойдите к стойке' : `Столик ${n.table}` };
+    if (n.mine) toast = { title: `Ваш заказ №${n.no} готов!`, text: whereText(n), order: n.no };
   }
   if (status === 'done') {
     n.doneAt = now;
@@ -161,12 +186,14 @@ export function orderView(o: Order, now: number, speed: number): OrderView {
   const prog = o.status === 'ready' || o.status === 'done' ? 1 : (o.status === 'new' || o.status === 'cancelled' ? 0 : Math.min(1, el / tot));
   const idx = STEP_IDX[o.status];
   const color = o.status === 'ready' ? C.green : (o.status === 'done' || o.status === 'cancelled' ? C.muted : C.copper);
-  const where = o.format === 'togo' ? 'Подойдите к стойке' : (o.table ? `Столик ${o.table}` : 'Столик назначит персонал');
+  const where = whereText(o);
   const etaAt = o.acceptedAt ? 'к ' + fmtTime(o.acceptedAt + tot / speed) : '';
+  // Время вышло, а кухня ещё не нажала «Готов»: «~0 мин» и время в прошлом выглядят как поломка.
+  const overdue = left <= 0;
   const ring: Record<OrderStatus, [string, string, string]> = {
     new: ['Ждём кухню', '—', 'время уточняет персонал'],
-    accepted: ['Будет готов через', `~${left} мин`, etaAt],
-    cooking: ['Будет готов через', `~${left} мин`, etaAt],
+    accepted: overdue ? ['', 'Вот-вот', 'кухня заканчивает'] : ['Будет готов через', `~${left} мин`, etaAt],
+    cooking: overdue ? ['', 'Вот-вот', 'кухня заканчивает'] : ['Будет готов через', `~${left} мин`, etaAt],
     ready: ['', 'Готов!', where],
     done: ['', 'Выдан', o.doneAt ? fmtTime(o.doneAt) : ''],
     cancelled: ['', 'Отменён', o.doneAt ? fmtTime(o.doneAt) : ''],
@@ -197,11 +224,12 @@ export function orderView(o: Order, now: number, speed: number): OrderView {
       sumLabel: rub(l.unit * l.qty),
     })),
     formatText: formatText(o), payText: PAY_TEXT[o.payment] || '', totalLabel: rub(o.total),
-    minutesShort: o.status === 'new' ? '…' : (o.status === 'cancelled' ? '×' : (o.status === 'ready' || o.status === 'done' ? '✓' : `${left} мин`)),
+    minutesShort: o.status === 'new' ? '…' : (o.status === 'cancelled' ? '×' : (o.status === 'ready' || o.status === 'done' ? '✓' : (overdue ? 'вот-вот' : `${left} мин`))),
     subline: o.status === 'new' ? 'Ждём подтверждения кухни'
       : o.status === 'cancelled' ? 'Заказ отменён'
       : o.status === 'ready' ? where
       : o.status === 'done' ? 'Выдан'
+      : overdue ? `Кухня заканчивает · ${where}`
       : `Будет готов через ~${left} мин · ${where}`,
     where, left,
   };

@@ -8,7 +8,7 @@
  * Пути считаются от области действия воркера, поэтому приложение работает и в корне домена,
  * и в подпапке (например, на GitHub Pages по адресу /graff-app/).
  */
-const CACHE = 'graff-v2';
+const CACHE = 'graff-v3';
 const BASE = new URL(self.registration.scope).pathname;
 const INDEX = BASE + 'index.html';
 const OFFLINE_URLS = [BASE, INDEX, BASE + 'manifest.webmanifest', BASE + 'icon.svg', BASE + 'icon-192.png', BASE + 'apple-touch-icon.png'];
@@ -42,6 +42,13 @@ self.addEventListener('fetch', event => {
   const isFont = url.hostname === 'fonts.googleapis.com' || url.hostname === 'fonts.gstatic.com';
   if (!sameOrigin && !isFont) return; // чужие запросы не трогаем
 
+  // Ответы сервера кафе не кэшируем: заказ, профиль и столики должны быть свежими.
+  // Иначе без сети приложение показало бы вчерашний заказ как сегодняшний.
+  // В боевой раздаче сервер стоит на том же домене по пути api/ (см. deploy/nginx.conf).
+  const isApi = sameOrigin && url.pathname.startsWith(BASE + 'api');
+  const isStream = (req.headers.get('accept') || '').includes('text/event-stream');
+  if (isApi || isStream) return;
+
   // Переходы по адресам: отдаём index.html (одностраничное приложение), офлайн — из кэша
   if (req.mode === 'navigate') {
     event.respondWith(
@@ -58,7 +65,9 @@ self.addEventListener('fetch', event => {
 
   event.respondWith(
     fetch(req)
-      .then(res => { if (res && res.ok) cachePut(req, res.clone()); return res; })
+      // Шрифты приходят «непрозрачным» ответом (res.ok у него всегда false) — их кладём в кэш отдельно,
+      // иначе без сети приложение осталось бы без своих шрифтов.
+      .then(res => { if (res && (res.ok || (isFont && res.type === 'opaque'))) cachePut(req, res.clone()); return res; })
       .catch(() => caches.match(req).then(r => r || Response.error())),
   );
 });

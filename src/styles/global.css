@@ -454,11 +454,18 @@ h1, h2, h3, p, ul, ol { margin: 0; }
   background: var(--toast-bg);
   color: var(--bg);
   border-radius: 18px;
-  padding: 12px 14px;
-  display: flex; gap: 12px; align-items: center;
   box-shadow: 0 12px 30px rgba(0, 0, 0, .25);
   animation: gr-toast .45s cubic-bezier(.2, .8, .2, 1);
+}
+/* Нажатие — настоящая кнопка: баннер открывается и с клавиатуры, и через скринридер. */
+.toast__tap {
+  width: 100%;
+  padding: 12px 14px;
+  display: flex; gap: 12px; align-items: center;
+  background: none; border: 0; border-radius: inherit;
+  color: inherit; font: inherit; text-align: left;
   cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
 }
 .toast__icon { width: 38px; height: 38px; border-radius: 10px; background: var(--grad); display: flex; align-items: center; justify-content: center; flex: none; }
 .toast__meta { display: flex; justify-content: space-between; font-size: 12px; opacity: .7; }

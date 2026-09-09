@@ -14,7 +14,7 @@ import { LEGAL_VERSION, type LegalDocId } from '../data/legal';
 import * as api from '../lib/api';
 import * as live from './live';
 import {
-  mkLine, mergeLines, orderTotal, transition, kitchenTick, minutesLeft,
+  mkLine, mergeLines, orderTotal, transition, kitchenTick, minutesLeft, canRepeat, relineForCart,
   seedOrders, SEED_OCCUPIED, SEED_NEXT_NO,
   type Line, type Order, type Occupied, type ToastMsg,
 } from '../lib/orders';
@@ -30,12 +30,14 @@ export type HeaderStyle = 'plate' | 'script';
 export interface Settings {
   /** кухня-автопилот: заказы сами проходят статусы (демо без персонала) */
   autoKitchen: boolean;
-  /** ускоренное время: 1 мин = 5 с */
+  /** ускоренное время только для показа: 1 мин = 5 с */
   fastTimer: boolean;
   /** push-баннеры внутри приложения */
   pushBanners: boolean;
   /** заголовки экранов: плашка (иконка + ЗАГЛАВНЫЕ) или рукописный медный */
   headerStyle: HeaderStyle;
+  /** два круглых фото по краям шапки на главной */
+  heroPhotos: boolean;
 }
 export interface User { name: string; phone: string }
 export interface Toast extends ToastMsg { id: number; target: Screen }
@@ -51,9 +53,12 @@ export const speedOf = (s: Settings) => (s.fastTimer ? 12 : 1);
 export const LIVE = api.isLive();
 
 export const DEFAULT_SETTINGS: Settings = LIVE
-  // на боевом сервере статусы ведёт кухня, а время идёт по-настоящему
-  ? { autoKitchen: false, fastTimer: false, pushBanners: true, headerStyle: 'plate' }
-  : { autoKitchen: true, fastTimer: true, pushBanners: true, headerStyle: 'plate' };
+  // на боевом сервере статусы ведёт кухня
+  ? { autoKitchen: false, fastTimer: false, pushBanners: true, headerStyle: 'plate', heroPhotos: true }
+  // в демонстрации статусы ведёт автопилот, но время идёт по-настоящему: «~12 мин» — это
+  // двенадцать настоящих минут. Ускорение включается вручную в панели персонала, когда надо
+  // показать весь путь заказа за минуту.
+  : { autoKitchen: true, fastTimer: false, pushBanners: true, headerStyle: 'plate', heroPhotos: true };
 
 export interface AppState {
   // навигация
@@ -82,6 +87,7 @@ export interface AppState {
   format: Format;
   table: number | 'any';
   pickup: 'asap' | 'time';
+  /** выбранное время самовывоза — метка времени слота; 0, пока время не выбрано */
   pickupTime: number;
   payment: PaymentId;
   guestName: string;
@@ -117,6 +123,8 @@ export interface AppState {
   busy: boolean;
   /** открыт поток живых обновлений */
   online: boolean;
+  /** сервер отказал в повторной отправке кода до этого времени (мс); 0 — ограничения нет */
+  resendAfter: number;
   /** сотрудник вошёл в панель; в демонстрации вход не нужен */
   staffAuthed: boolean;
 }
@@ -154,7 +162,8 @@ export interface AppActions {
   pickTable: (n: number, zone: Format) => void;
   pickAnyTable: () => void;
   pickAsap: () => void;
-  pickSlot: (i: number) => void;
+  /** ts — метка времени выбранного слота */
+  pickSlot: (ts: number) => void;
   setPayment: (p: PaymentId) => void;
   setGuestName: (v: string) => void;
   setGuestPhone: (v: string) => void;
@@ -170,7 +179,7 @@ export interface AppActions {
   setConsent: (accepted: boolean) => void;
   setMarketing: (accepted: boolean) => void;
   openLegal: (doc: LegalDocId | null) => void;
-  deleteAccount: () => void;
+  deleteAccount: () => Promise<void>;
   // персонал
   toggleStaffForm: () => void;
   setStaffForm: (patch: Partial<StaffForm>) => void;
@@ -181,7 +190,7 @@ export interface AppActions {
   bumpEta: (no: number) => void;
   toggleOccupied: (n: number) => void;
   // ui
-  showToast: (title: string, text: string, opts?: { force?: boolean; target?: Screen }) => void;
+  showToast: (title: string, text: string, opts?: { force?: boolean; target?: Screen; order?: number }) => void;
   hideToast: () => void;
   toastTap: () => void;
   tick: () => void;
@@ -241,7 +250,7 @@ function initialState(): AppState {
     consentAt: null, consentVersion: null, marketingConsent: false, marketingConsentAt: null, legalDoc: null,
     staffForm: null,
     toast: null, now, settings: { ...DEFAULT_SETTINGS },
-    netError: null, busy: false, online: false, staffAuthed: !LIVE || api.hasStaffToken(),
+    netError: null, busy: false, online: false, resendAfter: 0, staffAuthed: !LIVE || api.hasStaffToken(),
   };
 }
 
@@ -308,7 +317,7 @@ export const useStore = create<Store>()(
       pickTable: (n, zone) => set({ table: n, format: zone }),
       pickAnyTable: () => set({ table: 'any' }),
       pickAsap: () => set({ pickup: 'asap' }),
-      pickSlot: i => set({ pickup: 'time', pickupTime: i }),
+      pickSlot: ts => set({ pickup: 'time', pickupTime: ts }),
       setPayment: p => set({ payment: p }),
       setGuestName: v => set({ guestName: v }),
       setGuestPhone: v => set({ guestPhone: formatPhone(v) }),
@@ -322,7 +331,7 @@ export const useStore = create<Store>()(
         const o: Order = {
           no: s.nextNo, createdAt: now, status: 'new', format: s.format, table,
           pickup: s.format === 'togo' ? s.pickup : undefined,
-          pickupLabel: s.format === 'togo' && s.pickup === 'time' ? fmtTime(pickupSlotTs(now, s.pickupTime)) : '',
+          pickupLabel: s.format === 'togo' && s.pickup === 'time' && s.pickupTime > now ? fmtTime(s.pickupTime) : '',
           payment: s.payment, lines: s.cart, comment: s.comment.trim() || undefined, total,
           name: s.user ? s.user.name : (s.guestName.trim() || 'Гость'), phone: s.user ? s.user.phone : s.guestPhone,
           mine: true, auto: s.settings.autoKitchen, pendingEta: 15,
@@ -332,15 +341,17 @@ export const useStore = create<Store>()(
       },
       repeatOrder: no => {
         const s = get(); const o = s.orders.find(x => x.no === no); if (!o) return;
-        // повторить можно только позиции из меню (не ручные строки заказа по звонку)
-        const lines = o.lines.filter(l => l.itemId && ITEMS[l.itemId]).map(l => ({ ...l }));
+        // повторить можно только позиции из меню (не ручные строки заказа по звонку):
+        // если повторять нечего, не уводим в пустую корзину — кнопка у таких заказов и не показывается
+        if (!canRepeat(o)) return;
+        const lines = o.lines.map(relineForCart).filter((l): l is Line => !!l);
         set({ cart: mergeLines(s.cart, lines), screen: 'cart', profileSub: null, format: o.format, table: 'any' });
       },
 
       // ---- статус ----
       viewOrderNo: no => set({ viewOrder: no }),
       openActive: () => {
-        const s = get(); const a = s.orders.find(o => o.mine && o.status !== 'done');
+        const s = get(); const a = selActiveMine(s as Store)[0];
         set({ screen: 'status', viewOrder: a ? a.no : null, profileSub: null });
       },
 
@@ -371,9 +382,11 @@ export const useStore = create<Store>()(
        * Локально стираем профиль, свои заказы, избранное и корзину; заказы кафе (чужие) не трогаем.
        * При появлении сервера здесь же отправляется запрос на удаление данных на стороне кафе.
        */
-      deleteAccount: () => {
+      deleteAccount: async () => {
         const s = get();
-        if (LIVE) void live.deleteAccount();
+        // Данные на устройстве стираем только после того, как сервер подтвердил удаление:
+        // иначе при отказе профиль остался бы на сервере и вернулся при следующем запуске.
+        if (LIVE && !(await live.deleteAccount())) return;
         set({
           user: null, orders: s.orders.filter(o => !o.mine), cart: [], comment: '', favorites: {},
           consentAt: null, consentVersion: null, marketingConsent: false, marketingConsentAt: null, notifOn: true,
@@ -455,13 +468,14 @@ export const useStore = create<Store>()(
         if (!opts?.force && (!s.settings.pushBanners || !s.notifOn)) return;
         clearTimeout(toastTimer);
         const target: Screen = opts?.target || (s.screen === 'staff' ? 'staff' : 'status');
-        set({ toast: { id: ++toastSeq, title, text, target } });
+        set({ toast: { id: ++toastSeq, title, text, target, order: opts?.order } });
         toastTimer = setTimeout(() => set({ toast: null }), 5000);
         // Системное уведомление, когда приложение свёрнуто. На Android конструктор Notification запрещён —
         // там уведомление показывает service worker; если ни то ни другое недоступно, остаётся баннер в приложении.
         if (!opts?.force && typeof document !== 'undefined' && document.hidden && typeof window !== 'undefined'
             && 'Notification' in window && Notification.permission === 'granted') {
-          const body = { body: text, icon: '/icon-192.png', badge: '/icon-192.png', tag: 'graff-' + title, lang: 'ru' };
+          const icon = import.meta.env.BASE_URL + 'icon-192.png';
+          const body = { body: text, icon, badge: icon, tag: 'graff-' + title, lang: 'ru' };
           navigator.serviceWorker?.ready
             .then(reg => reg.showNotification(title, body))
             .catch(() => { try { new Notification(title, body); } catch { /* платформа не поддерживает */ } });
@@ -470,7 +484,11 @@ export const useStore = create<Store>()(
       hideToast: () => { clearTimeout(toastTimer); set({ toast: null }); },
       toastTap: () => {
         const t = get().toast; clearTimeout(toastTimer);
-        set({ toast: null, screen: t ? t.target : get().screen, profileSub: null });
+        // Баннер знает свой заказ: без этого открывался тот, что был выбран раньше.
+        set({
+          toast: null, screen: t ? t.target : get().screen, profileSub: null,
+          ...(t?.order != null ? { viewOrder: t.order } : {}),
+        });
       },
 
       // ---- таймер: раз в секунду ----
@@ -482,10 +500,27 @@ export const useStore = create<Store>()(
         const r = kitchenTick(s.orders, s.occupied, now, speedOf(s.settings));
         if (r.changed) {
           set({ now, orders: r.orders, occupied: r.occ });
-          r.toasts.forEach(t => get().showToast(t.title, t.text));
+          r.toasts.forEach(t => get().showToast(t.title, t.text, { order: t.order }));
         } else set({ now });
       },
-      setSetting: (key, value) => set({ settings: { ...get().settings, [key]: value } }),
+      setSetting: (key, value) => {
+        const s = get();
+        const settings = { ...s.settings, [key]: value };
+        if (key === 'fastTimer' && !LIVE) {
+          // Отсчёт ведётся от acceptedAt с множителем скорости. Меняя скорость, сдвигаем метку так,
+          // чтобы пройденная часть приготовления осталась прежней — иначе заказ скакнёт к нулю или назад.
+          const was = speedOf(s.settings), now = Date.now();
+          const become = speedOf(settings);
+          if (was !== become) {
+            const orders = s.orders.map(o => (o.acceptedAt && o.status !== 'done' && o.status !== 'cancelled'
+              ? { ...o, acceptedAt: now - ((now - o.acceptedAt) * was) / become }
+              : o));
+            set({ settings, orders });
+            return;
+          }
+        }
+        set({ settings });
+      },
       // ---- связь с сервером ----
       bootstrap: async () => { if (LIVE) await live.bootstrap(); },
       setNetError: msg => set({ netError: msg }),
@@ -494,7 +529,7 @@ export const useStore = create<Store>()(
         set({ staffAuthed: true });
         return true;
       },
-      staffLogout: () => { if (LIVE) live.staffLogout(); else set({ staffAuthed: false }); },
+      staffLogout: () => { if (LIVE) void live.staffLogout(); else set({ staffAuthed: false }); },
       cancelOrder: async no => {
         if (LIVE) { await live.cancelOrder(no); return; }
         get().setStatus(no, 'cancelled');
@@ -505,13 +540,14 @@ export const useStore = create<Store>()(
         set({
           orders: LIVE ? [] : seedOrders(now, speedOf(get().settings)),
           nextNo: SEED_NEXT_NO, occupied: LIVE ? {} : { ...SEED_OCCUPIED },
-          cart: [], comment: '', viewOrder: null, staffForm: null, favorites: {},
+          // избранное — данные гостя, а не демонстрации: подтверждение обещает сбросить только заказы и столики
+          cart: [], comment: '', viewOrder: null, staffForm: null,
         });
       },
     }),
     {
       name: 'graff-app',
-      version: 1,
+      version: 2,
       storage: createJSONStorage(() => safeStorage),
       partialize: s => ({
         screen: s.screen, staffTab: s.staffTab,
@@ -522,6 +558,13 @@ export const useStore = create<Store>()(
         consentAt: s.consentAt, consentVersion: s.consentVersion, marketingConsent: s.marketingConsent, marketingConsentAt: s.marketingConsentAt,
         staffAuthed: s.staffAuthed,
       }),
+      // Редакция 2: ускоренное время перестало включаться само. У тех, кто открывал приложение раньше,
+      // оно осталось в сохранённых настройках — выключаем, иначе «12 минут» снова пройдут за минуту.
+      migrate: (persisted, from) => {
+        const p = (persisted || {}) as Partial<AppState>;
+        if (from < 2 && p.settings) return { ...p, settings: { ...p.settings, fastTimer: false } };
+        return p;
+      },
       merge: (persisted, current) => {
         const p = (persisted || {}) as Partial<AppState>;
         const merged: Store = { ...current, ...p, settings: { ...DEFAULT_SETTINGS, ...(p.settings || {}) } };
@@ -541,7 +584,7 @@ if (import.meta.hot) import.meta.hot.accept(() => window.location.reload());
 live.bindStore({
   get: () => useStore.getState() as never,
   set: patch => useStore.setState(patch as never),
-  toast: (title, text) => useStore.getState().showToast(title, text),
+  toast: (title, text, order) => useStore.getState().showToast(title, text, { order }),
 });
 
 /* ---------- селекторы / хелперы для экранов ---------- */
@@ -550,11 +593,12 @@ export const selLoggedIn = (s: Store) => !!s.user;
 export const selCartCount = (s: Store) => s.cart.reduce((a, l) => a + l.qty, 0);
 export const selCartTotal = (s: Store) => orderTotal(s.cart);
 export const selMine = (s: Store) => s.orders.filter(o => o.mine);
-export const selActiveMine = (s: Store) => s.orders.filter(o => o.mine && o.status !== 'done');
+/** Активные заказы гостя: выданные и отменённые сюда не попадают — иначе карточка «Ваш заказ» висит вечно. */
+export const selActiveMine = (s: Store) => s.orders.filter(o => o.mine && o.status !== 'done' && o.status !== 'cancelled');
 /** заказ, показываемый на экране статуса: выбранный → активный → последний мой */
 export const selViewedOrder = (s: Store): Order | null => {
   const mine = selMine(s);
-  return (s.viewOrder != null && s.orders.find(o => o.no === s.viewOrder)) || mine.find(o => o.status !== 'done') || mine[0] || null;
+  return (s.viewOrder != null && s.orders.find(o => o.no === s.viewOrder)) || selActiveMine(s)[0] || mine[0] || null;
 };
 export const selUserInitial = (s: Store) => (s.user ? s.user.name.trim().charAt(0).toUpperCase() || 'G' : 'G');
 export const selDishUnit = (s: Store) => {

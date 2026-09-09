@@ -25,6 +25,7 @@ export function Home() {
   const openDish = useStore(s => s.openDish);
   // первый активный заказ пользователя — ссылка стабильна, пока заказ не изменится
   const active = useStore(s => selActiveMine(s)[0]);
+  const heroPhotos = useStore(s => s.settings.heroPhotos);
 
   return (
     <div className="screen">
@@ -34,13 +35,21 @@ export function Home() {
         <CallRound />
       </div>
 
-      {/* hero как верх печатного меню */}
-      {/* колонки фото сжимаются до 80px на узких экранах (360–375px), чтобы правая колонка не уезжала за край */}
-      <div style={{ margin: '22px var(--gutter) 0', display: 'grid', gridTemplateColumns: 'minmax(80px, 104px) minmax(max-content, 1fr) minmax(80px, 104px)', alignItems: 'center', gap: 6 }}>
-        <div style={{ position: 'relative' }}>
-          <div className="t-hand" style={{ position: 'absolute', left: 0, top: -18, width: 96 }}>{SLOGAN_LINES}</div>
-          <Photo id="hero-burger" shape="circle" width="100%" height="auto" placeholder="Фото бургера" icon="burger" style={{ marginTop: 20, aspectRatio: '1' }} />
-        </div>
+      {/* hero как верх печатного меню; два круглых фото по краям можно убрать в панели персонала */}
+      {/* колонки фото сжимаются на узких экранах (320–375px), чтобы правая колонка не уезжала за край */}
+      <div
+        style={heroPhotos
+          ? { margin: '22px var(--gutter) 0', display: 'grid', gridTemplateColumns: 'minmax(64px, 104px) minmax(max-content, 1fr) minmax(64px, 104px)', alignItems: 'center', gap: 6 }
+          : { margin: '22px var(--gutter) 0', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}
+      >
+        {heroPhotos ? (
+          <div style={{ position: 'relative' }}>
+            <div className="t-hand" style={{ position: 'absolute', left: 0, top: -18, width: 96 }}>{SLOGAN_LINES}</div>
+            <Photo id="hero-burger" shape="circle" width="100%" height="auto" placeholder="Фото бургера" icon="burger" style={{ marginTop: 20, aspectRatio: '1' }} />
+          </div>
+        ) : (
+          <div className="t-hand">{SLOGAN_LINES}</div>
+        )}
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', minWidth: 0 }}>
           <Crown width={26} strokeWidth={1.4} />
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, whiteSpace: 'nowrap' }}>
@@ -60,10 +69,14 @@ export function Home() {
             СМОТРЕТЬ
           </button>
         </div>
-        <div style={{ position: 'relative', minWidth: 0 }}>
-          <Photo id="hero-fries" shape="circle" width="100%" height="auto" placeholder="Фото фри GRAFF" icon="fries" style={{ aspectRatio: '1' }} />
-          <div className="t-hand" style={{ textAlign: 'right', marginTop: 6 }}>{TAGLINE}</div>
-        </div>
+        {heroPhotos ? (
+          <div style={{ position: 'relative', minWidth: 0 }}>
+            <Photo id="hero-fries" shape="circle" width="100%" height="auto" placeholder="Фото фри GRAFF" icon="fries" style={{ aspectRatio: '1' }} />
+            <div className="t-hand" style={{ textAlign: 'right', marginTop: 6 }}>{TAGLINE}</div>
+          </div>
+        ) : (
+          <div className="t-hand">{TAGLINE}</div>
+        )}
       </div>
 
       {/* три обещания бренда */}
@@ -112,7 +125,7 @@ export function Home() {
                 display: 'flex', flexDirection: 'column', gap: 8,
               }}
             >
-              <Photo id={'new-' + it.id} height={84} radius={10} placeholder="Фото" icon="star" />
+              <Photo id={'new-' + it.id} height={84} radius={10} placeholder={'Фото: ' + it.name} icon="star" />
               <span style={{ fontSize: 14, lineHeight: 1.2, minHeight: 34 }}>{it.name}</span>
               <span style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <span className="t-price">{it.priceLabel}</span>

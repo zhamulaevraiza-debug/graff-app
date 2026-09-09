@@ -9,6 +9,9 @@ const BRANCH_TOP = 'calc(var(--sat) + 60px)';
 /** сколько секунд ждать до повторной отправки кода */
 const RESEND_SEC = 60;
 
+/** «45 с» / «2 мин»: сервер при частых запросах может назвать и час — секунды там читать нечем. */
+const waitText = (sec: number) => (sec > 90 ? `${Math.ceil(sec / 60)} мин` : `${sec} с`);
+
 /** Сплэш / вход: логотип, слоган и карточка «вход по номеру → код из SMS → имя». */
 export function Splash() {
   const loginStep = useStore(s => s.loginStep);
@@ -37,6 +40,7 @@ export function Splash() {
   const [resendLeft, setResendLeft] = useState(0);
   const [resendTick, setResendTick] = useState(0);
   // момент отправки кода: отсчёт ведём по часам, а не счётчиком
+  const resendAfter = useStore(s => s.resendAfter);
   const sentAt = useRef(0);
   // идёт повторная отправка кода (а не проверка введённого)
   const resendPending = useRef(false);
@@ -45,13 +49,16 @@ export function Splash() {
   // ошибка сервера относится к прошлому шагу входа — на новом шаге её не показываем
   useEffect(() => { setNetError(null); }, [loginStep, setNetError]);
 
-  // отсчёт «Отправить ещё раз через N с»: 60 секунд после каждой отправки кода
+  // отсчёт «Отправить ещё раз через N»: 60 секунд после отправки, а если сервер отказал
+  // и назвал свой срок (429), ждём столько, сколько сказал он
   useEffect(() => {
     if (!LIVE || loginStep !== 'code') { setResendLeft(0); return; }
-    sentAt.current = Date.now();
-    setResendLeft(RESEND_SEC);
-    // считаем от метки времени: в свёрнутом приложении таймер притормаживают, а часы идут
-    const left = () => Math.max(0, RESEND_SEC - Math.floor((Date.now() - sentAt.current) / 1000));
+    if (sentAt.current === 0) sentAt.current = Date.now();
+    const left = () => Math.max(
+      sentAt.current ? Math.max(0, RESEND_SEC - Math.floor((Date.now() - sentAt.current) / 1000)) : 0,
+      resendAfter ? Math.max(0, Math.ceil((resendAfter - Date.now()) / 1000)) : 0,
+    );
+    setResendLeft(left());
     const step = () => {
       const v = left();
       setResendLeft(v);
@@ -62,7 +69,7 @@ export function Splash() {
     const onVis = () => { if (document.visibilityState === 'visible') step(); };
     document.addEventListener('visibilitychange', onVis);
     return () => { clearInterval(id); document.removeEventListener('visibilitychange', onVis); };
-  }, [loginStep, resendTick]);
+  }, [loginStep, resendTick, resendAfter]);
 
   // повторная отправка не удалась — SMS не ушла, значит и ждать минуту незачем
   useEffect(() => {
@@ -70,8 +77,12 @@ export function Splash() {
     prevBusy.current = busy;
     if (!was || busy || !resendPending.current) return;
     resendPending.current = false;
-    if (netError) { sentAt.current = 0; setResendLeft(0); }
-  }, [busy, netError]);
+    // SMS не ушла — своей минуты ждать незачем; ждём только тот срок, что назвал сервер
+    if (netError) {
+      sentAt.current = 0;
+      setResendLeft(resendAfter ? Math.max(0, Math.ceil((resendAfter - Date.now()) / 1000)) : 0);
+    }
+  }, [busy, netError, resendAfter]);
 
   // Enter в поле = кнопка текущего шага
   const onSubmit = (e: FormEvent<HTMLFormElement>) => {
@@ -195,9 +206,8 @@ export function Splash() {
               <button type="submit" className="btn btn--primary btn--block" disabled={busy}>
                 {busy && !resendPending.current ? 'ПРОВЕРЯЕМ…' : 'ПОДТВЕРДИТЬ'}
               </button>
-              <div className="splash__note">
-                {LIVE ? `Код придёт в SMS на ${phoneInput}` : 'Пока подходит любой код из 4 цифр'}
-              </div>
+              {/* номер уже назван строкой выше — в боевом режиме второй раз его не повторяем */}
+              {!LIVE && <div className="splash__note">Пока подходит любой код из 4 цифр</div>}
               {/* повторная отправка — только в боевом режиме, не чаще раза в минуту */}
               {LIVE && (
                 <button
@@ -206,7 +216,7 @@ export function Splash() {
                   onClick={onResend}
                   disabled={busy || resendLeft > 0}
                 >
-                  {resendLeft > 0 ? `Отправить ещё раз через ${resendLeft} с` : 'Отправить код ещё раз'}
+                  {resendLeft > 0 ? `Отправить ещё раз через ${waitText(resendLeft)}` : 'Отправить код ещё раз'}
                 </button>
               )}
             </>

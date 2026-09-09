@@ -6,7 +6,7 @@
 import { useEffect, useState } from 'react';
 import { ITEMS, FORMAT_NAME, STATUS_TEXT } from '../data/menu';
 import { rub, fmtDate, fmtTime } from '../lib/format';
-import { formatText, itemsText, type Order } from '../lib/orders';
+import { formatText, itemsText, canRepeat, type Order } from '../lib/orders';
 import { enablePush, disablePush, pushSupported, pushPermission, watchPushPermission } from '../lib/push';
 import { useStore, selUserInitial } from '../state/store';
 import { Icon, Crown } from '../components/Icon';
@@ -34,6 +34,7 @@ function MainSub() {
   const setMarketing = useStore(s => s.setMarketing);
   const openLegal = useStore(s => s.openLegal);
   const deleteAccount = useStore(s => s.deleteAccount);
+  const netError = useStore(s => s.netError);
   const notifOn = useStore(s => s.notifOn);
   const go = useStore(s => s.go);
   const setProfileSub = useStore(s => s.setProfileSub);
@@ -206,11 +207,13 @@ function MainSub() {
           // Подписку снимаем первой: она отписывает браузер и убирает с сервера адрес
           // вместе с номером телефона — иначе после «удаления всех данных» уведомления
           // о заказе на этот номер продолжали бы приходить на удалённый профиль.
-          if (ok) { void disablePush(); deleteAccount(); }
+          if (ok) { void disablePush(); void deleteAccount(); }
         }}
       >
         Удалить аккаунт и данные
       </button>
+      {/* Если сервер отказал, данные на устройстве остаются — человек должен об этом узнать. */}
+      {netError && <div className="cart-note field-err mt-8" role="alert">{netError}</div>}
 
       <button
         type="button"
@@ -263,9 +266,12 @@ function OrdersSub() {
             </button>
             <div className="row between" style={{ marginTop: 10 }}>
               <span style={{ font: '500 16px var(--f-body)', color: 'var(--price)' }}>{rub(o.total)}</span>
-              <button type="button" className="btn btn--secondary btn--sm" onClick={() => repeatOrder(o.no)}>
-                ПОВТОРИТЬ
-              </button>
+              {/* заказ по звонку персонал вводит от руки — повторять в нём нечего */}
+              {canRepeat(o) && (
+                <button type="button" className="btn btn--secondary btn--sm" onClick={() => repeatOrder(o.no)}>
+                  ПОВТОРИТЬ
+                </button>
+              )}
             </div>
           </div>
         ))

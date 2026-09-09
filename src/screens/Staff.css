@@ -49,3 +49,15 @@
    ВРЕМЕННО здесь: класс общий (его же рисует история заказов в профиле), место ему в global.css
    рядом с остальными .badge--*, например `.badge--done, .badge--cancelled { … }`. */
 .badge--cancelled { background: #EFE9E1; color: var(--sec); }
+
+/* Список незаполненных реквизитов: виден только персоналу и пропадает, когда всё внесено. */
+.staff-todo {
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--price);
+  border-radius: 14px;
+  padding: 12px 14px;
+  background: var(--card);
+}
+.staff-todo__text { margin: 0; font: 400 13px/1.45 var(--f-body); color: var(--sec); }
+.staff-todo__text code { font-size: 12px; }
+.staff-todo__list { margin: 8px 0 0; padding-left: 18px; font: 500 13px/1.6 var(--f-body); color: var(--text); }

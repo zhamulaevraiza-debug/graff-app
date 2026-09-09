@@ -68,13 +68,15 @@ const V3 = (a: number, b: number, c: number): Size[] => [S('S', a), S('M', b), S
 export const TEAS = ['Граф Орлов', 'Лес', 'Голден жасмин', 'Чёрный с бергамотом', 'Золотое Кении', 'Наглый фрукт', 'Таёжный сбор', 'Земляничный пудр', 'Дикая вишня', 'Улыбка гейши', '1001 ночь', 'Арбузная свежесть', 'Адмирал', 'Чёрный принц', 'Персик с айвой'];
 
 type RawItem = [name: string, price: number | Size[]];
-interface RawGroup { name?: string; icon?: string; items: RawItem[] }
+/** one — как группа называется рядом с блюдом в единственном числе: «Мясные» → «мясной».
+    Правилом это не выводится: у «Мясные» и «Куриные» окончания разные. */
+interface RawGroup { name?: string; icon?: string; one?: string; items: RawItem[] }
 interface RawCat { id: string; name: string; icon: string; sauces?: boolean; isNew?: boolean; photo?: string; groups: RawGroup[] }
 
 const RAW: RawCat[] = [
   { id: 'burgers', name: 'Бургеры', icon: ICON.burger, sauces: true, photo: 'Фото: двойной чизбургер', groups: [
-    { name: 'Мясные', items: [['Бургер классический', 330], ['Бургер с халапеньо', 340], ['Грибной', 370], ['Онион', 350], ['Сырный', 370]] },
-    { name: 'Куриные', items: [['Бургер классический', 230], ['Бургер с халапеньо', 250], ['Грибной', 270], ['Онион', 250], ['Сырный', 290], ['Мини бургеры 5 шт', 500]] },
+    { name: 'Мясные', one: 'мясной', items: [['Бургер классический', 330], ['Бургер с халапеньо', 340], ['Грибной', 370], ['Онион', 350], ['Сырный', 370]] },
+    { name: 'Куриные', one: 'куриный', items: [['Бургер классический', 230], ['Бургер с халапеньо', 250], ['Грибной', 270], ['Онион', 250], ['Сырный', 290], ['Мини бургеры 5 шт', 500]] },
   ] },
   { id: 'fastfood', name: 'Фастфуд', icon: ICON.fries, sauces: true, photo: 'Фото: фри в картонке GRAFF', groups: [
     { items: [
@@ -113,6 +115,8 @@ const RAW: RawCat[] = [
 export interface MenuItem {
   id: string; name: string; sizes: Size[]; hasSizes: boolean; priceLabel: string;
   catId: string; catName: string; isNew: boolean; canSauce: boolean; photo: string; group: string;
+  /** уточнение группы для строки заказа: ' (мясной)' — или пустая строка */
+  groupNote: string;
 }
 export interface MenuGroup { name: string; hasName: boolean; icon: string; hasIcon: boolean; items: MenuItem[] }
 export interface MenuCategory {
@@ -132,6 +136,7 @@ export const MENU: MenuCategory[] = RAW.map(c => ({
         id: `${c.id}-${gi}-${ii}`, name: it[0], sizes, hasSizes: sizes.length > 1,
         priceLabel: rub(sizes.map(z => z.p).join('/')), catId: c.id, catName: c.name,
         isNew: !!c.isNew, canSauce: !!c.sauces, photo: c.photo || 'Фото блюда', group: g.name || '',
+        groupNote: g.one ? ` (${g.one})` : '',
       };
     }),
   })),
@@ -227,10 +232,11 @@ export const ZONES: Zone[] = [
 ];
 
 export type PaymentId = 'cash' | 'card' | 'online';
-export const PAYMENTS: { id: PaymentId; name: string }[] = [
+/** soon — способ ещё не работает: показываем, но выбрать нельзя, иначе заказ уйдёт с невозможной оплатой. */
+export const PAYMENTS: { id: PaymentId; name: string; soon?: boolean }[] = [
   { id: 'cash', name: 'Наличными при получении' },
   { id: 'card', name: 'Картой при получении' },
-  { id: 'online', name: 'Онлайн — скоро' },
+  { id: 'online', name: 'Онлайн', soon: true },
 ];
 export const PAY_TEXT: Record<PaymentId, string> = { cash: 'наличными', card: 'картой', online: 'онлайн' };
 

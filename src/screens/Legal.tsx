@@ -6,7 +6,7 @@ import { useStore } from '../state/store';
 import { LEGAL_DOCS, LEGAL_UPDATED, legalDoc as findDoc, COMPANY } from '../data/legal';
 import { Icon } from '../components/Icon';
 import { BackButton, PlateTitle, ScriptTitle } from '../components/Titles';
-import { appBack } from '../lib/nav';
+import { appBack, replaceHistoryEntry } from '../lib/nav';
 import './Legal.css';
 
 export function Legal() {
@@ -16,10 +16,15 @@ export function Legal() {
   const script = useStore(s => s.settings.headerStyle === 'script');
   const doc = docId ? findDoc(docId) : undefined;
 
+  // Открытие документа добавило запись в историю — закрываем возвратом по ней.
+  // Если документ открыли прямой ссылкой, истории нет: тогда заменяем запись, иначе
+  // следующее «назад» снова открыло бы тот же документ.
+  const closeDoc = () => appBack(() => { replaceHistoryEntry(); openLegal(null); });
+
   return (
     <div className="screen screen--gutter">
       <div className="row gap-10">
-        <BackButton onClick={() => (doc ? openLegal(null) : appBack(() => go('profile')))} />
+        <BackButton onClick={() => (doc ? closeDoc() : appBack(() => go('profile')))} />
         {script
           ? <ScriptTitle size={32} crown={false}>{doc ? doc.title : 'Документы'}</ScriptTitle>
           : <PlateTitle icon="receipt">{doc ? 'ДОКУМЕНТ' : 'ДОКУМЕНТЫ'}</PlateTitle>}
@@ -74,7 +79,7 @@ export function Legal() {
               )}
             </section>
           ))}
-          <button type="button" className="btn btn--secondary btn--block mt-20" onClick={() => openLegal(null)}>
+          <button type="button" className="btn btn--secondary btn--block mt-20" onClick={closeDoc}>
             К списку документов
           </button>
         </article>

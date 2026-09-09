@@ -6,7 +6,7 @@
 import { useEffect } from 'react';
 import { COMPANY } from '../data/legal';
 import { useStore, selSpeed, selViewedOrder, LIVE } from '../state/store';
-import { orderView } from '../lib/orders';
+import { orderView, canRepeat } from '../lib/orders';
 import { fmtDate, fmtTime } from '../lib/format';
 import { Icon, Crown } from '../components/Icon';
 import { TimerRing } from '../components/TimerRing';
@@ -66,6 +66,7 @@ export function Status() {
   // отменить можно только свой заказ, только пока кухня не начала готовить
   // и только из профиля: сервер принимает отмену лишь с токеном входа по телефону
   const canCancel = LIVE && !!user && viewed.mine && (v.status === 'new' || v.status === 'accepted');
+  const repeatable = canRepeat(viewed);
   const askCancel = () => {
     if (!window.confirm(`Отменить заказ №${viewed.no}?`)) return;
     void cancelOrder(viewed.no);
@@ -152,17 +153,20 @@ export function Status() {
         </div>
       </div>
 
-      {/* кнопки без внутренних отступов, как в прототипе — иначе «ПОВТОРИТЬ ЗАКАЗ» переносится на 360–390px */}
-      <div className="grid-2 status-actions" style={{ marginTop: 14 }}>
+      {/* кнопки без внутренних отступов, как в прототипе — иначе «ПОВТОРИТЬ ЗАКАЗ» переносится на 360–390px.
+          У заказа по звонку строки рукописные: повторять нечего, остаётся один «Позвонить». */}
+      <div className={repeatable ? 'grid-2 status-actions' : 'status-actions'} style={{ marginTop: 14 }}>
         <CallButton variant="secondary">ПОЗВОНИТЬ</CallButton>
-        <button
-          type="button"
-          className="btn btn--primary"
-          style={{ height: 48, padding: '0 6px', fontSize: 15, letterSpacing: '.06em' }}
-          onClick={() => repeatOrder(viewed.no)}
-        >
-          ПОВТОРИТЬ ЗАКАЗ
-        </button>
+        {repeatable && (
+          <button
+            type="button"
+            className="btn btn--primary"
+            style={{ height: 48, padding: '0 6px', fontSize: 15, letterSpacing: '.06em' }}
+            onClick={() => repeatOrder(viewed.no)}
+          >
+            ПОВТОРИТЬ ЗАКАЗ
+          </button>
+        )}
       </div>
 
       {canCancel && (

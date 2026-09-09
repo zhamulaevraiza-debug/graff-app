@@ -7,7 +7,7 @@
  * Закон РФ «О защите прав потребителей», Правила оказания услуг общественного питания
  * (постановление Правительства РФ № 1515 от 21.09.2020), ГК РФ (публичная оферта), ФЗ «О рекламе».
  */
-import { PHOTO_CREDITS } from './photos';
+import { PHOTO_CREDITS, PHOTO_LICENSES } from './photos';
 
 
 /** Реквизиты исполнителя — обязательны к доведению до потребителя (ЗоЗПП ст. 9). */
@@ -32,10 +32,39 @@ export const COMPANY = {
   registrar: '[НАИМЕНОВАНИЕ РЕГИСТРИРУЮЩЕГО ОРГАНА]',
 } as const;
 
+/**
+ * Что владелец ещё не заполнил. Пока значение стоит в квадратных скобках, гость видит эти скобки
+ * в подтверждении заказа и в документах, поэтому список показывается в панели персонала
+ * и пропадает сам, как только поля заполнены.
+ */
+const REQUISITE_TITLES: Record<keyof typeof COMPANY, string> = {
+  legalName: 'Наименование ИП или ООО',
+  brand: 'Торговое название',
+  inn: 'ИНН',
+  ogrn: 'ОГРН или ОГРНИП',
+  legalAddress: 'Юридический адрес',
+  address: 'Адрес кафе',
+  hours: 'Часы работы',
+  phone: 'Телефон',
+  email: 'Электронная почта для обращений',
+  pdnResponsible: 'Ответственный за обработку персональных данных',
+  registrar: 'Регистрирующий орган',
+};
+
+const notFilled = (v: string) => /\[[^\]]+\]/.test(v);
+
 /** Дата редакции документов. Меняйте при каждом изменении текстов. */
 export const LEGAL_UPDATED = '[ДАТА РЕДАКЦИИ]';
 /** Версия документов — сохраняется вместе с согласием пользователя как доказательство. */
 export const LEGAL_VERSION = '1.0';
+
+/** Незаполненные реквизиты — по-человечески, для списка в панели персонала. */
+export const MISSING_REQUISITES: string[] = [
+  ...(Object.keys(REQUISITE_TITLES) as (keyof typeof COMPANY)[])
+    .filter(k => notFilled(COMPANY[k]))
+    .map(k => REQUISITE_TITLES[k]),
+  ...(notFilled(LEGAL_UPDATED) ? ['Дата редакции документов'] : []),
+];
 
 export type LegalDocId = 'privacy' | 'terms' | 'consent' | 'requisites' | 'photos';
 
@@ -244,6 +273,7 @@ if (PHOTO_CREDITS.length) {
       { h: 'Лицензии', p: [
         'Используются только снимки под лицензиями CC0, «общественное достояние» и CC BY: их разрешено использовать в коммерческих целях, в том числе обрезать под карточку, при указании автора.',
       ] },
+      { links: PHOTO_LICENSES.map(l => ({ text: `Текст лицензии ${l.name}`, href: l.url })) },
       {
         h: 'Авторы снимков',
         links: PHOTO_CREDITS.map(c => ({ text: `${c.what} — ${c.author}, ${c.license}`, href: c.source })),

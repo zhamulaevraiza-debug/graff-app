@@ -55,9 +55,19 @@ export function Cart() {
   // не расходились со временем, которое placeOrder посчитает в момент нажатия
   const slotBase = useStore(s => Math.ceil(s.now / 900000));
   const slots = pickupSlots(slotBase * 900000);
-  const slot = slots[pickupTime] || slots[0];
+  const slot = slots.find(sl => sl.ts === pickupTime);
+
+  // Пока гость заполняет корзину, время идёт: выбранный слот может уйти в прошлое, а выбранный
+  // столик — оказаться занятым. Молча подставлять другое время или занятый столик нельзя.
+  useEffect(() => {
+    if (pickup === 'time' && !slot) pickAsap();
+  }, [pickup, slot, pickAsap]);
+  useEffect(() => {
+    if (table !== 'any' && occupied[table]) pickAnyTable();
+  }, [table, occupied, pickAnyTable]);
+
   const formatSummary = format === 'togo'
-    ? 'С собой' + (pickup === 'time' ? ' · к ' + slot.label : ' · как можно скорее')
+    ? 'С собой' + (pickup === 'time' && slot ? ' · к ' + slot.label : ' · как можно скорее')
     : FORMAT_NAME[format] + (table === 'any' ? ' · любой свободный столик' : ' · столик ' + table);
   const totalLabel = rub(total);
 
@@ -84,7 +94,7 @@ export function Cart() {
           <div className="list" style={{ marginTop: 14 }}>
             {cart.map(l => {
               const meta = [
-                l.sauceNames.length ? 'соус: ' + l.sauceNames.join(', ').toLowerCase() : '',
+                l.sauceNames.length ? (l.sauceNames.length > 1 ? 'соусы: ' : 'соус: ') + l.sauceNames.join(', ').toLowerCase() : '',
                 rub(l.unit) + ' × ' + l.qty,
               ].filter(Boolean).join(' · ');
               return (
@@ -181,13 +191,13 @@ export function Cart() {
                   Как можно скорее
                 </button>
                 {slots.map(sl => {
-                  const on = pickup === 'time' && pickupTime === sl.i;
+                  const on = pickup === 'time' && pickupTime === sl.ts;
                   return (
                     <button
-                      key={sl.i}
+                      key={sl.ts}
                       type="button"
                       className={`chip${on ? ' chip--on' : ''}`}
-                      onClick={() => pickSlot(sl.i)}
+                      onClick={() => pickSlot(sl.ts)}
                       aria-pressed={on}
                     >
                       {sl.label}
@@ -242,11 +252,14 @@ export function Cart() {
                   type="button"
                   role="radio"
                   aria-checked={on}
-                  className="list__row cart-pay"
+                  aria-disabled={pm.soon || undefined}
+                  className={`list__row cart-pay${pm.soon ? ' cart-pay--soon' : ''}`}
+                  disabled={pm.soon}
                   onClick={() => setPayment(pm.id)}
                 >
                   <span className={`cart-radio${on ? ' cart-radio--on' : ''}`}><span className="cart-radio__dot" /></span>
                   <span className="grow">{pm.name}</span>
+                  {pm.soon && <span className="cart-pay__soon">скоро</span>}
                 </button>
               );
             })}
@@ -259,19 +272,19 @@ export function Cart() {
             <div className="leader-row leader-row--big"><span>ИТОГО</span><span className="leader" /><span style={{ color: 'var(--price)' }}>{totalLabel}</span></div>
           </div>
 
-          {/* Согласие на обработку данных — до оформления заказа (152-ФЗ, ст. 9) */}
-          {!consentGiven && (
-            <div className="cart-consent">
-              <input
-                id="cart-consent"
-                type="checkbox"
-                className="cart-consent__box"
-                checked={consentGiven}
-                onChange={e => setConsent(e.target.checked)}
-              />
-              <label htmlFor="cart-consent">{CONSENT_SHORT}</label>
-            </div>
-          )}
+          {/* Согласие на обработку данных — до оформления заказа (152-ФЗ, ст. 9).
+              Строка видна всегда: гость должен видеть, что согласие отмечено, и мочь его снять.
+              Раньше блок пропадал сразу после отметки, и кнопка «Оформить» прыгала на его место. */}
+          <div className="cart-consent">
+            <input
+              id="cart-consent"
+              type="checkbox"
+              className="cart-consent__box"
+              checked={consentGiven}
+              onChange={e => setConsent(e.target.checked)}
+            />
+            <label htmlFor="cart-consent">{CONSENT_SHORT}</label>
+          </div>
 
           <button
             type="button"

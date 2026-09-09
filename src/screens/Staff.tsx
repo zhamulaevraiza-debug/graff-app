@@ -5,13 +5,17 @@
  * В боевом режиме панель открывается только после входа сотрудника (логин + PIN),
  * а блок настроек демонстрации не показывается: статусы ведёт кухня, время идёт по-настоящему.
  */
-import { useEffect, useState, type FormEvent, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type FormEvent, type ReactNode } from 'react';
 import { useStore, selSpeed, LIVE, type Settings } from '../state/store';
 import { hasStaffToken } from '../lib/api';
-import { FORMATS, ZONES, STATUS_TEXT, ETA_CHOICES } from '../data/menu';
+import { FORMATS, ZONES, STATUS_TEXT, ETA_CHOICES, type IconName } from '../data/menu';
+import { MISSING_REQUISITES } from '../data/legal';
 import { rub, fmtTime } from '../lib/format';
 import { formatText, itemsText, minutesLeft, type Order } from '../lib/orders';
 import { Monogram } from '../components/Logo';
+import { Photo } from '../components/Photo';
+import { setOwnPhoto, clearOwnPhoto, useOwnPhoto } from '../lib/photoStore';
+import { photoCredit } from '../data/photos';
 import { Icon } from '../components/Icon';
 import './Staff.css';
 
@@ -165,7 +169,7 @@ export function Staff() {
   };
 
   const onReset = () => { if (window.confirm('Сбросить заказы и столики к демо-данным?')) resetDemo(); };
-  const flip = (key: 'autoKitchen' | 'fastTimer' | 'pushBanners') => () => setSetting(key, !settings[key]);
+  const flip = (key: 'autoKitchen' | 'fastTimer' | 'pushBanners' | 'heroPhotos') => () => setSetting(key, !settings[key]);
 
   // В боевом режиме кухня открыта только сотруднику. Одного staffAuthed мало: он переживает перезагрузку,
   // а токен смены стирается сам при ответе 401 — без проверки токена панель осталась бы открытой и нерабочей.
@@ -344,12 +348,51 @@ export function Staff() {
         </>
       )}
 
+      {/* ---------- ЧЕГО НЕ ХВАТАЕТ ПЕРЕД ПОКАЗОМ ---------- */}
+      {/* Список пропадает сам, как только реквизиты заполнены в src/data/legal.ts. */}
+      {MISSING_REQUISITES.length > 0 && (
+        <>
+          <div className="t-caps" style={{ marginTop: 24 }}>ЗАПОЛНИТЬ ПЕРЕД ПОКАЗОМ</div>
+          <div className="staff-todo mt-8">
+            <p className="staff-todo__text">
+              Пока эти данные не внесены, гость видит вместо них квадратные скобки — в подтверждении
+              заказа, в разделе «О нас» и в документах. Заполните их в файле <code>src/data/legal.ts</code>.
+            </p>
+            <ul className="staff-todo__list">
+              {MISSING_REQUISITES.map(t => <li key={t}>{t}</li>)}
+            </ul>
+          </div>
+        </>
+      )}
+
+      {/* ---------- ФОТОГРАФИИ КАФЕ ---------- */}
+      {/* Эти снимки может дать только само кафе: витрина на главной и зал в разделе «О нас». */}
+      <div className="t-caps" style={{ marginTop: 24 }}>ФОТОГРАФИИ КАФЕ</div>
+      <div className="list mt-8">
+        <SwitchRow
+          title="Круглые фото в шапке"
+          sub="два снимка по краям заголовка «Меню» на главной"
+          on={settings.heroPhotos}
+          onToggle={flip('heroPhotos')}
+        />
+        <OwnPhotoRow slot="hero-burger" title="Главная, слева" icon="burger" />
+        <OwnPhotoRow slot="hero-fries" title="Главная, справа" icon="fries" />
+        <OwnPhotoRow slot="about-hall" title="«О нас»: зал" icon="chair" />
+        <OwnPhotoRow slot="about-terrace" title="«О нас»: терраса" icon="sun" />
+        <OwnPhotoRow slot="about-map" title="«О нас»: карта" icon="pin" />
+      </div>
+      <p className="t-small mt-8">
+        Выбранный здесь снимок хранится в этом браузере и виден только на этом устройстве. Чтобы фото
+        увидели все гости, положите файл с тем же именем (например, <code>hero-burger.jpg</code>) в папку
+        <code> public/photos</code> и соберите приложение заново — список имён лежит в README этой папки.
+      </p>
+
       {/* ---------- НАСТРОЙКИ ---------- */}
       {/* кухня-автопилот, ускоренное время и сброс — только для демонстрации без сервера */}
       <div className="t-caps" style={{ marginTop: 24 }}>{LIVE ? 'НАСТРОЙКИ' : 'НАСТРОЙКИ ДЕМО'}</div>
       <div className="list mt-8">
         {!LIVE && <SwitchRow title="Кухня-автопилот" sub="заказы сами проходят статусы" on={settings.autoKitchen} onToggle={flip('autoKitchen')} />}
-        {!LIVE && <SwitchRow title="Ускоренное время" sub="1 мин = 5 с" on={settings.fastTimer} onToggle={flip('fastTimer')} />}
+        {!LIVE && <SwitchRow title="Ускоренное время" sub="только для показа: минута проходит за 5 секунд" on={settings.fastTimer} onToggle={flip('fastTimer')} />}
         <SwitchRow title="Push-баннеры" on={settings.pushBanners} onToggle={flip('pushBanners')} />
         <div className="list__row list__row--static">
           <div className="list__grow">Заголовки экранов</div>
@@ -360,6 +403,50 @@ export function Staff() {
       {!LIVE && (
         <button type="button" className="btn btn--ghost btn--block mt-10" style={{ color: 'var(--sec)' }} onClick={onReset}>Сбросить демо-данные</button>
       )}
+    </div>
+  );
+}
+
+/** Строка выбора своего снимка для одного слота фотографии. */
+function OwnPhotoRow({ slot, title, icon }: { slot: string; title: string; icon: IconName }) {
+  const own = useOwnPhoto(slot);
+  const [err, setErr] = useState('');
+  const input = useRef<HTMLInputElement>(null);
+
+  const pick = async (file: File | undefined) => {
+    if (!file) return;
+    setErr('');
+    try {
+      await setOwnPhoto(slot, file);
+    } catch (e) {
+      setErr(e instanceof Error ? e.message : 'Не удалось поставить фото');
+    }
+  };
+
+  return (
+    <div className="list__row list__row--static">
+      <Photo id={slot} shape="circle" width={40} height={40} placeholder={title} icon={icon} />
+      <div className="list__grow">
+        <div>{title}</div>
+        <div className="list__sub">
+          {own ? 'своё фото' : photoCredit(slot) ? 'снимок из каталога' : 'фото пока нет'}
+        </div>
+        {err && <div className="t-small" style={{ color: 'var(--price)' }}>{err}</div>}
+      </div>
+      <button type="button" className="chip chip--sm" onClick={() => input.current?.click()}>
+        {own ? 'Заменить' : 'Выбрать'}
+      </button>
+      {own && (
+        <button type="button" className="chip chip--sm" onClick={() => { setErr(''); clearOwnPhoto(slot); }}>Убрать</button>
+      )}
+      <input
+        ref={input}
+        type="file"
+        accept="image/*"
+        hidden
+        aria-label={`Выбрать фото: ${title}`}
+        onChange={e => { const f = e.target.files?.[0]; e.target.value = ''; void pick(f); }}
+      />
     </div>
   );
 }
