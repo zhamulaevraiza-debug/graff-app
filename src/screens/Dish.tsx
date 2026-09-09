@@ -3,6 +3,7 @@ import { ITEMS, SAUCES, describe, catIcon, itemInfo, portionOf, PHONE_DISPLAY, P
 import { rub } from '../lib/format';
 import { Icon, Crown } from '../components/Icon';
 import { Photo } from '../components/Photo';
+import { photoCredit } from '../data/photos';
 import { BackButton } from '../components/Titles';
 import { appBack } from '../lib/nav';
 import './Dish.css';
@@ -29,6 +30,8 @@ export function Dish() {
   const go = useStore(s => s.go);
 
   const it = dishId ? ITEMS[dishId] : undefined;
+  // Снимок из открытого каталога, а не съёмка этой порции — об этом честно говорим под фото.
+  const stockPhoto = !!(it && photoCredit('dish-' + it.id));
 
   if (!it) {
     return (
@@ -48,6 +51,7 @@ export function Dish() {
       <div className="screen screen--nonav" style={{ paddingTop: 'calc(var(--sat) + 8px)', paddingBottom: 120 }}>
         <div className="dish-hero">
           <Photo key={it.id} id={'dish-' + it.id} height={250} radius={18} placeholder={it.photo} icon={catIcon(it.catId)} />
+          {stockPhoto && <div className="dish-hero__note">Фото иллюстративное</div>}
           <div className="dish-hero__back"><BackButton glass onClick={() => appBack(dishBack)} /></div>
           <button
             type="button"

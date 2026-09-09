@@ -84,3 +84,17 @@
 }
 .dish-info__value { font-size: 14px; line-height: 1.35; text-wrap: pretty; }
 
+
+/* Пока в карточке снимок из открытого каталога, а не съёмка кафе. */
+.dish-hero__note {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: rgba(46, 33, 25, .55);
+  color: #fff;
+  font: 500 11px var(--f-body);
+  letter-spacing: .02em;
+  backdrop-filter: blur(3px);
+}

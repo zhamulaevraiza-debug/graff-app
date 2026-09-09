@@ -3,6 +3,9 @@ dist
 .DS_Store
 *.log
 
+# кэш подбора фотографий (scripts/photos.mjs)
+.photo-scan
+
 # локальные настройки
 .env
 .env.local

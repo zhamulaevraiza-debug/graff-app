@@ -24,7 +24,8 @@ const EXT = ['jpg', 'png', 'webp', 'jpeg'];
 export function Photo({ id, placeholder = 'Фото', icon = 'burger', shape = 'rect', radius = 14, width = '100%', height = 120, style, className }: PhotoProps) {
   const [ext, setExt] = useState(0);
   const failed = ext >= EXT.length;
-  const src = failed ? '' : `/photos/${id}.${EXT[ext]}`;
+  // Приложение может стоять в подпапке (GitHub Pages: /graff-app/), поэтому путь строится от базы сборки.
+  const src = failed ? '' : `${import.meta.env.BASE_URL}photos/${id}.${EXT[ext]}`;
   const iconSize = typeof height === 'number' ? Math.max(22, Math.min(44, Math.round(height * 0.3))) : 32;
   return (
     <div

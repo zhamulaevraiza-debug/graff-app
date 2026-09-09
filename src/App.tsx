@@ -1,7 +1,7 @@
 import { useEffect, useRef, type ComponentType } from 'react';
 import { useStore, NAV_SCREENS, SCREENS, speedOf, forgetLastWrite, type Screen, type ProfileSub, type AppState } from './state/store';
 import { minutesLeft, type Order } from './lib/orders';
-import type { LegalDocId } from './data/legal';
+import { LEGAL_DOCS, type LegalDocId } from './data/legal';
 import { BottomNav } from './components/BottomNav';
 import { Toast } from './components/Toast';
 import { Splash } from './screens/Splash';
@@ -25,7 +25,8 @@ const SHARED_KEYS = ['orders', 'nextNo', 'occupied', 'settings', 'user', 'favori
 type SharedKey = (typeof SHARED_KEYS)[number];
 
 /* ---------- адресная строка ↔ экран ---------- */
-const LEGAL_IDS = ['privacy', 'terms', 'consent', 'requisites'];
+// Список берём из самих документов: иначе новый документ не открывался бы по ссылке.
+const LEGAL_IDS: string[] = LEGAL_DOCS.map(d => d.id);
 const hashFor = (screen: Screen, sub: string | null) => '#/' + screen + (sub ? '/' + sub : '');
 /** Под-страница текущего экрана: раздел профиля или открытый документ. */
 const subOf = (s: Pick<AppState, 'screen' | 'profileSub' | 'legalDoc'>) =>

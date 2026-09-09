@@ -61,6 +61,17 @@ export function Legal() {
                   {b.ul.map((li, j) => <li key={j}>{li}</li>)}
                 </ul>
               )}
+              {b.links && (
+                <ul className="legal-doc__ul">
+                  {b.links.map((l, j) => (
+                    <li key={j}>
+                      {l.href
+                        ? <a href={l.href} target="_blank" rel="noreferrer noopener">{l.text}</a>
+                        : l.text}
+                    </li>
+                  ))}
+                </ul>
+              )}
             </section>
           ))}
           <button type="button" className="btn btn--secondary btn--block mt-20" onClick={() => openLegal(null)}>

@@ -1,0 +1,821 @@
+{
+  "hero-burger": {
+    "what": "бургер в круге на главной",
+    "id": "46498605-681f-4575-aaaa-9aa279e6865d",
+    "title": "Double cheeseburger: tomato confit, red onions, butter lettuce, sharp cheddar, sesame mayo, sans buttered brioche bun",
+    "author": "T.Tseng",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+    "source": "https://www.flickr.com/photos/68147320@N02/14585225540"
+  },
+  "hero-fries": {
+    "what": "картофель фри в круге на главной",
+    "id": "9031add3-a847-484e-af47-eff5d3c28af5",
+    "title": "french fries",
+    "author": "waferboard",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+    "source": "https://www.flickr.com/photos/60944931@N00/5729028796"
+  },
+  "cat-burgers": {
+    "what": "раздел «Бургеры»",
+    "id": "660d6749-e5ee-43bf-9702-831863f30a55",
+    "title": "Here's another shot of Hamburger!",
+    "author": "chichacha",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+    "source": "https://www.flickr.com/photos/10673045@N04/2323760575"
+  },
+  "cat-fastfood": {
+    "what": "раздел «Фастфуд»",
+    "id": "4c288f54-1b6b-4d9e-b24d-6347ec89e09b",
+    "title": "$3.50 Chicken Wings",
+    "author": "J Wynia",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+    "source": "https://www.flickr.com/photos/73451168@N00/182534422"
+  },
+  "cat-new": {
+    "what": "раздел «Новинки»",
+    "id": "1d38e445-b94b-4622-91cf-57300bd45dfe",
+    "title": "Chicken Fajitas",
+    "author": "ugod",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+    "source": "https://www.flickr.com/photos/27513492@N00/4588453233"
+  },
+  "cat-tea": {
+    "what": "раздел «Чай»",
+    "id": "54f8ad66-4090-4372-bc36-481344b70efc",
+    "title": "Frühstückstee",
+    "author": "mkniebes",
+    "license": "CC0 1.0",
+    "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "source": "https://www.flickr.com/photos/76696276@N00/44459331652"
+  },
+  "cat-jam": {
+    "what": "раздел «Варенья»",
+    "id": "6806cbbc-e51b-4ead-8160-a2e8763f7094",
+    "title": "Mmm...cherry preserves",
+    "author": "jeffreyw",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+    "source": "https://www.flickr.com/photos/7927684@N03/4880802685"
+  },
+  "cat-drinks": {
+    "what": "раздел «Напитки»",
+    "id": "5f3ed37c-87fe-457c-a0a9-2bde52365c9d",
+    "title": "Calgary Alberta Phil and Sebastian Chinook Mall Coffee Roasters Large Latte Heart Foam Art",
+    "author": "Calgary Reviews",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+    "source": "https://www.flickr.com/photos/51930963@N02/5192261289"
+  },
+  "dish-burgers-0-0": {
+    "what": "Бургер классический (мясной)",
+    "id": "b2abbb8f-61dd-4558-a28d-67df6abad59c",
+    "title": "Mmm...hamburgers",
+    "author": "jeffreyw",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+    "source": "https://www.flickr.com/photos/7927684@N03/5397163628"
+  },
+  "dish-burgers-0-1": {
+    "what": "Бургер с халапеньо (мясной)",
+    "id": "00c32c88-781d-4f6f-bf5c-c6ebab918999",
+    "title": "spicy jalapeno black bean burgers",
+    "author": "Stacy Spensley",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+    "source": "https://www.flickr.com/photos/21001756@N06/4683162341"
+  },
+  "dish-burgers-0-2": {
+    "what": "Грибной бургер (мясной)",
+    "id": "32d3b4c7-566a-4612-b92d-d7a228bd33f5",
+    "title": "Mmm... mushroom burger",
+    "author": "jeffreyw",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+    "source": "https://www.flickr.com/photos/7927684@N03/5708593861"
+  },
+  "dish-burgers-0-3": {
+    "what": "Онион бургер (мясной)",
+    "id": "f1b53dca-7c33-45fe-9c25-93987986c3a0",
+    "title": "Onion Rings and Truffle Burger KCI_1539",
+    "author": "kurmanstaff",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+    "source": "https://www.flickr.com/photos/62558987@N07/11741345126"
+  },
+  "dish-burgers-0-4": {
+    "what": "Сырный бургер (мясной)",
+    "id": "ef23c999-b878-478f-8be3-049a1be076af",
+    "title": "I haz cheezburger",
+    "author": "SimonDoggett",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+    "source": "https://www.flickr.com/photos/90037546@N00/2630283209"
+  },
+  "dish-burgers-1-0": {
+    "what": "Бургер классический (куриный)",
+    "id": "c41917bc-e4fc-4d7c-866b-a3b788b3098c",
+    "title": "Crispy-Chicken-Burger",
+    "author": "ccnull.de Bilddatenbank",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+    "source": "https://www.flickr.com/photos/115225894@N07/54380260364"
+  },
+  "dish-burgers-1-1": {
+    "what": "Бургер с халапеньо (куриный)",
+    "id": "9d9631f1-f9ea-4116-bc0f-d031a27e28d1",
+    "title": "I forget the exact name of this spicy chicken sandwich, but I must say, it was delicious.",
+    "author": "rick",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+    "source": "https://www.flickr.com/photos/35034361412@N01/2236254570"
+  },
+  "dish-burgers-1-2": {
+    "what": "Грибной бургер (куриный)",
+    "id": "9a5f32b4-de07-4c6f-a7e1-a89a14f53441",
+    "title": "Mmm...fried mushrooms",
+    "author": "jeffreyw",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+    "source": "https://www.flickr.com/photos/7927684@N03/19084166375"
+  },
+  "dish-burgers-1-3": {
+    "what": "Онион бургер (куриный)",
+    "id": "5ca84632-7be8-4786-8588-ca943a4122fb",
+    "title": "Food Pr0n - The Angry Chicken",
+    "author": "Sean-Franc",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+    "source": "https://www.flickr.com/photos/16541534@N00/3609055995"
+  },
+  "dish-burgers-1-4": {
+    "what": "Сырный бургер (куриный)",
+    "id": "4684633a-807e-424b-8ee2-a7ece47aa217",
+    "title": "Fried chicken burger!",
+    "author": "theCSSdiv",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+    "source": "https://www.flickr.com/photos/92146798@N00/6085468668"
+  },
+  "dish-burgers-1-5": {
+    "what": "Мини бургеры, 5 шт",
+    "id": "4c2d94e4-f71c-4cc3-97e1-9db0f4c46395",
+    "title": "Better Burger Project winners serve burgers at the James Beard House",
+    "author": "Shreveport-Bossier: Louisiana's Other Side",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+    "source": "https://www.flickr.com/photos/57902140@N08/22378759142"
+  },
+  "dish-fastfood-0-0": {
+    "what": "Стрипсы",
+    "id": "ae513b1e-c2e6-4d14-95cf-609fcd8daf01",
+    "title": "Chicken tenders and french fries from The Chippy at the Anaheim Packing House might be even better then their fish & chips! #lunch #hotfood #friedchicken #frenchfries #chicken #foodporn #foodie #instafood",
+    "author": "L.A. Foodie",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+    "source": "https://www.flickr.com/photos/67839741@N06/16066413303"
+  },
+  "dish-fastfood-0-1": {
+    "what": "Крылышки острые",
+    "id": "d9f61776-80cb-40e2-8500-9d1132d34a0f",
+    "title": "hot buffalo wings",
+    "author": "*highlimitzz",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+    "source": "https://www.flickr.com/photos/61608029@N00/388065385"
+  },
+  "dish-fastfood-0-2": {
+    "what": "Крылышки шашлычные",
+    "id": "80757f28-a908-4f98-a61b-1d3581496a8d",
+    "title": "Chicken wings",
+    "author": "Smabs Sputzer (1956-2017)",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+    "source": "https://www.flickr.com/photos/10413717@N08/2626413070"
+  },
+  "dish-fastfood-0-3": {
+    "what": "Наггетсы",
+    "id": "aadf5381-7d95-41d5-976e-1b7599ef282d",
+    "title": "coconut chicken nuggets",
+    "author": "seelensturm",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+    "source": "https://www.flickr.com/photos/61404197@N00/4603477877"
+  },
+  "dish-fastfood-0-4": {
+    "what": "Креветки",
+    "id": "eeaca960-470a-4a24-8395-9d96d6306d51",
+    "title": "Shrimp and Grits $15",
+    "author": "kurmanstaff",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+    "source": "https://www.flickr.com/photos/62558987@N07/16803970001"
+  },
+  "dish-fastfood-0-5": {
+    "what": "Сырные палочки",
+    "id": "f6c718c6-720e-4a3f-a92f-ff35bf6aef25",
+    "title": "Fried mozzarella sticks",
+    "author": "sarahstierch",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+    "source": "https://www.flickr.com/photos/7633518@N08/52403565850"
+  },
+  "dish-fastfood-0-6": {
+    "what": "Фри",
+    "id": "c0c631bd-7d9d-4bdd-bced-fa80d422607b",
+    "title": "Chips / French Fries / Frites / Pommes / Sglodion / Patatas Fritas",
+    "author": "Richard Allaway",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+    "source": "https://www.flickr.com/photos/16287002@N00/7433812616"
+  },
+  "dish-fastfood-0-7": {
+    "what": "Сэндвич",
+    "id": "437e4c67-8ce1-41ed-8e59-ede1db36ffc3",
+    "title": "club sandwich",
+    "author": "hepp",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+    "source": "https://www.flickr.com/photos/15511507@N00/16600641702"
+  },
+  "dish-fastfood-0-8": {
+    "what": "Деревенский картофель",
+    "id": "c4a6549e-d1fa-4330-ab5f-a2f5d878dfb4",
+    "title": "Beef brisket sandwich with potato wedges and butt rub sauce",
+    "author": "Ruth and Dave",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+    "source": "https://www.flickr.com/photos/95142644@N00/31912155220"
+  },
+  "dish-new-0-0": {
+    "what": "Фахитас с мясом",
+    "id": "826e86fb-2763-45ef-bbba-a954cef57632",
+    "title": "Mmm... Flat Iron Fajitas",
+    "author": "jeffreyw",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+    "source": "https://www.flickr.com/photos/7927684@N03/8732592579"
+  },
+  "dish-new-0-1": {
+    "what": "Фахитас мексикано мясной",
+    "id": "f748cc24-e786-4d73-b98c-c0af4a3ff5a1",
+    "title": "Mmm...chicken fajitas",
+    "author": "jeffreyw",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+    "source": "https://www.flickr.com/photos/7927684@N03/4686236996"
+  },
+  "dish-new-0-2": {
+    "what": "Филадельфия мексикано",
+    "id": "0d503337-9c11-463f-ad3c-aed3d2a9001d",
+    "title": "Egg Tortilla Wrap",
+    "author": "LeonardKong",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+    "source": "https://www.flickr.com/photos/30216515@N05/8728191788"
+  },
+  "dish-new-0-3": {
+    "what": "Филадельфия с курицей",
+    "id": "35d44a61-c258-4ae2-a8f3-ecef769e3a85",
+    "title": "Chorizo breakfast wrap with Korean Kimchi",
+    "author": "elsie.hui",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+    "source": "https://www.flickr.com/photos/91188380@N05/9098009176"
+  },
+  "dish-new-0-4": {
+    "what": "Гиро на тарелке",
+    "id": "3f3e4718-b074-484f-ac57-36dcbddb8788",
+    "title": "Gyros Plate 02",
+    "author": "Shadowgate",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+    "source": "https://www.flickr.com/photos/79586279@N00/3176872128"
+  },
+  "dish-new-0-5": {
+    "what": "Сэндвич с курицей",
+    "id": "7c0a3bf6-0d34-4142-8147-309428ba1dc5",
+    "title": "Andersen Bakery's Chicken Sandwich",
+    "author": "avrene",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+    "source": "https://www.flickr.com/photos/23212428@N00/11333873715"
+  },
+  "dish-tea-0-0": {
+    "what": "Чай «Граф Орлов»",
+    "id": "09e8d9db-d5d5-4e3d-9186-b37155ec9565",
+    "title": "TURKISH TEA",
+    "author": "BOMBMAN",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+    "source": "https://www.flickr.com/photos/99622129@N00/9235413327"
+  },
+  "dish-tea-0-1": {
+    "what": "Чай «Лес»",
+    "id": "c830733e-a895-43c1-b3b5-de6b65e32509",
+    "title": "Teatime",
+    "author": "mripp",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+    "source": "https://www.flickr.com/photos/56218409@N03/15442876494"
+  },
+  "dish-tea-0-2": {
+    "what": "Чай «Голден жасмин»",
+    "id": "140bdbf3-e1bb-461f-88b9-b5dad0fdc36f",
+    "title": "Jasmine tea at Suika",
+    "author": "Ruth and Dave",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+    "source": "https://www.flickr.com/photos/95142644@N00/8659253496"
+  },
+  "dish-tea-0-3": {
+    "what": "Чёрный с бергамотом",
+    "id": "202ef4d7-7755-4bc7-aee3-2e6afdaf7c35",
+    "title": "Earl Grey tea at Yūkei Salon de Thé on Aneya-koij dori in Kyoto",
+    "author": "Paul Keller",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+    "source": "https://www.flickr.com/photos/18259771@N00/4444567918"
+  },
+  "dish-tea-0-4": {
+    "what": "Чай «Золотое Кении»",
+    "id": "5e975a23-53bf-4902-8889-24b9e415a1b9",
+    "title": "kenyan oreti syphon",
+    "author": "tristankenney",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+    "source": "https://www.flickr.com/photos/14764065@N02/5170518083"
+  },
+  "dish-tea-0-5": {
+    "what": "Чай «Наглый фрукт»",
+    "id": "26448df4-cbd3-4d06-bfd0-476a3acde65c",
+    "title": "Mint Tea",
+    "author": "basheertome",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+    "source": "https://www.flickr.com/photos/10019047@N05/10183302616"
+  },
+  "dish-tea-0-6": {
+    "what": "Чай «Таёжный сбор»",
+    "id": "cd1cc103-75e9-48ed-94aa-25ed12430b39",
+    "title": "Tea in Cup - Credit to http://homedust.com/",
+    "author": "Homedust",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+    "source": "https://www.flickr.com/photos/159630537@N08/29166774748"
+  },
+  "dish-tea-0-7": {
+    "what": "Чай «Земляничный пудр»",
+    "id": "bd392a66-6add-45e6-82c7-0359b23f0130",
+    "title": "jesus",
+    "author": ".zoe",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+    "source": "https://www.flickr.com/photos/81143208@N00/154956419"
+  },
+  "dish-tea-0-8": {
+    "what": "Чай «Дикая вишня»",
+    "id": "ad463a94-8443-4035-b4a8-e9c858bf3ee1",
+    "title": "Hibiscus (extra) - 01",
+    "author": "Kabacchi",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+    "source": "https://www.flickr.com/photos/36197880@N03/3791479427"
+  },
+  "dish-tea-0-9": {
+    "what": "Чай «Улыбка гейши»",
+    "id": "7394bb4d-2339-4717-8065-f1d994170dae",
+    "title": "green tea",
+    "author": "Marntzu cook",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+    "source": "https://www.flickr.com/photos/69701588@N05/8189271371"
+  },
+  "dish-tea-0-10": {
+    "what": "Чай «1001 ночь»",
+    "id": "2ce9ce29-c8f6-4835-a685-7c67a4ea5fa7",
+    "title": "Clear Teapot",
+    "author": "ToastyKen",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+    "source": "https://www.flickr.com/photos/24226200@N00/4456884294"
+  },
+  "dish-tea-0-11": {
+    "what": "Чай «Арбузная свежесть»",
+    "id": "f4000e96-31a1-4641-86ee-6a1a257d3c4a",
+    "title": "Watermelon Margarita or Mojito",
+    "author": "PersonalCreations.com",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+    "source": "https://www.flickr.com/photos/127294011@N07/14888830500"
+  },
+  "dish-tea-0-12": {
+    "what": "Чай «Адмирал»",
+    "id": "968c9751-2d83-4432-8f78-e57fc5ac824d",
+    "title": "tea mint lemon",
+    "author": "FoodImage",
+    "license": "Public Domain Mark 1.0",
+    "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+    "source": "https://www.flickr.com/photos/147117376@N07/29709403721"
+  },
+  "dish-tea-0-13": {
+    "what": "Чай «Чёрный принц»",
+    "id": "7abab1d2-bc41-46eb-ad2a-a88deaae9f96",
+    "title": "DSC02778",
+    "author": "The Man-Machine",
+    "license": "CC0 1.0",
+    "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "source": "https://www.flickr.com/photos/127283891@N07/17139233119"
+  },
+  "dish-tea-0-14": {
+    "what": "Чай «Персик с айвой»",
+    "id": "345ea903-c638-4408-86cd-251140d8d09f",
+    "title": "A cold glass of lemon, honey and mint iced tea.",
+    "author": "insatiablemunch",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+    "source": "https://www.flickr.com/photos/48041244@N05/15387741985"
+  },
+  "dish-jam-0-0": {
+    "what": "Варенье из айвы",
+    "id": "5d502b5b-cc84-42d6-bb53-a7809056b279",
+    "title": "Quince jam",
+    "author": "grongar",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+    "source": "https://www.flickr.com/photos/70757891@N00/11060320704"
+  },
+  "dish-jam-0-1": {
+    "what": "Малиновое варенье",
+    "id": "9abbaf3c-e9a7-421c-a685-7e6c5691386f",
+    "title": "Many jars of raspberry jam",
+    "author": "Ruth and Dave",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+    "source": "https://www.flickr.com/photos/95142644@N00/19778995921"
+  },
+  "dish-jam-0-2": {
+    "what": "Варенье из белой вишни",
+    "id": "02dc215c-4b9a-4d4a-9d03-7c3b22055658",
+    "title": "Ground cherry jam",
+    "author": "Steven Jackson Photography",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+    "source": "https://www.flickr.com/photos/79892177@N00/6168044695"
+  },
+  "dish-jam-0-3": {
+    "what": "Варенье из инжира",
+    "id": "17de2593-697c-42bd-9d80-71f6ad3e1613",
+    "title": "#breakfast on the #patio #deck ^^ #foodporn #scramble #toast #coffee #organic #veggies #fig #fruit #spread #berry #jam",
+    "author": "starpause kid",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+    "source": "https://www.flickr.com/photos/58972197@N00/7866551486"
+  },
+  "dish-jam-0-4": {
+    "what": "Кокосовое варенье",
+    "id": "42272afb-0b9a-4b15-8067-d911e8c4a748",
+    "title": "Kaya toast: coconut jam, butter, slow cooked egg",
+    "author": "T.Tseng",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+    "source": "https://www.flickr.com/photos/68147320@N02/27515962505"
+  },
+  "dish-drinks-0-0": {
+    "what": "Лунго",
+    "id": "5f0f8dd1-18f5-4d53-aed6-19e5ef9c24bd",
+    "title": "Espresso lungo coffee in a cup made of glass and steel.",
+    "author": "Nilo Velez",
+    "license": "CC0 1.0",
+    "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "source": "https://wordpress.org/photos/photo/16065c3b54/"
+  },
+  "dish-drinks-0-1": {
+    "what": "Эспрессо",
+    "id": "81445c24-ad48-4bbf-90d6-218b14b2eaff",
+    "title": "Espresso",
+    "author": "TheCulinaryGeek",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+    "source": "https://www.flickr.com/photos/72949902@N00/5076909942"
+  },
+  "dish-drinks-0-2": {
+    "what": "Эспрессо финик",
+    "id": "9c36bc85-e0cb-48e7-990e-a7a5c63c99df",
+    "title": "Yogurt with dates, orange and honey",
+    "author": "chispita_666",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+    "source": "https://www.flickr.com/photos/12477719@N00/5960463984"
+  },
+  "dish-drinks-0-3": {
+    "what": "Американо",
+    "id": "03f812eb-bd33-4dc0-8ae4-252f99768277",
+    "title": "how to make americano coffee (Credit to https://coffee-rank.com)",
+    "author": "coffee-rank",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+    "source": "https://www.flickr.com/photos/189612330@N06/50661444097"
+  },
+  "dish-drinks-0-4": {
+    "what": "Флэт уайт",
+    "id": "592759bc-f1b8-421f-9e2a-b27df02e2e49",
+    "title": "Flat white coffee at Patch Cafe in Richmond",
+    "author": "ultrakml",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+    "source": "https://www.flickr.com/photos/34948727@N00/17364920932"
+  },
+  "dish-drinks-0-5": {
+    "what": "Капучино",
+    "id": "a4dc63e5-a823-4acb-8a95-98ff7f5eb6d9",
+    "title": "first attempt, pouring hot chocolate like latte art",
+    "author": "insidious_plots",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+    "source": "https://www.flickr.com/photos/70928775@N00/4561741727"
+  },
+  "dish-drinks-0-6": {
+    "what": "Латте",
+    "id": "70b18b00-ec9f-4613-b1c3-832cf9138398",
+    "title": "Caffe Latte at Pulse Cafe",
+    "author": "B adger1",
+    "license": "CC0 1.0",
+    "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/deed.en/",
+    "source": "https://commons.wikimedia.org/w/index.php?curid=146356511"
+  },
+  "dish-drinks-0-7": {
+    "what": "Раф классический",
+    "id": "64bf0da8-1e3b-4d1c-be37-94ddb848bcde",
+    "title": "Batido de manzana y leche de soja",
+    "author": "Lablascovegmenu",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+    "source": "https://www.flickr.com/photos/35022955@N06/4621153888"
+  },
+  "dish-drinks-0-8": {
+    "what": "Раф урбеч",
+    "id": "6afac813-e815-46cb-b1bd-c37e7aac85a6",
+    "title": "Coffee Time",
+    "author": "rockindave1",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+    "source": "https://www.flickr.com/photos/63723146@N08/8705318368"
+  },
+  "dish-drinks-0-9": {
+    "what": "Какао",
+    "id": "1215747e-58f2-43fb-866a-cfbe5ae2ba8b",
+    "title": "Fuel for brides",
+    "author": "orangeacid",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+    "source": "https://www.flickr.com/photos/71753457@N00/2258166649"
+  },
+  "dish-drinks-1-0": {
+    "what": "Тоник гранат",
+    "id": "d03635f4-458f-4000-84f6-72b8e075e0d9",
+    "title": "Drinks Are Served",
+    "author": "Sam Howzit",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+    "source": "https://www.flickr.com/photos/12508217@N08/7559878860"
+  },
+  "dish-drinks-1-1": {
+    "what": "Тоник ананас",
+    "id": "79a3677f-63d7-4889-84f3-8976e8849969",
+    "title": "Ginger and pineapple cocktail",
+    "author": "Ruth and Dave",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+    "source": "https://www.flickr.com/photos/95142644@N00/2787256480"
+  },
+  "dish-drinks-1-2": {
+    "what": "Тоник свежевыжатый",
+    "id": "12642dde-6554-4059-ae2d-180aa0d8a686",
+    "title": "Fruit juices all in a row",
+    "author": "Catherine Sharman",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+    "source": "https://www.flickr.com/photos/17182451@N00/16781893720"
+  },
+  "dish-drinks-2-0": {
+    "what": "Фраппе",
+    "id": "80cb6549-35b5-4fe2-a27f-0058c0eb971b",
+    "title": "Frappe - coffee milkshake with whipped cream and chocolate (KETO, LCHF, Low Carb, Gluten free, FIT) - 52774791604",
+    "author": "epodrez",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+    "source": "https://commons.wikimedia.org/w/index.php?curid=130069901"
+  },
+  "dish-drinks-2-1": {
+    "what": "Айс какао",
+    "id": "99e3bd22-ca58-4025-92bf-fb899cf1cf50",
+    "title": "Iced Chocolate Drink",
+    "author": "Takeshi Kriang",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+    "source": "https://www.flickr.com/photos/41722709@N04/16154083116"
+  },
+  "dish-drinks-2-2": {
+    "what": "Айс урбеч",
+    "id": "dba90dea-6537-4531-90a7-0e01ca88ecca",
+    "title": "Cold-Brewed Iced Coffee",
+    "author": "thebittenword.com",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+    "source": "https://www.flickr.com/photos/22198928@N00/2574630081"
+  },
+  "dish-drinks-3-0": {
+    "what": "Лимонад манго-маракуйя",
+    "id": "911908fe-3396-4848-b5fb-14822f1abfab",
+    "title": "mango dream",
+    "author": "Matthias Rhomberg",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+    "source": "https://www.flickr.com/photos/33772123@N03/3444207913"
+  },
+  "dish-drinks-3-1": {
+    "what": "Лимонад ягодный",
+    "id": "f51b9eda-4ad3-43fd-bd40-9e0e9f998223",
+    "title": "berry lemonade",
+    "author": "Rodrigo Paoletti",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+    "source": "https://www.flickr.com/photos/78112145@N00/485782686"
+  },
+  "dish-drinks-3-2": {
+    "what": "Мохито клубничный",
+    "id": "50972e8c-fa92-4765-b951-6a2fc6d85767",
+    "title": "Strawberry Mojito (Unsplash)",
+    "author": "Neha Deshmukh nehadeshmukh",
+    "license": "CC0 1.0",
+    "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/deed.en/",
+    "source": "https://commons.wikimedia.org/w/index.php?curid=61855706"
+  },
+  "dish-drinks-3-4": {
+    "what": "Графин лимонада",
+    "id": "7498b204-dd40-4bcb-8e2d-d171b32738fd",
+    "title": "1840 A pitcher of Lemonade",
+    "author": "bsabarnowl",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+    "source": "https://www.flickr.com/photos/10966541@N02/4847631321"
+  },
+  "dish-drinks-4-0": {
+    "what": "Фреш апельсин",
+    "id": "4fbb0fdd-ef2b-45b6-b8e0-0ac64961c2a8",
+    "title": "orange juice",
+    "author": "Geoff Peters 604",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+    "source": "https://www.flickr.com/photos/54359128@N00/3249410157"
+  },
+  "dish-drinks-4-1": {
+    "what": "Фреш яблоко",
+    "id": "73fd9e6e-3bf2-47c3-8d27-faab68004b97",
+    "title": "Juicing",
+    "author": "bertholf",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+    "source": "https://www.flickr.com/photos/61800045@N02/12396496643"
+  },
+  "dish-drinks-4-2": {
+    "what": "Фреш ананасовый",
+    "id": "4056c709-c8d2-49f5-a2f8-332f703677a4",
+    "title": "orange juice",
+    "author": "Mervi Emilia",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+    "source": "https://www.flickr.com/photos/14394039@N00/5563590861"
+  },
+  "dish-drinks-4-3": {
+    "what": "Фреш гранатовый",
+    "id": "ef8ea593-1c76-445a-bed2-37419e40df90",
+    "title": "Pomegranate Grapefruit Spritz",
+    "author": "Jun Seita",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+    "source": "https://www.flickr.com/photos/90454079@N00/7031133949"
+  },
+  "dish-drinks-4-4": {
+    "what": "Фреш яблоко-апельсин",
+    "id": "957ad57e-f4c3-4d27-86e1-54c78a3a329f",
+    "title": "Orange Juice",
+    "author": "Yu. Samoilov",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+    "source": "https://www.flickr.com/photos/110751683@N02/13638538444"
+  },
+  "dish-sauces-0-0": {
+    "what": "Чесночный соус",
+    "id": "9455585d-bc7f-4029-93ab-b19a501380ff",
+    "title": "Fried Parmesan Eggplant Sticks with a Garlic-Basil Sauce",
+    "author": "thebittenword.com",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+    "source": "https://www.flickr.com/photos/22198928@N00/1325393797"
+  },
+  "dish-sauces-0-1": {
+    "what": "Фирменный соус",
+    "id": "ebfcfa4e-2472-4921-8d47-df99502a7d52",
+    "title": "Divinely-inspired tartar sauce at Big O's, Bossier City",
+    "author": "Shreveport-Bossier: Louisiana's Other Side",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+    "source": "https://www.flickr.com/photos/57902140@N08/5755954932"
+  },
+  "dish-sauces-0-2": {
+    "what": "Острый соус",
+    "id": "4a7eaf16-d102-4d4b-be68-3b68774797d4",
+    "title": "spaghetti squash lasagna casserole sauce and cheese",
+    "author": "PersonalCreations.com",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+    "source": "https://www.flickr.com/photos/127294011@N07/15415357730"
+  },
+  "dish-sauces-0-3": {
+    "what": "Сырный соус",
+    "id": "d5a26303-4aff-404d-88ca-9a25a804b978",
+    "title": "Easy white bean dip with garlic and fresh herbs",
+    "author": "Gudlyf",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+    "source": "https://www.flickr.com/photos/80093862@N00/3758076863"
+  },
+  "dish-sauces-0-4": {
+    "what": "Томатный соус",
+    "id": "13d1dc5c-f18c-473e-81ab-2fd538ebd6e7",
+    "title": "ketchup",
+    "author": "EvelynGiggles",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+    "source": "https://www.flickr.com/photos/23797059@N02/3275416505"
+  },
+  "dish-drinks-3-3": {
+    "what": "Мохито классика",
+    "id": "fcbb69cb-e2e5-41e1-8520-314723fee53c",
+    "title": "Green Tea Mojito",
+    "author": "PersonalCreations.com",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+    "source": "https://www.flickr.com/photos/127294011@N07/15072446911"
+  },
+  "new-new-0-0": {
+    "what": "Фахитас с мясом",
+    "id": "826e86fb-2763-45ef-bbba-a954cef57632",
+    "title": "Mmm... Flat Iron Fajitas",
+    "author": "jeffreyw",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+    "source": "https://www.flickr.com/photos/7927684@N03/8732592579"
+  },
+  "new-new-0-1": {
+    "what": "Фахитас мексикано мясной",
+    "id": "f748cc24-e786-4d73-b98c-c0af4a3ff5a1",
+    "title": "Mmm...chicken fajitas",
+    "author": "jeffreyw",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+    "source": "https://www.flickr.com/photos/7927684@N03/4686236996"
+  },
+  "new-new-0-2": {
+    "what": "Филадельфия мексикано",
+    "id": "0d503337-9c11-463f-ad3c-aed3d2a9001d",
+    "title": "Egg Tortilla Wrap",
+    "author": "LeonardKong",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+    "source": "https://www.flickr.com/photos/30216515@N05/8728191788"
+  },
+  "new-new-0-3": {
+    "what": "Филадельфия с курицей",
+    "id": "35d44a61-c258-4ae2-a8f3-ecef769e3a85",
+    "title": "Chorizo breakfast wrap with Korean Kimchi",
+    "author": "elsie.hui",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+    "source": "https://www.flickr.com/photos/91188380@N05/9098009176"
+  },
+  "new-new-0-4": {
+    "what": "Гиро на тарелке",
+    "id": "3f3e4718-b074-484f-ac57-36dcbddb8788",
+    "title": "Gyros Plate 02",
+    "author": "Shadowgate",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+    "source": "https://www.flickr.com/photos/79586279@N00/3176872128"
+  },
+  "new-new-0-5": {
+    "what": "Сэндвич с курицей",
+    "id": "7c0a3bf6-0d34-4142-8147-309428ba1dc5",
+    "title": "Andersen Bakery's Chicken Sandwich",
+    "author": "avrene",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+    "source": "https://www.flickr.com/photos/23212428@N00/11333873715"
+  }
+}
