@@ -12,7 +12,7 @@ import { FORMATS, ZONES, STATUS_TEXT, ETA_CHOICES, type IconName } from '../data
 import { MISSING_REQUISITES } from '../data/legal';
 import { rub, fmtTime } from '../lib/format';
 import { formatText, itemsText, minutesLeft, type Order } from '../lib/orders';
-import { Monogram } from '../components/Logo';
+import { Monogram, LogoWord } from '../components/Logo';
 import { Photo } from '../components/Photo';
 import { setOwnPhoto, clearOwnPhoto, useOwnPhoto } from '../lib/photoStore';
 import { photoCredit } from '../data/photos';
@@ -47,9 +47,9 @@ function StaffHead({ children }: { children?: ReactNode }) {
   return (
     <div className="row between">
       <div className="row gap-8">
-        <Monogram size={30} gradient={false} />
+        <Monogram size={30} />
         <div>
-          <div style={{ font: '900 17px/1 var(--f-logo)', color: 'var(--copper)' }}>GRAFF</div>
+          <LogoWord height={16} style={{ display: 'block' }} />
           <div style={{ font: '600 8px var(--f-caps)', letterSpacing: '.28em', color: 'var(--sec)', marginTop: 3 }}>КУХНЯ · ПЕРСОНАЛ</div>
         </div>
       </div>

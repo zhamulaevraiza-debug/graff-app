@@ -1,45 +1,69 @@
-import { useId, type CSSProperties } from 'react';
-import { Crown } from './Icon';
+/**
+ * Логотип GRAFF — обводка с фотографии вывески кафе (design/logo.jpg).
+ *
+ * Части лежат в одной системе координат снимка, поэтому их взаимное положение
+ * (корона над «R», подпись под словом, отступ от знака) точно такое же, как на вывеске.
+ * Сами контуры — в src/data/logo-paths.ts, они собираются скриптом, а не правятся руками.
+ */
+import { type CSSProperties } from 'react';
+import {
+  LOGO_MARK, LOGO_CROWN, LOGO_WORD, LOGO_TAGLINE, LOGO_RED, LOGO_BLACK, type LogoPart,
+} from '../data/logo-paths';
 
-/** Медная монограмма «G» — спираль с тонкой горизонтальной линией (viewBox 48×48). */
-export function Monogram({ size = 42, gradient = true, color = 'var(--copper)', strokeWidth = 3.6, style }: { size?: number; gradient?: boolean; color?: string; strokeWidth?: number; style?: CSSProperties }) {
-  const id = useId();
-  const stroke = gradient ? `url(#${id})` : color;
+/** Рамка, охватывающая весь знак: логотип целиком, как на вывеске. */
+const FULL_BOX = '64 22 1163 395';
+/** Корона, «GRAFF» и подпись без знака слева. */
+const TEXT_BOX = '377 22 850 383';
+
+const size = (box: string, height: number) => {
+  const [, , w, h] = box.split(' ').map(Number);
+  return { width: Math.round((height * w) / h), height };
+};
+
+const ALT = 'GRAFF — Fast & Delicious';
+
+/** Знак — спиральная «G». Ширина считается от высоты, пропорции вывески сохраняются. */
+export function Monogram({ size: h = 42, color = LOGO_RED, style }: { size?: number; color?: string; style?: CSSProperties }) {
+  const box = size(LOGO_MARK.box, h);
   return (
-    <svg viewBox="0 0 48 48" width={size} height={size} fill="none" strokeLinecap="round" style={style} aria-label="GRAFF">
-      {gradient && (
-        <defs>
-          <linearGradient id={id} x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0" stopColor="#B8622B" />
-            <stop offset="1" stopColor="#D08A4E" />
-          </linearGradient>
-        </defs>
-      )}
-      <path d="M34.5 11.5A16 16 0 1 0 40 27" stroke={stroke} strokeWidth={strokeWidth} />
-      <path d="M40 27a8 8 0 0 0-8-8" stroke={stroke} strokeWidth={strokeWidth} />
-      <path d="M25 27h15" stroke={stroke} strokeWidth={strokeWidth * 0.44} />
+    <svg viewBox={LOGO_MARK.box} {...box} role="img" aria-label="GRAFF" style={style}>
+      <path d={LOGO_MARK.d} fill={color} fillRule="evenodd" />
     </svg>
   );
 }
 
-/** Словесный знак: корона над GRAFF и «FAST & DELICIOUS» под ним. */
-export function Wordmark({ size = 22, crown = true, align = 'center', style }: { size?: number; crown?: boolean; align?: 'center' | 'flex-start'; style?: CSSProperties }) {
-  const fd = Math.max(6, Math.round(size * 0.32));
+/** Корона, «GRAFF» и «FAST & DELICIOUS» — без знака. */
+export function Wordmark({ height = 44, red = LOGO_RED, black = LOGO_BLACK, style }: { height?: number; red?: string; black?: string; style?: CSSProperties }) {
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: align, ...style }}>
-      {crown && <Crown width={Math.round(size * 0.73)} strokeWidth={1.6} />}
-      <div style={{ font: `900 ${size}px var(--f-logo)`, color: 'var(--copper)', letterSpacing: '.02em', lineHeight: 1 }}>GRAFF</div>
-      <div style={{ font: `600 ${fd}px var(--f-caps)`, letterSpacing: '.3em', color: 'var(--sec)', marginTop: Math.round(size * 0.14), whiteSpace: 'nowrap' }}>FAST &amp; DELICIOUS</div>
-    </div>
+    <svg viewBox={TEXT_BOX} {...size(TEXT_BOX, height)} role="img" aria-label={ALT} style={style}>
+      <Part part={LOGO_CROWN} fill={red} />
+      <Part part={LOGO_WORD} fill={black} />
+      <Part part={LOGO_TAGLINE} fill={black} />
+    </svg>
   );
 }
 
-/** Логотип шапки: монограмма + словесный знак в ряд (как на главной). */
-export function HeaderLogo() {
+/** Одно слово «GRAFF» — для узких мест вроде шапки панели персонала. */
+export function LogoWord({ height = 17, color = LOGO_BLACK, style }: { height?: number; color?: string; style?: CSSProperties }) {
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-      <Monogram size={42} />
-      <Wordmark size={22} />
-    </div>
+    <svg viewBox={LOGO_WORD.box} {...size(LOGO_WORD.box, height)} role="img" aria-label="GRAFF" style={style}>
+      <path d={LOGO_WORD.d} fill={color} fillRule="evenodd" />
+    </svg>
   );
 }
+
+/** Логотип целиком: знак, корона, «GRAFF» и подпись — как на вывеске. */
+export function HeaderLogo({ height = 46, style }: { height?: number; style?: CSSProperties }) {
+  return (
+    <svg viewBox={FULL_BOX} {...size(FULL_BOX, height)} role="img" aria-label={ALT} style={style}>
+      <Part part={LOGO_MARK} fill={LOGO_RED} />
+      <Part part={LOGO_CROWN} fill={LOGO_RED} />
+      <Part part={LOGO_WORD} fill={LOGO_BLACK} />
+      <Part part={LOGO_TAGLINE} fill={LOGO_BLACK} />
+    </svg>
+  );
+}
+
+const Part = ({ part, fill }: { part: LogoPart; fill: string }) => (
+  <path d={part.d} fill={fill} fillRule="evenodd" />
+);

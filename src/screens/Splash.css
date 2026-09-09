@@ -8,8 +8,6 @@
   flex-direction: column;
   align-items: center;
 }
-.splash__logo { font: 900 48px var(--f-logo); color: var(--copper); letter-spacing: .02em; line-height: 1; margin-top: 10px; }
-.splash__fd { font: 600 11px var(--f-caps); letter-spacing: .34em; color: var(--sec); margin-top: 10px; white-space: nowrap; }
 .splash__hand { font: 500 26px var(--f-hand); color: var(--copper); margin-top: 14px; text-align: center; }
 .splash__spacer { flex: 1; min-height: 24px; }
 

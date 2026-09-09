@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { useStore, LIVE } from '../state/store';
 import { CONSENT_SHORT, OFFER_NOTE, MARKETING_CONSENT } from '../data/legal';
-import { Branch, Crown } from '../components/Icon';
-import { Monogram } from '../components/Logo';
+import { Branch } from '../components/Icon';
+import { Monogram, Wordmark } from '../components/Logo';
 import './Splash.css';
 
 const BRANCH_TOP = 'calc(var(--sat) + 60px)';
@@ -114,10 +114,8 @@ export function Splash() {
       <Branch mirror style={{ position: 'absolute', right: 16, top: BRANCH_TOP }} />
 
       <div className="splash__col">
-        <Crown width={36} strokeWidth={1.4} />
-        <Monogram size={108} strokeWidth={3.4} style={{ marginTop: 6 }} />
-        <div className="splash__logo">GRAFF</div>
-        <div className="splash__fd">FAST &amp; DELICIOUS</div>
+        <Monogram size={104} />
+        <Wordmark height={62} style={{ marginTop: 10 }} />
         <div className="splash__hand">Вкус · Качество · Скорость</div>
 
         <div className="splash__spacer" />

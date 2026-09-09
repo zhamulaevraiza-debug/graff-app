@@ -14,7 +14,7 @@ export function Toast() {
         onClick={toastTap}
         aria-label={`${toast.title} ${toast.text}. Открыть заказ`}
       >
-        <div className="toast__icon"><Monogram size={26} gradient={false} color="#fff" strokeWidth={3.6} /></div>
+        <div className="toast__icon"><Monogram size={26} color="#fff" /></div>
         <div className="grow">
           <div className="toast__meta"><span>GRAFF</span><span>сейчас</span></div>
           <div className="toast__title">{toast.title}</div>
