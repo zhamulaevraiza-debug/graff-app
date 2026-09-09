@@ -50,8 +50,8 @@ const BAD = new RegExp([
   'illustration', 'sticker', 'clipart', 'clip art', 'vector', 'drawing', 'cartoon', 'psd',
   'collage', 'ripped paper', 'png\\b', 'logo', 'signage', 'storefront', 'billboard',
   'menu board', 'price list', 'advertisement', 'diagram', 'screenshot', 'meme',
-  'raspberry pi', 'bottles', '\bbeer\b', 'vodka', '\bgin\b', '\brum\b', 'whisky', 'whiskey',
-  '\bwine\b', 'liqueur', 'bourbon', 'champagne', 'brewery',
+  'raspberry pi', 'bottles', '\\bbeer\\b', 'vodka', '\\bgin\\b', '\\brum\\b', 'whisky', 'whiskey',
+  '\\bwine\\b', 'liqueur', 'bourbon', 'champagne', 'brewery',
 ].join('|'), 'i');
 
 const sleep = (ms) => new Promise(r => setTimeout(r, ms));
@@ -99,11 +99,20 @@ function rate(r, words) {
   const tags = (r.tags || []).map(t => String(t.name || '').toLowerCase());
   if (BAD.test(title) || tags.some(t => BAD.test(t))) return null;
 
-  /* Снимок должен быть про то, что ищем: слово из запроса в названии или в метках. */
+  /* Снимок должен быть про то, что ищем. Совпадение считаем по целым словам: подстрока
+     подводит («jam» находится внутри «pyjamas»), а одного общего слова мало — по запросу
+     «fig jam toast» иначе подходит любая фотография тоста. */
   const t = title.toLowerCase();
-  const inTitle = words.filter(w => t.includes(w)).length;
-  const inTags = words.filter(w => tags.some(tag => tag.includes(w))).length;
-  if (!inTitle && !inTags) return null;
+  const where = w => {
+    // Слова запроса — обычные латинские слова из scripts/photo-slots.mjs, экранировать нечего.
+    const re = new RegExp('\\b' + w + '\\b', 'i');
+    return re.test(t) ? 'title' : tags.some(tag => re.test(tag)) ? 'tag' : '';
+  };
+  const marks = words.map(where);
+  const inTitle = marks.filter(m => m === 'title').length;
+  const inTags = marks.filter(m => m === 'tag').length;
+  const need = Math.min(2, Math.max(1, words.length));
+  if (inTitle + inTags < need) return null;
 
   let score = 0;
   if (r.license === 'cc0' || r.license === 'pdm') score += 6;
@@ -134,7 +143,10 @@ async function candidatesFor(slot) {
   const seen = new Set();
   const out = [];
   for (const q of slot.q) {
-    const words = q.toLowerCase().split(/\s+/).filter(w => w.length > 3);
+    // Короткие слова тоже значимы: без них от запроса «fig jam» не осталось бы ничего.
+    // Служебные предлоги отбрасываем — они есть в любой подписи.
+    const stop = new Set(['and', 'the', 'with', 'for', 'of', 'in', 'on', 'a']);
+    const words = q.toLowerCase().split(/\s+/).filter(w => w.length > 2 && !stop.has(w));
     const data = await search(q);
     for (const r of data.results || []) {
       if (seen.has(r.id)) continue;

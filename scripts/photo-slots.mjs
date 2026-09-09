@@ -29,10 +29,10 @@ export const SLOTS = [
   /* Бургеры — куриные */
   d('dish-burgers-1-0', 'Бургер классический (куриный)', 'crispy chicken burger', 'chicken sandwich burger'),
   d('dish-burgers-1-1', 'Бургер с халапеньо (куриный)', 'spicy chicken sandwich', 'chicken burger spicy'),
-  d('dish-burgers-1-2', 'Грибной бургер (куриный)', 'chicken mushroom burger', 'mushroom burger'),
+  d('dish-burgers-1-2', 'Грибной бургер (куриный)', 'chicken burger mushroom', 'mushroom chicken sandwich'),
   d('dish-burgers-1-3', 'Онион бургер (куриный)', 'chicken burger onion rings', 'onion rings burger'),
   d('dish-burgers-1-4', 'Сырный бургер (куриный)', 'chicken cheese burger', 'chicken cheeseburger'),
-  d('dish-burgers-1-5', 'Мини бургеры, 5 шт', 'slider burgers', 'mini burgers'),
+  d('dish-burgers-1-5', 'Мини бургеры, 5 шт', 'slider burgers', 'mini burgers plate'),
 
   /* Фастфуд */
   d('dish-fastfood-0-0', 'Стрипсы', 'chicken tenders fried', 'chicken strips'),
@@ -43,7 +43,7 @@ export const SLOTS = [
   d('dish-fastfood-0-5', 'Сырные палочки', 'mozzarella sticks', 'fried cheese sticks'),
   d('dish-fastfood-0-6', 'Фри', 'french fries', 'pommes frites'),
   d('dish-fastfood-0-7', 'Сэндвич', 'club sandwich', 'turkey sandwich'),
-  d('dish-fastfood-0-8', 'Деревенский картофель', 'potato wedges', 'country potatoes roasted'),
+  d('dish-fastfood-0-8', 'Деревенский картофель', 'potato wedges', 'roasted potato wedges'),
 
   /* Новинки */
   d('dish-new-0-0', 'Фахитас с мясом', 'beef fajitas', 'fajitas'),
@@ -74,13 +74,13 @@ export const SLOTS = [
   d('dish-jam-0-0', 'Варенье из айвы', 'quince jam', 'quince preserve'),
   d('dish-jam-0-1', 'Малиновое варенье', 'raspberry jam jar', 'jam jar spoon berries'),
   d('dish-jam-0-2', 'Варенье из белой вишни', 'cherry jam', 'cherry preserve jar'),
-  d('dish-jam-0-3', 'Варенье из инжира', 'fig jam toast', 'figs jam'),
+  d('dish-jam-0-3', 'Варенье из инжира', 'jam figs', 'figs bowl'),
   d('dish-jam-0-4', 'Кокосовое варенье', 'coconut jam jar', 'kaya jam toast'),
 
   /* Напитки — классика */
   d('dish-drinks-0-0', 'Лунго', 'lungo coffee', 'espresso cup coffee'),
   d('dish-drinks-0-1', 'Эспрессо', 'espresso shot cup', 'espresso coffee cup saucer'),
-  d('dish-drinks-0-2', 'Эспрессо финик', 'arabic coffee dates', 'coffee cup dates plate'),
+  d('dish-drinks-0-2', 'Эспрессо финик', 'espresso coffee cup', 'espresso shot saucer'),
   d('dish-drinks-0-3', 'Американо', 'americano coffee', 'black coffee cup'),
   d('dish-drinks-0-4', 'Флэт уайт', 'flat white coffee', 'flat white'),
   d('dish-drinks-0-5', 'Капучино', 'cappuccino latte art', 'cappuccino'),
@@ -105,7 +105,7 @@ export const SLOTS = [
   /* Напитки — фреши */
   d('dish-drinks-4-0', 'Фреш апельсин', 'orange juice glass', 'freshly squeezed orange juice'),
   d('dish-drinks-4-1', 'Фреш яблоко', 'glass of apple juice', 'apple juice glass table'),
-  d('dish-drinks-4-2', 'Фреш ананасовый', 'tropical juice glass', 'pineapple juice glass table'),
+  d('dish-drinks-4-2', 'Фреш ананасовый', 'pineapple juice', 'pineapple drink glass'),
   d('dish-drinks-4-3', 'Фреш гранатовый', 'pomegranate glass drink', 'red fruit juice glass'),
   d('dish-drinks-4-4', 'Фреш яблоко-апельсин', 'juice glasses breakfast', 'orange juice glass table'),
 
