@@ -3,7 +3,7 @@
  * три обещания бренда, карточка активного заказа, формат получения, категории, Новинки ★, адрес.
  * Источник: design/GRAFF App.dc.html, секция isHome (строки 100–183).
  */
-import { useStore, selActiveMine, selSpeed } from '../state/store';
+import { useStore, selActiveMine } from '../state/store';
 import { MENU, NEW_ITEMS, TOWN, ADDRESS, HOURS, SLOGAN_LINES, TAGLINE } from '../data/menu';
 import { orderView, type Order } from '../lib/orders';
 import { Icon, Crown, SpeedStrokes } from '../components/Icon';
@@ -159,9 +159,8 @@ export function Home() {
 /** Карточка «Ваш заказ» с минутами в кольце — единственная часть главной, живущая по секундному таймеру. */
 function ActiveOrderCard({ order }: { order: Order }) {
   const now = useStore(s => s.now);
-  const speed = useStore(selSpeed);
   const openActive = useStore(s => s.openActive);
-  const view = orderView(order, now, speed);
+  const view = orderView(order, now);
   return (
     <button
       type="button"

@@ -5,7 +5,7 @@
  */
 import { useEffect } from 'react';
 import { COMPANY } from '../data/legal';
-import { useStore, selSpeed, selViewedOrder, LIVE } from '../state/store';
+import { useStore, selViewedOrder, LIVE } from '../state/store';
 import { orderView, canRepeat } from '../lib/orders';
 import { fmtDate, fmtTime } from '../lib/format';
 import { Icon, Crown } from '../components/Icon';
@@ -16,7 +16,6 @@ import './Status.css';
 export function Status() {
   // now — для обратного отсчёта (обновляется раз в секунду)
   const now = useStore(s => s.now);
-  const speed = useStore(selSpeed);
   const orders = useStore(s => s.orders);
   const viewed = useStore(selViewedOrder);
   const go = useStore(s => s.go);
@@ -61,7 +60,7 @@ export function Status() {
   // активные заказы этого устройства — чипы переключения, если их больше одного
   // (выданные и отменённые заказы активными не считаем: из 'cancelled' заказ уже никуда не перейдёт)
   const activeMine = orders.filter(o => o.mine && o.status !== 'done' && o.status !== 'cancelled');
-  const v = orderView(viewed, now, speed);
+  const v = orderView(viewed, now);
   const cancelled = v.status === 'cancelled';
   // отменить можно только свой заказ, только пока кухня не начала готовить
   // и только из профиля: сервер принимает отмену лишь с токеном входа по телефону

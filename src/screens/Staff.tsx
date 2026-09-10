@@ -6,7 +6,7 @@
  * а блок настроек демонстрации не показывается: статусы ведёт кухня, время идёт по-настоящему.
  */
 import { useEffect, useRef, useState, type FormEvent, type ReactNode } from 'react';
-import { useStore, selSpeed, LIVE, type Settings } from '../state/store';
+import { useStore, LIVE, type Settings } from '../state/store';
 import { hasStaffToken } from '../lib/api';
 import { FORMATS, ZONES, STATUS_TEXT, ETA_CHOICES, type IconName } from '../data/menu';
 import { MISSING_REQUISITES } from '../data/legal';
@@ -17,7 +17,7 @@ import { Monogram, LogoWord } from '../components/Logo';
 import { Photo } from '../components/Photo';
 import { setOwnPhoto, clearOwnPhoto, useOwnPhoto } from '../lib/photoStore';
 import { photoCredit } from '../data/photos';
-import { Icon } from '../components/Icon';
+import { Icon, Crown } from '../components/Icon';
 import './Staff.css';
 
 const cx = (...a: (string | false | null | undefined)[]) => a.filter(Boolean).join(' ');
@@ -28,10 +28,10 @@ const stripPrefix = (v: string) => (v.startsWith('+7') ? v.slice(2) : v);
 /** Заказ закрыт: выдан или отменён — такие уходят вниз списка и показываются бледнее. */
 const isClosed = (o: Order) => o.status === 'done' || o.status === 'cancelled';
 
-function etaText(o: Order, now: number, speed: number): string {
+function etaText(o: Order, now: number): string {
   switch (o.status) {
     case 'accepted':
-    case 'cooking': return `Готов через ~${minutesLeft(o, now, speed)} мин`;
+    case 'cooking': return `Готов через ~${minutesLeft(o, now)} мин`;
     case 'ready': return 'Ждёт выдачи';
     case 'done': return 'Выдан ' + fmtTime(o.doneAt || o.createdAt);
     case 'cancelled': return 'Отменён';
@@ -179,7 +179,6 @@ function StaffLogin() {
 
 export function Staff() {
   const now = useStore(s => s.now);
-  const speed = useStore(selSpeed);
   const orders = useStore(s => s.orders);
   const occupied = useStore(s => s.occupied);
   const staffTab = useStore(s => s.staffTab);
@@ -201,7 +200,6 @@ export function Staff() {
   const bumpEta = useStore(s => s.bumpEta);
   const toggleOccupied = useStore(s => s.toggleOccupied);
   const setSetting = useStore(s => s.setSetting);
-  const resetDemo = useStore(s => s.resetDemo);
   const lockStaff = useStore(s => s.lockStaff);
   const touchStaff = useStore(s => s.touchStaff);
 
@@ -218,8 +216,7 @@ export function Staff() {
     }
   };
 
-  const onReset = () => { if (window.confirm('Сбросить заказы, столики и корзину к демо-данным? Избранное останется.')) resetDemo(); };
-  const flip = (key: 'autoKitchen' | 'fastTimer' | 'pushBanners' | 'heroPhotos') => () => setSetting(key, !settings[key]);
+  const flip = (key: 'pushBanners' | 'heroPhotos') => () => setSetting(key, !settings[key]);
 
   // Панель закрыта, пока не введён код заведения и не вошёл сотрудник — и в демонстрации тоже.
   // В боевом режиме одного staffAuthed мало: он переживает перезагрузку, а токен смены
@@ -317,6 +314,16 @@ export function Staff() {
             </div>
           )}
 
+          {/* Пустая лента — обычное состояние в начале смены, и это надо сказать словами:
+              иначе экран выглядит так, будто заказы не загрузились. */}
+          {sorted.length === 0 && (
+            <div className="empty" style={{ marginTop: 40, marginBottom: 20 }}>
+              <Crown width={56} strokeWidth={1} />
+              <div className="empty__title">Заказов пока нет</div>
+              <div className="t-sec">Новые появятся здесь сами, как только гость оформит заказ.</div>
+            </div>
+          )}
+
           {sorted.map(o => {
             const action = actionFor(o);
             const canBump = o.status === 'accepted' || o.status === 'cooking';
@@ -330,7 +337,7 @@ export function Staff() {
                 <div style={{ marginTop: 8, fontSize: 14, lineHeight: 1.4 }}>{itemsText(o, true)}</div>
                 {o.comment && <div style={{ marginTop: 4, fontSize: 13, color: 'var(--sec)', fontStyle: 'italic' }}>«{o.comment}»</div>}
                 <div className="row between" style={{ marginTop: 6, fontSize: 14 }}>
-                  <span style={{ color: 'var(--sec)' }}>{etaText(o, now, speed)}</span>
+                  <span style={{ color: 'var(--sec)' }}>{etaText(o, now)}</span>
                   <span style={{ color: 'var(--price)', fontWeight: 500 }}>{rub(o.total)}</span>
                 </div>
 
@@ -445,11 +452,8 @@ export function Staff() {
       </p>
 
       {/* ---------- НАСТРОЙКИ ---------- */}
-      {/* кухня-автопилот, ускоренное время и сброс — только для демонстрации без сервера */}
-      <div className="t-caps" style={{ marginTop: 24 }}>{LIVE ? 'НАСТРОЙКИ' : 'НАСТРОЙКИ ДЕМО'}</div>
+      <div className="t-caps" style={{ marginTop: 24 }}>НАСТРОЙКИ</div>
       <div className="list mt-8">
-        {!LIVE && <SwitchRow title="Кухня-автопилот" sub="заказы сами проходят статусы" on={settings.autoKitchen} onToggle={flip('autoKitchen')} />}
-        {!LIVE && <SwitchRow title="Ускоренное время" sub="только для показа: минута проходит за 5 секунд" on={settings.fastTimer} onToggle={flip('fastTimer')} />}
         <SwitchRow title="Push-баннеры" on={settings.pushBanners} onToggle={flip('pushBanners')} />
         <div className="list__row list__row--static">
           <div className="list__grow">Заголовки экранов</div>
@@ -457,9 +461,6 @@ export function Staff() {
           <HeaderChip value="script" current={settings.headerStyle} onPick={v => setSetting('headerStyle', v)}>Рукописный</HeaderChip>
         </div>
       </div>
-      {!LIVE && (
-        <button type="button" className="btn btn--ghost btn--block mt-10" style={{ color: 'var(--sec)' }} onClick={onReset}>Сбросить демо-данные</button>
-      )}
     </div>
   );
 }

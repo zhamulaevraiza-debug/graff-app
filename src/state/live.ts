@@ -88,8 +88,6 @@ export function fromApi(o: ApiOrder): Order {
     name: o.name,
     phone: o.phone ?? '',
     mine: o.mine ?? false,
-    // статусы ведёт кухня, автопилот в боевом режиме не нужен
-    auto: false,
     pendingEta: o.eta ?? 15,
     eta: o.eta,
     acceptedAt: o.acceptedAt,

@@ -1,7 +1,7 @@
 /**
  * Модель заказа и чистая логика статусов — перенесено из прототипа (design/GRAFF App.dc.html).
  * Статусы: new → accepted → cooking → ready → done.
- * Время: eta (мин) считается от acceptedAt; speed — ускорение демо-таймера (1 = реальное время, 12 = «1 мин = 5 с»).
+ * Время: eta (мин) считается от acceptedAt и идёт по-настоящему.
  */
 import {
   ITEMS, SAUCES, ZONES, FORMAT_NAME, STATUS_TEXT, STEP_IDX, PAY_TEXT, ICON, C, portionOf,
@@ -36,8 +36,6 @@ export interface Order {
   phone: string;
   /** заказ текущего пользователя этого устройства (виден в «Заказ» и истории) */
   mine: boolean;
-  /** кухня-автопилот ведёт статусы сама (демо без персонала) */
-  auto: boolean;
   /** выбранное персоналом время до принятия */
   pendingEta: number;
   eta?: number;
@@ -114,9 +112,9 @@ export function freeTable(format: Format, occ: Occupied): number | null {
   return z ? (z.tables.find(n => !occ[n]) ?? null) : null;
 }
 
-export function minutesLeft(o: Order, now: number, speed: number): number {
+export function minutesLeft(o: Order, now: number): number {
   if (!o.acceptedAt) return o.eta || 0;
-  return Math.max(0, Math.ceil(((o.eta || 0) * 60000 - (now - o.acceptedAt) * speed) / 60000));
+  return Math.max(0, Math.ceil(((o.eta || 0) * 60000 - (now - o.acceptedAt)) / 60000));
 }
 
 /** Перевод заказа в статус. Возвращает новый заказ, занятость столиков и push для клиента (если заказ его). */
@@ -143,29 +141,6 @@ export function transition(o: Order, status: OrderStatus, occ: Occupied, now: nu
   return { order: n, occ, toast };
 }
 
-/** Один тик кухни-автопилота: ведёт заказы с auto=true по статусам. */
-export function kitchenTick(orders: Order[], occ: Occupied, now: number, speed: number): { orders: Order[]; occ: Occupied; changed: boolean; toasts: ToastMsg[] } {
-  let changed = false;
-  const toasts: ToastMsg[] = [];
-  const out = orders.map(o => {
-    if (!o.auto || o.status === 'done' || o.status === 'cancelled') return o;
-    let next: [OrderStatus, Partial<Order>?] | null = null;
-    if (o.status === 'new' && now - o.createdAt > 4000) next = ['accepted', { eta: 12 }];
-    else if (o.status === 'accepted' || o.status === 'cooking') {
-      const el = (now - (o.acceptedAt || now)) * speed, tot = (o.eta || 15) * 60000;
-      if (o.status === 'accepted' && el > tot * 0.2) next = ['cooking'];
-      else if (o.status === 'cooking' && el >= tot) next = ['ready'];
-    } else if (o.status === 'ready' && now - (o.readyAt || now) > 90000) next = ['done'];
-    if (!next) return o;
-    changed = true;
-    const r = transition(o, next[0], occ, now, next[1]);
-    occ = r.occ;
-    if (r.toast) toasts.push(r.toast);
-    return r.order;
-  });
-  return { orders: out, occ, changed, toasts };
-}
-
 export interface StepView { name: string; icon: string; bg: string; fg: string; border: string; anim: string; textColor: string; weight: number; current: boolean; done: boolean }
 export interface OrderView {
   no: number; status: OrderStatus; statusText: string; formatLabel: string;
@@ -179,15 +154,15 @@ export interface OrderView {
 export const RING_LEN = 603.2; // 2πr, r = 96
 
 /** Вью-модель для экрана статуса, карточки «Ваш заказ» и истории. */
-export function orderView(o: Order, now: number, speed: number): OrderView {
-  const left = minutesLeft(o, now, speed);
+export function orderView(o: Order, now: number): OrderView {
+  const left = minutesLeft(o, now);
   const tot = (o.eta || 15) * 60000;
-  const el = o.acceptedAt ? (now - o.acceptedAt) * speed : 0;
+  const el = o.acceptedAt ? now - o.acceptedAt : 0;
   const prog = o.status === 'ready' || o.status === 'done' ? 1 : (o.status === 'new' || o.status === 'cancelled' ? 0 : Math.min(1, el / tot));
   const idx = STEP_IDX[o.status];
   const color = o.status === 'ready' ? C.green : (o.status === 'done' || o.status === 'cancelled' ? C.muted : C.copper);
   const where = whereText(o);
-  const etaAt = o.acceptedAt ? 'к ' + fmtTime(o.acceptedAt + tot / speed) : '';
+  const etaAt = o.acceptedAt ? 'к ' + fmtTime(o.acceptedAt + tot) : '';
   // Время вышло, а кухня ещё не нажала «Готов»: «~0 мин» и время в прошлом выглядят как поломка.
   const overdue = left <= 0;
   const ring: Record<OrderStatus, [string, string, string]> = {
@@ -240,15 +215,8 @@ export function itemsText(o: Order, withSauces = false): string {
   return o.lines.map(l => (l.qty > 1 ? l.qty + ' × ' : '') + l.name + (withSauces && l.sauceNames && l.sauceNames.length ? ' + ' + l.sauceNames.join(', ').toLowerCase() : '')).join(', ');
 }
 
-/** Демо-данные первого запуска (как в прототипе): два заказа на кухне и два в истории клиента. */
-export function seedOrders(now: number, speed: number): Order[] {
-  const base: Omit<Order, 'total'>[] = [
-    { no: 1245, createdAt: now - 14 * 60000, status: 'cooking', eta: 20, acceptedAt: now - (9 * 60000) / speed, format: 'hall', table: 9, lines: [mkLine('burgers-0-4', 0, 1), mkLine('drinks-0-5', 1, 2)], name: 'Аслан', phone: '+7 928 000-00-21', mine: false, auto: false, pendingEta: 15, payment: 'cash' },
-    { no: 1246, createdAt: now - 4 * 60000, status: 'new', format: 'togo', table: null, lines: [mkLine('fastfood-0-0', 1, 1), mkLine('fastfood-0-6', 1, 1)], name: 'Мадина', phone: '+7 963 000-00-08', mine: false, auto: false, pendingEta: 15, byPhone: true, payment: 'cash' },
-    { no: 1198, createdAt: now - 3 * 86400000, status: 'done', doneAt: now - 3 * 86400000 + 25 * 60000, format: 'terrace', table: 4, lines: [mkLine('burgers-0-0', 0, 2), mkLine('drinks-3-1', 1, 1)], name: 'Гость', phone: '', mine: true, auto: false, pendingEta: 15, payment: 'card' },
-    { no: 1173, createdAt: now - 9 * 86400000, status: 'done', doneAt: now - 9 * 86400000 + 20 * 60000, format: 'togo', table: null, lines: [mkLine('fastfood-0-1', 1, 1), mkLine('tea-0-0', 1, 1)], name: 'Гость', phone: '', mine: true, auto: false, pendingEta: 15, payment: 'cash' },
-  ];
-  return base.map(o => ({ ...o, total: orderTotal(o.lines) }));
-}
-export const SEED_OCCUPIED: Occupied = { 2: true, 5: true, 9: true, 12: true };
-export const SEED_NEXT_NO = 1247;
+/**
+ * С какого номера начинается счёт заказов. То же значение, что и на сервере
+ * (ORDER_START_NO): номера не должны разъезжаться при переходе на боевой режим.
+ */
+export const FIRST_ORDER_NO = 1001;

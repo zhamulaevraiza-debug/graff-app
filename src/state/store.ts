@@ -15,8 +15,7 @@ import { DEMO_PANEL_CODE, DEMO_STAFF, STAFF_IDLE_MINUTES } from '../data/staff';
 import * as api from '../lib/api';
 import * as live from './live';
 import {
-  mkLine, mergeLines, orderTotal, transition, kitchenTick, minutesLeft, canRepeat, relineForCart,
-  seedOrders, SEED_OCCUPIED, SEED_NEXT_NO,
+  mkLine, mergeLines, orderTotal, transition, minutesLeft, canRepeat, relineForCart, FIRST_ORDER_NO,
   type Line, type Order, type Occupied, type ToastMsg,
 } from '../lib/orders';
 
@@ -29,10 +28,6 @@ export type ProfileSub = null | 'orders' | 'favs';
 export type StaffTab = 'orders' | 'tables';
 export type HeaderStyle = 'plate' | 'script';
 export interface Settings {
-  /** кухня-автопилот: заказы сами проходят статусы (демо без персонала) */
-  autoKitchen: boolean;
-  /** ускоренное время только для показа: 1 мин = 5 с */
-  fastTimer: boolean;
   /** push-баннеры внутри приложения */
   pushBanners: boolean;
   /** заголовки экранов: плашка (иконка + ЗАГЛАВНЫЕ) или рукописный медный */
@@ -44,22 +39,18 @@ export interface User { name: string; phone: string }
 export interface Toast extends ToastMsg { id: number; target: Screen }
 export interface StaffForm { phone: string; text: string; format: Format; sum: string }
 
-export const speedOf = (s: Settings) => (s.fastTimer ? 12 : 1);
-
 /**
  * Боевой режим включается адресом сервера в переменной сборки VITE_API_URL.
  * Без сервера приложение работает как демонстрация: заказы живут на устройстве,
- * кухня-автопилот сама двигает статусы, время ускорено.
+ * а статусы двигает персонал через панель кухни — так же, как это будет на сервере.
  */
 export const LIVE = api.isLive();
 
-export const DEFAULT_SETTINGS: Settings = LIVE
-  // на боевом сервере статусы ведёт кухня
-  ? { autoKitchen: false, fastTimer: false, pushBanners: true, headerStyle: 'plate', heroPhotos: true }
-  // в демонстрации статусы ведёт автопилот, но время идёт по-настоящему: «~12 мин» — это
-  // двенадцать настоящих минут. Ускорение включается вручную в панели персонала, когда надо
-  // показать весь путь заказа за минуту.
-  : { autoKitchen: true, fastTimer: false, pushBanners: true, headerStyle: 'plate', heroPhotos: true };
+export const DEFAULT_SETTINGS: Settings = {
+  pushBanners: true,
+  headerStyle: 'plate',
+  heroPhotos: true,
+};
 
 export interface AppState {
   // навигация
@@ -208,7 +199,6 @@ export interface AppActions {
   toastTap: () => void;
   tick: () => void;
   setSetting: <K extends keyof Settings>(key: K, value: Settings[K]) => void;
-  resetDemo: () => void;
   // связь с сервером
   /** загрузка профиля, заказов и столиков при старте, подписка на живые события */
   bootstrap: () => Promise<void>;
@@ -264,7 +254,7 @@ function initialState(): AppState {
     cat: 'burgers', dishId: null, dishSize: 0, dishSauces: {}, dishQty: 1, dishFrom: 'menu',
     cart: [], comment: '', format: 'hall', table: 'any', pickup: 'asap', pickupTime: 0, payment: 'cash', guestName: '', guestPhone: '',
     // демо-заказы нужны только для показа приложения без сервера
-    orders: LIVE ? [] : seedOrders(now, speedOf(DEFAULT_SETTINGS)), nextNo: SEED_NEXT_NO, occupied: LIVE ? {} : { ...SEED_OCCUPIED }, viewOrder: null,
+    orders: [], nextNo: FIRST_ORDER_NO, occupied: {}, viewOrder: null,
     favorites: {}, favFormat: 'hall', notifOn: true,
     consentAt: null, consentVersion: null, marketingConsent: false, marketingConsentAt: null, legalDoc: null,
     storageNoticeAt: null,
@@ -356,7 +346,7 @@ export const useStore = create<Store>()(
           pickupLabel: s.format === 'togo' && s.pickup === 'time' && s.pickupTime > now ? fmtTime(s.pickupTime) : '',
           payment: s.payment, lines: s.cart, comment: s.comment.trim() || undefined, total,
           name: s.user ? s.user.name : (s.guestName.trim() || 'Гость'), phone: s.user ? s.user.phone : s.guestPhone,
-          mine: true, auto: s.settings.autoKitchen, pendingEta: 15,
+          mine: true, pendingEta: 15,
         };
         set({ orders: [o, ...s.orders], nextNo: s.nextNo + 1, cart: [], comment: '', occupied: occ, screen: 'status', viewOrder: o.no, profileSub: null, table: 'any', pickup: 'asap', pickupTime: 0 });
         return true;
@@ -441,7 +431,7 @@ export const useStore = create<Store>()(
         const o: Order = {
           no: s.nextNo, createdAt: Date.now(), status: 'new', format: f.format, table: null, payment: 'cash',
           lines: [{ key: 'manual-' + s.nextNo, name: f.text.trim() || 'Заказ по звонку', sauceNames: [], unit: sum, qty: 1 }],
-          total: sum, name: 'По звонку', phone: f.phone, byPhone: true, mine, auto: false, pendingEta: 15,
+          total: sum, name: 'По звонку', phone: f.phone, byPhone: true, mine, pendingEta: 15,
         };
         set({ orders: [o, ...s.orders], nextNo: s.nextNo + 1, staffForm: null });
       },
@@ -470,11 +460,11 @@ export const useStore = create<Store>()(
           void live.staffEta(no, ((o && o.eta) || 15) + 5);
           return;
         }
-        const speed = speedOf(s.settings); let toast: ToastMsg | undefined;
+        let toast: ToastMsg | undefined;
         const orders = s.orders.map(o => {
           if (o.no !== no) return o;
           const n = { ...o, eta: (o.eta || 15) + 5 };
-          if (n.mine) toast = { title: 'Время готовности изменено', text: `Заказ №${n.no} будет готов через ~${minutesLeft(n, Date.now(), speed)} мин` };
+          if (n.mine) toast = { title: 'Время готовности изменено', text: `Заказ №${n.no} будет готов через ~${minutesLeft(n, Date.now())} мин` };
           return n;
         });
         set({ orders });
@@ -523,33 +513,9 @@ export const useStore = create<Store>()(
           get().lockStaff();
           return;
         }
-        // Кухня-автопилот работает и в свёрнутой вкладке: статусы считаются от меток времени заказа,
-        // поэтому две вкладки приходят к одинаковому результату, а уведомление «Заказ готов» успевает прийти.
-        if (LIVE || !s.settings.autoKitchen) { set({ now }); return; }
-        const r = kitchenTick(s.orders, s.occupied, now, speedOf(s.settings));
-        if (r.changed) {
-          set({ now, orders: r.orders, occupied: r.occ });
-          r.toasts.forEach(t => get().showToast(t.title, t.text, { order: t.order }));
-        } else set({ now });
+        set({ now });
       },
-      setSetting: (key, value) => {
-        const s = get();
-        const settings = { ...s.settings, [key]: value };
-        if (key === 'fastTimer' && !LIVE) {
-          // Отсчёт ведётся от acceptedAt с множителем скорости. Меняя скорость, сдвигаем метку так,
-          // чтобы пройденная часть приготовления осталась прежней — иначе заказ скакнёт к нулю или назад.
-          const was = speedOf(s.settings), now = Date.now();
-          const become = speedOf(settings);
-          if (was !== become) {
-            const orders = s.orders.map(o => (o.acceptedAt && o.status !== 'done' && o.status !== 'cancelled'
-              ? { ...o, acceptedAt: now - ((now - o.acceptedAt) * was) / become }
-              : o));
-            set({ settings, orders });
-            return;
-          }
-        }
-        set({ settings });
-      },
+      setSetting: (key, value) => set({ settings: { ...get().settings, [key]: value } }),
       // ---- связь с сервером ----
       bootstrap: async () => { if (LIVE) await live.bootstrap(); },
       setNetError: msg => set({ netError: msg }),
@@ -587,19 +553,10 @@ export const useStore = create<Store>()(
         get().setStatus(no, 'cancelled');
       },
 
-      resetDemo: () => {
-        const now = Date.now();
-        set({
-          orders: LIVE ? [] : seedOrders(now, speedOf(get().settings)),
-          nextNo: SEED_NEXT_NO, occupied: LIVE ? {} : { ...SEED_OCCUPIED },
-          // избранное — данные гостя, а не демонстрации: подтверждение обещает сбросить только заказы и столики
-          cart: [], comment: '', viewOrder: null, staffForm: null,
-        });
-      },
     }),
     {
       name: 'graff-app',
-      version: 3,
+      version: 4,
       storage: createJSONStorage(() => safeStorage),
       partialize: s => ({
         screen: s.screen, staffTab: s.staffTab,
@@ -613,12 +570,12 @@ export const useStore = create<Store>()(
       }),
       migrate: (persisted, from) => {
         let p = (persisted || {}) as Partial<AppState>;
-        // Редакция 2: ускоренное время перестало включаться само. У тех, кто открывал приложение
-        // раньше, оно осталось в настройках — выключаем, иначе «12 минут» снова пройдут за минуту.
-        if (from < 2 && p.settings) p = { ...p, settings: { ...p.settings, fastTimer: false } };
         // Редакция 3: панель кухни закрывается кодом заведения и личным PIN. Раньше в демонстрации
         // она была открыта всем, и это состояние сохранено на устройстве — закрываем.
         if (from < 3) p = { ...p, staffAuthed: false, panelTicket: null, staffSeenAt: 0 };
+        // Редакция 4: вымышленных заказов и занятых столиков больше нет. У тех, кто открывал
+        // приложение раньше, они сохранены на устройстве — стираем, счёт начинаем сначала.
+        if (from < 4) p = { ...p, orders: [], occupied: {}, nextNo: FIRST_ORDER_NO, viewOrder: null };
         return p;
       },
       merge: (persisted, current) => {
@@ -644,7 +601,6 @@ live.bindStore({
 });
 
 /* ---------- селекторы / хелперы для экранов ---------- */
-export const selSpeed = (s: Store) => speedOf(s.settings);
 export const selLoggedIn = (s: Store) => !!s.user;
 export const selCartCount = (s: Store) => s.cart.reduce((a, l) => a + l.qty, 0);
 export const selCartTotal = (s: Store) => orderTotal(s.cart);

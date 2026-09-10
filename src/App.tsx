@@ -1,5 +1,5 @@
 import { useEffect, useRef, type ComponentType } from 'react';
-import { useStore, NAV_SCREENS, SCREENS, speedOf, forgetLastWrite, type Screen, type ProfileSub, type AppState } from './state/store';
+import { useStore, NAV_SCREENS, SCREENS, forgetLastWrite, type Screen, type ProfileSub, type AppState } from './state/store';
 import { minutesLeft, whereText, type Order } from './lib/orders';
 import { LEGAL_DOCS, type LegalDocId } from './data/legal';
 import { ITEMS } from './data/menu';
@@ -72,7 +72,7 @@ function pickShared(src: Partial<AppState>): Partial<AppState> {
   return out;
 }
 /** Push-баннеры о моих заказах, которые изменила другая вкладка (например, персонал принял заказ). */
-function notifyOrderChanges(prev: Order[], next: Order[], speed: number) {
+function notifyOrderChanges(prev: Order[], next: Order[]) {
   const { showToast } = useStore.getState();
   for (const o of next) {
     if (!o.mine) continue;
@@ -82,12 +82,12 @@ function notifyOrderChanges(prev: Order[], next: Order[], speed: number) {
       if (o.status === 'accepted') showToast('Заказ принят!', `№${o.no} · готовим ~${o.eta} мин` + (o.table ? ` · столик ${o.table}` : ''), { order: o.no });
       else if (o.status === 'ready') showToast(`Ваш заказ №${o.no} готов!`, whereText(o), { order: o.no });
     } else if (p.eta !== o.eta && (o.status === 'accepted' || o.status === 'cooking')) {
-      showToast('Время готовности изменено', `Заказ №${o.no} будет готов через ~${minutesLeft(o, Date.now(), speed)} мин`, { order: o.no });
+      showToast('Время готовности изменено', `Заказ №${o.no} будет готов через ~${minutesLeft(o, Date.now())} мин`, { order: o.no });
     }
   }
 }
 
-/** Секундный таймер (кухня-автопилот, обратный отсчёт), синхронизация вкладок, история браузера. */
+/** Секундный таймер (обратный отсчёт, автоблокировка панели), синхронизация вкладок, история браузера. */
 function useAppEffects() {
   const tick = useStore(s => s.tick);
   const screen = useStore(s => s.screen);
@@ -121,7 +121,7 @@ function useAppEffects() {
         if (JSON.stringify(incoming) === JSON.stringify(pickShared(current))) return; // ничего нового — не пишем обратно (иначе вкладки пинг-понгом переписывают друг друга)
         forgetLastWrite();
         useStore.setState(incoming);
-        if (incoming.orders) notifyOrderChanges(current.orders, incoming.orders, speedOf(incoming.settings || current.settings));
+        if (incoming.orders) notifyOrderChanges(current.orders, incoming.orders);
       } catch { /* чужая/битая запись — игнорируем */ }
     };
     window.addEventListener('storage', onStorage);
