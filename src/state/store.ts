@@ -110,6 +110,12 @@ export interface AppState {
   marketingConsentAt: number | null;
   /** открытый правовой документ; null — список документов */
   legalDoc: LegalDocId | null;
+  /**
+   * Когда гость закрыл уведомление о данных на устройстве; null — ещё не показывали.
+   * Показывается один раз: приложение не пишет на устройство ничего сверх необходимого,
+   * но человек должен знать, что там хранится (152-ФЗ, ст. 14).
+   */
+  storageNoticeAt: number | null;
   // персонал
   staffForm: StaffForm | null;
   // ui
@@ -179,6 +185,8 @@ export interface AppActions {
   setConsent: (accepted: boolean) => void;
   setMarketing: (accepted: boolean) => void;
   openLegal: (doc: LegalDocId | null) => void;
+  /** «Понятно» под уведомлением о данных на устройстве */
+  dismissStorageNotice: () => void;
   deleteAccount: () => Promise<void>;
   // персонал
   toggleStaffForm: () => void;
@@ -248,6 +256,7 @@ function initialState(): AppState {
     orders: LIVE ? [] : seedOrders(now, speedOf(DEFAULT_SETTINGS)), nextNo: SEED_NEXT_NO, occupied: LIVE ? {} : { ...SEED_OCCUPIED }, viewOrder: null,
     favorites: {}, favFormat: 'hall', notifOn: true,
     consentAt: null, consentVersion: null, marketingConsent: false, marketingConsentAt: null, legalDoc: null,
+    storageNoticeAt: null,
     staffForm: null,
     toast: null, now, settings: { ...DEFAULT_SETTINGS },
     netError: null, busy: false, online: false, resendAfter: 0, staffAuthed: !LIVE || api.hasStaffToken(),
@@ -377,6 +386,7 @@ export const useStore = create<Store>()(
         if (LIVE) void live.setMarketing(accepted);
       },
       openLegal: doc => set({ screen: 'legal', legalDoc: doc, profileSub: null }),
+      dismissStorageNotice: () => set({ storageNoticeAt: Date.now() }),
       /**
        * Отзыв согласия и удаление аккаунта (152-ФЗ ст. 9 ч. 2, требования Google Play и App Store).
        * Локально стираем профиль, свои заказы, избранное и корзину; заказы кафе (чужие) не трогаем.
@@ -556,6 +566,7 @@ export const useStore = create<Store>()(
         orders: s.orders, nextNo: s.nextNo, occupied: s.occupied, viewOrder: s.viewOrder,
         favorites: s.favorites, favFormat: s.favFormat, notifOn: s.notifOn, settings: s.settings,
         consentAt: s.consentAt, consentVersion: s.consentVersion, marketingConsent: s.marketingConsent, marketingConsentAt: s.marketingConsentAt,
+        storageNoticeAt: s.storageNoticeAt,
         staffAuthed: s.staffAuthed,
       }),
       // Редакция 2: ускоренное время перестало включаться само. У тех, кто открывал приложение раньше,

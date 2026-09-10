@@ -6,6 +6,7 @@ import { ITEMS } from './data/menu';
 import { takeReplaceHistoryEntry } from './lib/nav';
 import { BottomNav } from './components/BottomNav';
 import { Toast } from './components/Toast';
+import { StorageNotice } from './components/StorageNotice';
 import { Splash } from './screens/Splash';
 import { Home } from './screens/Home';
 import { Menu } from './screens/Menu';
@@ -174,6 +175,7 @@ export default function App() {
         <Current key={screen} />
         <Toast />
         {showNav && <BottomNav />}
+        <StorageNotice />
       </div>
     </div>
   );

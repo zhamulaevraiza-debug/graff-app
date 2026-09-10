@@ -1,0 +1,54 @@
+/* Уведомление о данных на устройстве: карточка снизу, поверх экрана и навигации. */
+.storage-notice {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 90;
+  padding: 12px 12px calc(12px + var(--sab, 0px));
+  /* тень кверху, чтобы карточка читалась поверх любого экрана */
+  background: linear-gradient(to top, rgba(46, 33, 25, .16), rgba(46, 33, 25, 0));
+  animation: gr-notice .35s cubic-bezier(.2, .8, .2, 1);
+}
+
+@keyframes gr-notice {
+  from { transform: translateY(16px); opacity: 0; }
+  to { transform: none; opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .storage-notice { animation: none; }
+}
+
+.storage-notice__card {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 16px 16px 14px;
+  box-shadow: 0 14px 34px rgba(60, 40, 20, .18);
+}
+
+.storage-notice__title {
+  margin: 0;
+  font: 700 17px var(--f-body);
+  color: var(--text);
+}
+
+.storage-notice__text {
+  margin: 6px 0 14px;
+  font: 400 13px/1.45 var(--f-body);
+  color: var(--sec);
+  text-wrap: pretty;
+}
+
+/* «Подробнее» — обычная кнопка, но выглядит и читается как ссылка внутри абзаца */
+.storage-notice__more {
+  padding: 0;
+  border: 0;
+  background: none;
+  font: 600 13px var(--f-body);
+  color: var(--copper);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
