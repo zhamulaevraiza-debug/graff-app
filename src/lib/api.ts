@@ -137,9 +137,23 @@ export interface StaffOrderBody {
   name?: string;
 }
 
+/** Код заведения: первый шаг входа в панель кухни. */
+export interface StaffPanelBody {
+  code: string;
+}
+export interface StaffPanelReply {
+  /** пропуск, с которым принимается вход сотрудника */
+  ticket: string;
+  /** сколько минут он действует */
+  minutes: number;
+}
 export interface StaffLoginBody {
+  /** номер сотрудника */
   login: string;
+  /** личный PIN */
   pin: string;
+  /** пропуск из StaffPanelReply */
+  ticket: string;
 }
 export interface StaffLoginReply {
   token: string;
@@ -203,6 +217,7 @@ export const ROUTES = {
   order: (no: number) => `/orders/${no}`,
   cancelOrder: (no: number) => `/orders/${no}/cancel`,
   tables: '/tables',
+  staffPanel: '/staff/panel',
   staffLogin: '/staff/login',
   staffOrders: '/staff/orders',
   staffAccept: (no: number) => `/staff/orders/${no}/accept`,
@@ -637,9 +652,18 @@ export function getTables(signal?: AbortSignal) {
 
 /* ======================= панель персонала ======================= */
 
-/** Вход сотрудника по логину и PIN. При успехе токен сохраняется отдельно от клиентского. */
-export async function staffLogin(login: string, pin: string, signal?: AbortSignal) {
-  const body: StaffLoginBody = { login: login.trim(), pin: pin.trim() };
+/**
+ * Первый шаг входа: код заведения. В ответ приходит короткий пропуск, без которого
+ * вход сотрудника не отвечает вовсе — подбирать PIN, не зная кода, не с чего.
+ */
+export async function staffPanel(code: string, signal?: AbortSignal) {
+  const body: StaffPanelBody = { code: code.trim() };
+  return request<StaffPanelReply>(ROUTES.staffPanel, { method: 'POST', body, signal });
+}
+
+/** Второй шаг: номер сотрудника и его личный PIN. При успехе токен сохраняется отдельно от клиентского. */
+export async function staffLogin(login: string, pin: string, ticket: string, signal?: AbortSignal) {
+  const body: StaffLoginBody = { login: login.trim(), pin: pin.trim(), ticket };
   const reply = await request<StaffLoginReply>(ROUTES.staffLogin, { method: 'POST', body, signal });
   if (reply?.token) setStaffToken(reply.token);
   return reply;
@@ -694,6 +718,6 @@ export async function staffToggleTable(n: number, signal?: AbortSignal) {
 export const api = {
   requestCode, verifyCode, me, updateMe, deleteMe, exportMyData,
   createOrder, myOrders, getOrder, cancelOrder, getTables,
-  staffLogin, staffOrders, staffCreateOrder, staffAccept, staffStatus, staffEta,
+  staffPanel, staffLogin, staffOrders, staffCreateOrder, staffAccept, staffStatus, staffEta,
   staffTables, staffToggleTable,
 };

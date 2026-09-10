@@ -7,6 +7,7 @@
 const base = (process.argv[2] || 'http://localhost:3000').replace(/\/$/, '');
 const staffLogin = process.argv[3] || 'kitchen';
 const staffPin = process.argv[4] || '1234';
+const panelCode = process.argv[5] || '2468';
 
 let failures = 0;
 const check = (name: string, cond: boolean, detail = '') => {
@@ -110,15 +111,26 @@ check('перебор кода останавливается', blocked, blocked
 const again = await call('/auth/request-code', { method: 'POST', body: JSON.stringify({ phone: victim, consent: true }) });
 check('повторный код не выдаётся сразу', again.status === 429, `статус ${again.status}`);
 
+/* Панель кухни: код заведения — первый рубеж, без него PIN даже не проверяется */
+const noTicket = await call('/staff/login', { method: 'POST', body: JSON.stringify({ login: staffLogin, pin: staffPin }) });
+check('вход сотрудника без кода заведения не отвечает', noTicket.status === 401 && noTicket.body?.error === 'panel_required', `статус ${noTicket.status}`);
+
+const badPanel = await call('/staff/panel', { method: 'POST', body: JSON.stringify({ code: '0000' }) });
+check('неверный код заведения отклоняется', badPanel.status === 401, `статус ${badPanel.status}`);
+
+const panel = await call('/staff/panel', { method: 'POST', body: JSON.stringify({ code: panelCode }) });
+check('верный код заведения даёт пропуск', panel.status === 200 && !!panel.body?.ticket, `статус ${panel.status}`);
+const panelTicket: string = panel.body?.ticket || '';
+
 let pinBlocked = false;
 for (let i = 0; i < 12; i++) {
-  const r = await call('/staff/login', { method: 'POST', body: JSON.stringify({ login: staffLogin, pin: '0000' }) });
+  const r = await call('/staff/login', { method: 'POST', body: JSON.stringify({ login: staffLogin, pin: '0000', ticket: panelTicket }) });
   if (r.status === 429) { pinBlocked = true; break; }
 }
 check('перебор PIN сотрудника ограничивается', pinBlocked, pinBlocked ? 'сработало ограничение частоты' : 'ограничение не сработало');
 
 /* После ограничения вход настоящим PIN может быть временно закрыт — это ожидаемо */
-const staffOk = await call('/staff/login', { method: 'POST', body: JSON.stringify({ login: staffLogin, pin: staffPin }) });
+const staffOk = await call('/staff/login', { method: 'POST', body: JSON.stringify({ login: staffLogin, pin: staffPin, ticket: panelTicket }) });
 check('сервер отвечает на вход сотрудника', staffOk.status === 200 || staffOk.status === 429, `статус ${staffOk.status}`);
 
 console.log(`\n${failures === 0 ? 'Защита работает' : `Провалено проверок: ${failures}`}`);

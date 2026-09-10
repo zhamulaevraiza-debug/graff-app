@@ -16,6 +16,18 @@ if (isProd && !secretFromEnv) {
   throw new Error('JWT_SECRET не задан. Сгенерируйте: node -e "console.log(require(\'crypto\').randomBytes(32).toString(\'hex\'))"');
 }
 
+/**
+ * Код заведения — первый шаг входа в панель кухни. В бою обязателен: без него панель
+ * открылась бы любому, кто знает адрес, и оставалось бы подобрать только PIN сотрудника.
+ */
+const panelCodeFromEnv = (env.STAFF_PANEL_CODE || '').trim();
+if (isProd && !/^\d{4,8}$/.test(panelCodeFromEnv)) {
+  throw new Error(
+    'STAFF_PANEL_CODE не задан или не похож на код: нужны 4–8 цифр. ' +
+    'Это код заведения — первый шаг входа в панель кухни, его знают только сотрудники.',
+  );
+}
+
 export const config = {
   port: num(env.PORT, 3000),
   host: env.HOST || '0.0.0.0',
@@ -26,6 +38,14 @@ export const config = {
   tokenDays: num(env.TOKEN_DAYS, 90),
   /** Сколько живёт токен сотрудника, часов: смена закончилась — вход нужен заново. */
   staffTokenHours: num(env.STAFF_TOKEN_HOURS, 12),
+  /**
+   * Код заведения — первый шаг входа в панель кухни. Цифры, знают только сотрудники.
+   * Он не заменяет личный PIN, а закрывает саму панель от посторонних: без него
+   * подобрать PIN нельзя, потому что вход сотрудника без пропуска не отвечает.
+   */
+  staffPanelCode: panelCodeFromEnv,
+  /** Сколько минут действует пропуск, выданный за код заведения. */
+  panelTicketMinutes: num(env.PANEL_TICKET_MINUTES, 30),
   /** Домены, которым разрешено обращаться к API. */
   corsOrigins: list(env.CORS_ORIGINS),
 

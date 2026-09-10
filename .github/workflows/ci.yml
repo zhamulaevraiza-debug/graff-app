@@ -76,6 +76,7 @@ jobs:
           SMS_PROVIDER=log \
           STAFF_LOGIN=kitchen \
           STAFF_PIN=1234 \
+          STAFF_PANEL_CODE=2468 \
           npm start > server.log 2>&1 &
           for i in $(seq 1 30); do
             if curl -sf http://localhost:3000/health > /dev/null; then echo "сервер поднялся"; exit 0; fi

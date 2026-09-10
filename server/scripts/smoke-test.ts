@@ -10,6 +10,7 @@
 const base = (process.argv[2] || 'http://localhost:3000').replace(/\/$/, '');
 const staffLogin = process.argv[3] || 'kitchen';
 const staffPin = process.argv[4] || '1234';
+const panelCode = process.argv[6] || '2468';
 const phone = process.argv[5] || '9990000001';
 
 let failures = 0;
@@ -97,10 +98,20 @@ check('заказ виден в своём списке', myOrders.some(o => o.n
 
 /* 4. Кухня */
 console.log('\nПанель персонала');
-const badLogin = await call('/staff/login', { method: 'POST', body: JSON.stringify({ login: staffLogin, pin: '0000' }) });
+const noTicket = await call('/staff/login', { method: 'POST', body: JSON.stringify({ login: staffLogin, pin: staffPin }) });
+check('без кода заведения вход не отвечает', noTicket.status === 401, `статус ${noTicket.status}`);
+
+const badCode = await call('/staff/panel', { method: 'POST', body: JSON.stringify({ code: '0000' }) });
+check('неверный код заведения отклоняется', badCode.status === 401, `статус ${badCode.status}`);
+
+const panel = await call('/staff/panel', { method: 'POST', body: JSON.stringify({ code: panelCode }) });
+check('код заведения принят', panel.status === 200 && !!panel.body?.ticket);
+const ticket: string = panel.body?.ticket || '';
+
+const badLogin = await call('/staff/login', { method: 'POST', body: JSON.stringify({ login: staffLogin, pin: '0000', ticket }) });
 check('неверный PIN отклоняется', badLogin.status === 401, `статус ${badLogin.status}`);
 
-const login = await call('/staff/login', { method: 'POST', body: JSON.stringify({ login: staffLogin, pin: staffPin }) });
+const login = await call('/staff/login', { method: 'POST', body: JSON.stringify({ login: staffLogin, pin: staffPin, ticket }) });
 const staffToken: string = login.body?.token || '';
 if (!check('сотрудник вошёл', login.status === 200 && !!staffToken, `статус ${login.status}`)) {
   console.error('\n  ! Заведите сотрудника: npm run seed:staff -- kitchen 1234 Кухня');

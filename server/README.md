@@ -141,7 +141,7 @@ sudo mkdir -p /opt/graff && cd /opt/graff
 git clone <адрес репозитория> .
 
 cp server/.env.example server/.env
-nano server/.env        # JWT_SECRET, SMS_*, VAPID_*, STAFF_LOGIN/STAFF_PIN, TABLES_*, WORK_*
+nano server/.env        # JWT_SECRET, SMS_*, VAPID_*, STAFF_PANEL_CODE, STAFF_LOGIN/STAFF_PIN, TABLES_*, WORK_*
 
 # домен в конфигурации nginx (три места)
 sed -i 's/graff.example.ru/ваш-домен.ру/g' deploy/nginx.conf
@@ -254,17 +254,35 @@ sudo systemctl status certbot.timer   # таймер продления став
 sudo certbot renew --dry-run          # проверка, что всё сработает
 ```
 
+## Вход в панель кухни: два шага
+
+1. **Код заведения** — `STAFF_PANEL_CODE`, 4–8 цифр, один на кафе. Он открывает саму панель.
+   В бою обязателен: без него сервер не запустится. Меняйте его, когда увольняется сотрудник, —
+   код знают наизусть все, кто работал.
+2. **Номер сотрудника и его личный PIN** — у каждого свой. Сервер проверяет PIN только после
+   первого шага: без пропуска запрос на вход отвечает `panel_required`, поэтому подобрать PIN,
+   не зная кода заведения, не получится.
+
+Пропуск за код заведения живёт `PANEL_TICKET_MINUTES` минут (по умолчанию 30). Панель,
+оставленную открытой, приложение закрывает само через 15 минут без действий — планшет на кухне
+видят все, а в панели телефоны гостей и вся лента заказов.
+
+Оба шага защищены от перебора: ограничение частоты по адресу и отдельный счётчик неудач
+по учётной записи с нарастающими паузами. Неудачные попытки пишутся в журнал (`staff.panel.failed`,
+`staff.login.failed`), удачные — с номером сотрудника.
+
 ## Сотрудники кухни
 
 Первый сотрудник создаётся автоматически при первом старте из переменных
 `STAFF_LOGIN`, `STAFF_PIN`, `STAFF_NAME`. После этого переменные можно убрать из `.env`.
+Номер удобно делать цифровым: его набирают на кухонном планшете.
 
 Остальных заводим командой:
 
 ```bash
-docker compose exec app npm run seed:staff -- <логин> <PIN> <имя> [staff|admin]
+docker compose exec app npm run seed:staff -- <номер> <PIN> <имя> [staff|admin]
 # пример
-docker compose exec app npm run seed:staff -- aslan 4821 Аслан staff
+docker compose exec app npm run seed:staff -- 02 4821 Аслан staff
 ```
 
 Логин — от 2 до 32 символов, PIN — только цифры, не короче 4. PIN хранится в базе

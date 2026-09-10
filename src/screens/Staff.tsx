@@ -10,6 +10,7 @@ import { useStore, selSpeed, LIVE, type Settings } from '../state/store';
 import { hasStaffToken } from '../lib/api';
 import { FORMATS, ZONES, STATUS_TEXT, ETA_CHOICES, type IconName } from '../data/menu';
 import { MISSING_REQUISITES } from '../data/legal';
+import { DEMO_PANEL_CODE, DEMO_STAFF } from '../data/staff';
 import { rub, fmtTime } from '../lib/format';
 import { formatText, itemsText, minutesLeft, type Order } from '../lib/orders';
 import { Monogram, LogoWord } from '../components/Logo';
@@ -61,31 +62,38 @@ function StaffHead({ children }: { children?: ReactNode }) {
 /** Вход для персонала: показывается вместо панели, пока сотрудник не вошёл (только в боевом режиме). */
 function StaffLogin() {
   const netError = useStore(s => s.netError);
+  const panelTicket = useStore(s => s.panelTicket);
+  const staffPanelCode = useStore(s => s.staffPanelCode);
   const staffLogin = useStore(s => s.staffLogin);
   const setNetError = useStore(s => s.setNetError);
+  const lockStaff = useStore(s => s.lockStaff);
   const go = useStore(s => s.go);
 
+  const [code, setCode] = useState('');
   const [login, setLogin] = useState('');
   const [pin, setPin] = useState('');
   // занятость только своя: чужой запрос не должен гасить кнопку входа
   const [sending, setSending] = useState(false);
 
   // netError общий на всё приложение: чужую ошибку (например, «Слишком часто» с экрана гостя)
-  // гасим при открытии формы, иначе она читается как «не подошёл PIN»
+  // гасим при открытии формы, иначе она читается как «не подошёл код»
   useEffect(() => { setNetError(null); }, [setNetError]);
-
-  const ready = !sending && login.trim() !== '' && pin !== '';
 
   // ошибку прошлой попытки убираем, как только сотрудник начал править поля
   const clearErr = () => { if (netError) setNetError(null); };
+  const digits = (v: string) => v.replace(/\D/g, '').slice(0, 12);
+
+  const step = panelTicket ? 'staff' : 'panel';
+  const ready = !sending && (step === 'panel' ? code.length >= 4 : login !== '' && pin.length >= 4);
 
   const onSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!ready) return;
     setSending(true);
-    void staffLogin(login.trim(), pin)
-      .then(ok => { if (!ok) setPin(''); })
-      .finally(() => setSending(false));
+    const done = step === 'panel'
+      ? staffPanelCode(code).then(ok => { if (ok) setCode(''); else setCode(''); })
+      : staffLogin(login, pin).then(ok => { if (!ok) setPin(''); });
+    void done.finally(() => setSending(false));
   };
 
   return (
@@ -93,36 +101,77 @@ function StaffLogin() {
       <StaffHead />
 
       <form className="card card--pad stack gap-10 mt-16" onSubmit={onSubmit} noValidate>
-        <h2 className="t-head">ВХОД ДЛЯ ПЕРСОНАЛА</h2>
-        <div className="t-sec">Панель кухни доступна сотрудникам кафе.</div>
+        {step === 'panel' ? (
+          <>
+            <h2 className="t-head">КОД ЗАВЕДЕНИЯ</h2>
+            <div className="t-sec t-pretty">Панель кухни закрыта. Введите код кафе — его знают только сотрудники.</div>
+            <input
+              className={cx('input', 'input--white', 'input--code', netError && 'input--err')}
+              type="password"
+              placeholder="••••"
+              aria-label="Код заведения"
+              inputMode="numeric"
+              pattern="[0-9]*"
+              autoComplete="off"
+              enterKeyHint="next"
+              aria-invalid={netError ? true : undefined}
+              value={code}
+              onChange={e => { setCode(digits(e.target.value)); clearErr(); }}
+              autoFocus
+            />
+          </>
+        ) : (
+          <>
+            <h2 className="t-head">ВХОД СОТРУДНИКА</h2>
+            <div className="t-sec t-pretty">Код заведения принят. Теперь ваш номер и личный PIN.</div>
+            <input
+              className="input input--white"
+              placeholder="Номер сотрудника"
+              aria-label="Номер сотрудника"
+              inputMode="numeric"
+              autoComplete="username"
+              enterKeyHint="next"
+              value={login}
+              onChange={e => { setLogin(e.target.value.trim().slice(0, 32)); clearErr(); }}
+              autoFocus
+            />
+            <input
+              className={cx('input', 'input--white', netError && 'input--err')}
+              type="password"
+              placeholder="Личный PIN"
+              aria-label="Личный PIN"
+              inputMode="numeric"
+              pattern="[0-9]*"
+              autoComplete="current-password"
+              enterKeyHint="go"
+              aria-invalid={netError ? true : undefined}
+              value={pin}
+              onChange={e => { setPin(digits(e.target.value)); clearErr(); }}
+            />
+          </>
+        )}
 
-        <input
-          className="input input--white"
-          placeholder="Логин"
-          aria-label="Логин"
-          autoCapitalize="none"
-          autoCorrect="off"
-          autoComplete="username"
-          enterKeyHint="next"
-          value={login}
-          onChange={e => { setLogin(e.target.value); clearErr(); }}
-        />
-        <input
-          className={cx('input', 'input--white', netError && 'input--err')}
-          type="password"
-          placeholder="PIN"
-          aria-label="PIN"
-          inputMode="numeric"
-          autoComplete="current-password"
-          enterKeyHint="go"
-          aria-invalid={netError ? true : undefined}
-          value={pin}
-          onChange={e => { setPin(e.target.value); clearErr(); }}
-        />
         {netError && <div className="field-err" role="alert">{netError}</div>}
 
-        <button type="submit" className="btn btn--primary btn--block" disabled={!ready}>{sending ? 'ВХОДИМ…' : 'ВОЙТИ'}</button>
-        <button type="button" className="btn btn--ghost" onClick={() => go('home')}>← Клиент</button>
+        <button type="submit" className="btn btn--primary btn--block" disabled={!ready}>
+          {sending ? 'ПРОВЕРЯЕМ…' : step === 'panel' ? 'ДАЛЕЕ' : 'ВОЙТИ'}
+        </button>
+
+        {!LIVE && (
+          <div className="t-small">
+            В демонстрации коды проверяет само устройство, а не сервер: код заведения {DEMO_PANEL_CODE},
+            сотрудник {DEMO_STAFF[0].number} с PIN {DEMO_STAFF[0].pin}. На сервере они хранятся в виде хэша.
+          </div>
+        )}
+
+        <div className="row gap-12">
+          <button type="button" className="btn btn--ghost" onClick={() => go('home')}>← Клиент</button>
+          {step === 'staff' && (
+            <button type="button" className="btn btn--ghost" onClick={() => { setPin(''); setLogin(''); lockStaff(); }}>
+              Другой код заведения
+            </button>
+          )}
+        </div>
       </form>
     </div>
   );
@@ -153,7 +202,8 @@ export function Staff() {
   const toggleOccupied = useStore(s => s.toggleOccupied);
   const setSetting = useStore(s => s.setSetting);
   const resetDemo = useStore(s => s.resetDemo);
-  const staffLogout = useStore(s => s.staffLogout);
+  const lockStaff = useStore(s => s.lockStaff);
+  const touchStaff = useStore(s => s.touchStaff);
 
   const openCount = orders.filter(o => !isClosed(o)).length;
   const sorted = orders.slice().sort((a, b) => (Number(isClosed(a)) - Number(isClosed(b))) || (b.createdAt - a.createdAt));
@@ -171,19 +221,26 @@ export function Staff() {
   const onReset = () => { if (window.confirm('Сбросить заказы, столики и корзину к демо-данным? Избранное останется.')) resetDemo(); };
   const flip = (key: 'autoKitchen' | 'fastTimer' | 'pushBanners' | 'heroPhotos') => () => setSetting(key, !settings[key]);
 
-  // В боевом режиме кухня открыта только сотруднику. Одного staffAuthed мало: он переживает перезагрузку,
-  // а токен смены стирается сам при ответе 401 — без проверки токена панель осталась бы открытой и нерабочей.
-  if (LIVE && !(staffAuthed && hasStaffToken())) return <StaffLogin />;
+  // Панель закрыта, пока не введён код заведения и не вошёл сотрудник — и в демонстрации тоже.
+  // В боевом режиме одного staffAuthed мало: он переживает перезагрузку, а токен смены
+  // стирается сам при ответе 401 — без проверки токена панель осталась бы открытой и нерабочей.
+  if (LIVE ? !(staffAuthed && hasStaffToken()) : !staffAuthed) return <StaffLogin />;
 
   return (
-    <div className="screen screen--gutter screen--nonav" style={{ paddingBottom: 60 }}>
+    // Любое касание в панели отодвигает автоблокировку: она нужна против забытого планшета,
+    // а не против сотрудника, который сейчас работает.
+    <div
+      className="screen screen--gutter screen--nonav"
+      style={{ paddingBottom: 60 }}
+      onPointerDown={touchStaff}
+      onKeyDown={touchStaff}
+    >
       {/* шапка */}
       <StaffHead>
         <div className="row gap-12">
           <button type="button" className="btn btn--ghost" style={{ fontSize: 13, fontWeight: 500, padding: 0 }} onClick={() => go('home')}>← Клиент</button>
-          {LIVE && (
-            <button type="button" className="btn btn--ghost" style={{ fontSize: 13, fontWeight: 500, padding: 0 }} onClick={staffLogout}>Выйти</button>
-          )}
+          {/* Закрыть панель нужно и в демонстрации: иначе показ идёт с открытой кухней. */}
+          <button type="button" className="btn btn--ghost" style={{ fontSize: 13, fontWeight: 500, padding: 0 }} onClick={lockStaff}>Закрыть</button>
         </div>
       </StaffHead>
 

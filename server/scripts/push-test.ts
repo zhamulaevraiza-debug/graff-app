@@ -12,6 +12,7 @@ import { db } from '../src/db.ts';
 const base = (process.argv[2] || 'http://localhost:3000').replace(/\/$/, '');
 const staffLogin = process.argv[3] || 'kitchen';
 const staffPin = process.argv[4] || '1234';
+const panelCode = process.argv[5] || '2468';
 
 let failures = 0;
 const check = (name: string, cond: boolean, detail = '') => {
@@ -73,7 +74,8 @@ check('подписка сохраняется', ok.status === 200 && countSubs(
 
 /* Адресность: чужой гостевой заказ на номер Алисы не должен её будить */
 console.log('\nАдресность');
-const staff = await call('/staff/login', { method: 'POST', body: JSON.stringify({ login: staffLogin, pin: staffPin }) });
+const panel = await call('/staff/panel', { method: 'POST', body: JSON.stringify({ code: panelCode }) });
+const staff = await call('/staff/login', { method: 'POST', body: JSON.stringify({ login: staffLogin, pin: staffPin, ticket: panel.body?.ticket }) });
 if (staff.status !== 200) {
   console.error('  ! вход сотрудника недоступен (статус ' + staff.status + '), часть проверок пропущена');
 } else {

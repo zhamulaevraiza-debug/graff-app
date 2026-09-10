@@ -94,9 +94,23 @@ export interface CreateOrderBody {
   consent: true;
 }
 
+/** Код заведения: первый шаг входа в панель кухни. */
+export interface StaffPanelBody {
+  code: string;
+}
+export interface StaffPanelReply {
+  /** пропуск, с которым принимается вход сотрудника */
+  ticket: string;
+  /** сколько минут он действует */
+  minutes: number;
+}
 export interface StaffLoginBody {
+  /** номер сотрудника */
   login: string;
+  /** личный PIN */
   pin: string;
+  /** пропуск из StaffPanelReply */
+  ticket: string;
 }
 export interface StaffLoginReply {
   token: string;

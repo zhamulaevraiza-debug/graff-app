@@ -11,6 +11,7 @@ import { persist, createJSONStorage } from 'zustand/middleware';
 import { ITEMS, SAUCES, type Format, type PaymentId, type OrderStatus } from '../data/menu';
 import { formatPhone, isPhoneComplete, phoneKey, fmtTime } from '../lib/format';
 import { LEGAL_VERSION, type LegalDocId } from '../data/legal';
+import { DEMO_PANEL_CODE, DEMO_STAFF, STAFF_IDLE_MINUTES } from '../data/staff';
 import * as api from '../lib/api';
 import * as live from './live';
 import {
@@ -131,7 +132,11 @@ export interface AppState {
   online: boolean;
   /** сервер отказал в повторной отправке кода до этого времени (мс); 0 — ограничения нет */
   resendAfter: number;
-  /** сотрудник вошёл в панель; в демонстрации вход не нужен */
+  /** пропуск за код заведения — первый шаг входа в панель; null — код ещё не введён */
+  panelTicket: string | null;
+  /** последнее действие в панели: по нему она закрывается сама, если её забыли открытой */
+  staffSeenAt: number;
+  /** сотрудник вошёл в панель */
   staffAuthed: boolean;
 }
 
@@ -209,8 +214,14 @@ export interface AppActions {
   bootstrap: () => Promise<void>;
   setNetError: (msg: string | null) => void;
   /** вход сотрудника в панель по логину и PIN */
+  /** первый шаг: код заведения открывает панель */
+  staffPanelCode: (code: string) => Promise<boolean>;
+  /** второй шаг: номер сотрудника и его личный PIN */
   staffLogin: (login: string, pin: string) => Promise<boolean>;
-  staffLogout: () => void;
+  /** закрыть панель: кнопкой или сама по бездействию */
+  lockStaff: () => void;
+  /** отметить действие в панели, чтобы она не закрылась под руками */
+  touchStaff: () => void;
   /** отмена своего заказа, пока кухня не начала готовить */
   cancelOrder: (no: number) => Promise<void>;
 }
@@ -259,7 +270,9 @@ function initialState(): AppState {
     storageNoticeAt: null,
     staffForm: null,
     toast: null, now, settings: { ...DEFAULT_SETTINGS },
-    netError: null, busy: false, online: false, resendAfter: 0, staffAuthed: !LIVE || api.hasStaffToken(),
+    netError: null, busy: false, online: false, resendAfter: 0,
+    // Панель закрыта, пока не введён код заведения и не вошёл сотрудник — и в демонстрации тоже.
+    panelTicket: null, staffSeenAt: 0, staffAuthed: LIVE && api.hasStaffToken(),
   };
 }
 
@@ -504,6 +517,12 @@ export const useStore = create<Store>()(
       // ---- таймер: раз в секунду ----
       tick: () => {
         const s = get(); const now = Date.now();
+        // Панель кухни, оставленную открытой, закрываем сами: планшет на кухне
+        // видят все, а в панели телефоны гостей и вся лента заказов.
+        if (s.staffAuthed && s.staffSeenAt && now - s.staffSeenAt > STAFF_IDLE_MINUTES * 60_000) {
+          get().lockStaff();
+          return;
+        }
         // Кухня-автопилот работает и в свёрнутой вкладке: статусы считаются от меток времени заказа,
         // поэтому две вкладки приходят к одинаковому результату, а уведомление «Заказ готов» успевает прийти.
         if (LIVE || !s.settings.autoKitchen) { set({ now }); return; }
@@ -534,12 +553,35 @@ export const useStore = create<Store>()(
       // ---- связь с сервером ----
       bootstrap: async () => { if (LIVE) await live.bootstrap(); },
       setNetError: msg => set({ netError: msg }),
-      staffLogin: async (login, pin) => {
-        if (LIVE) return live.staffLogin(login, pin);
-        set({ staffAuthed: true });
+      staffPanelCode: async code => {
+        if (LIVE) return live.staffPanelCode(code);
+        // В демонстрации проверка идёт на устройстве: это показ порядка входа, а не защита.
+        if (code.trim() !== DEMO_PANEL_CODE) {
+          set({ netError: 'Неверный код заведения' });
+          return false;
+        }
+        set({ panelTicket: 'demo', netError: null });
         return true;
       },
-      staffLogout: () => { if (LIVE) void live.staffLogout(); else set({ staffAuthed: false }); },
+      staffLogin: async (login, pin) => {
+        if (LIVE) return live.staffLogin(login, pin);
+        if (!get().panelTicket) {
+          set({ netError: 'Сначала введите код заведения' });
+          return false;
+        }
+        const who = DEMO_STAFF.find(x => x.number === login.trim() && x.pin === pin.trim());
+        if (!who) {
+          set({ netError: 'Неверный номер сотрудника или PIN' });
+          return false;
+        }
+        set({ staffAuthed: true, staffSeenAt: Date.now(), netError: null });
+        return true;
+      },
+      lockStaff: () => {
+        if (LIVE) void live.staffLogout();
+        set({ staffAuthed: false, panelTicket: null, staffSeenAt: 0, staffForm: null, netError: null });
+      },
+      touchStaff: () => { if (get().staffAuthed) set({ staffSeenAt: Date.now() }); },
       cancelOrder: async no => {
         if (LIVE) { await live.cancelOrder(no); return; }
         get().setStatus(no, 'cancelled');
@@ -557,7 +599,7 @@ export const useStore = create<Store>()(
     }),
     {
       name: 'graff-app',
-      version: 2,
+      version: 3,
       storage: createJSONStorage(() => safeStorage),
       partialize: s => ({
         screen: s.screen, staffTab: s.staffTab,
@@ -567,13 +609,16 @@ export const useStore = create<Store>()(
         favorites: s.favorites, favFormat: s.favFormat, notifOn: s.notifOn, settings: s.settings,
         consentAt: s.consentAt, consentVersion: s.consentVersion, marketingConsent: s.marketingConsent, marketingConsentAt: s.marketingConsentAt,
         storageNoticeAt: s.storageNoticeAt,
-        staffAuthed: s.staffAuthed,
+        staffAuthed: s.staffAuthed, panelTicket: s.panelTicket, staffSeenAt: s.staffSeenAt,
       }),
-      // Редакция 2: ускоренное время перестало включаться само. У тех, кто открывал приложение раньше,
-      // оно осталось в сохранённых настройках — выключаем, иначе «12 минут» снова пройдут за минуту.
       migrate: (persisted, from) => {
-        const p = (persisted || {}) as Partial<AppState>;
-        if (from < 2 && p.settings) return { ...p, settings: { ...p.settings, fastTimer: false } };
+        let p = (persisted || {}) as Partial<AppState>;
+        // Редакция 2: ускоренное время перестало включаться само. У тех, кто открывал приложение
+        // раньше, оно осталось в настройках — выключаем, иначе «12 минут» снова пройдут за минуту.
+        if (from < 2 && p.settings) p = { ...p, settings: { ...p.settings, fastTimer: false } };
+        // Редакция 3: панель кухни закрывается кодом заведения и личным PIN. Раньше в демонстрации
+        // она была открыта всем, и это состояние сохранено на устройстве — закрываем.
+        if (from < 3) p = { ...p, staffAuthed: false, panelTicket: null, staffSeenAt: 0 };
         return p;
       },
       merge: (persisted, current) => {

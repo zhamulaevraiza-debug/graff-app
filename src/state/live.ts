@@ -51,6 +51,8 @@ interface StoreShape {
   online: boolean;
   resendAfter: number;
   staffAuthed: boolean;
+  panelTicket: string | null;
+  staffSeenAt: number;
 }
 
 let ref: StoreAccess | null = null;
@@ -404,11 +406,26 @@ export const cartTotal = (cart: Line[]) => orderTotal(cart);
 
 /* ---------- панель персонала ---------- */
 
+/** Первый шаг: код заведения. Пропуск кладём в стор — с ним принимается вход сотрудника. */
+export async function staffPanelCode(code: string): Promise<boolean> {
+  const s = store();
+  const reply = await run(() => api.staffPanel(code));
+  if (!reply) return false;
+  s.set({ panelTicket: reply.ticket });
+  return true;
+}
+
+/** Второй шаг: номер сотрудника и его PIN. Без пропуска сервер даже не проверяет PIN. */
 export async function staffLogin(login: string, pin: string): Promise<boolean> {
   const s = store();
-  const reply = await run(() => api.staffLogin(login, pin));
+  const ticket = s.get().panelTicket;
+  if (!ticket) {
+    s.set({ netError: 'Сначала введите код заведения' });
+    return false;
+  }
+  const reply = await run(() => api.staffLogin(login, pin, ticket));
   if (!reply) return false;
-  s.set({ staffAuthed: true });
+  s.set({ staffAuthed: true, staffSeenAt: Date.now() });
   await loadStaffOrders();
   reconnect();
   return true;

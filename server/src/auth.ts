@@ -15,7 +15,8 @@ const fromB64url = (s: string) => Buffer.from(s.replace(/-/g, '+').replace(/_/g,
 export interface TokenPayload {
   /** идентификатор пользователя или сотрудника */
   sub: string;
-  role: 'user' | 'staff' | 'admin';
+  /** panel — пропуск, выданный за код заведения; сам по себе он ничего не открывает, кроме входа сотрудника */
+  role: 'user' | 'staff' | 'admin' | 'panel';
   /** телефон клиента: позволяет показать заказы, внесённые персоналом по звонку */
   phone?: string;
   exp: number;

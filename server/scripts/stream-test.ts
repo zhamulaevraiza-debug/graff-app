@@ -8,6 +8,7 @@
 const base = (process.argv[2] || 'http://localhost:3000').replace(/\/$/, '');
 const staffLogin = process.argv[3] || 'kitchen';
 const staffPin = process.argv[4] || '1234';
+const panelCode = process.argv[5] || '2468';
 const phone = '999' + String(Date.now()).slice(-7);
 
 let failures = 0;
@@ -71,7 +72,8 @@ const verify = await call('/auth/verify', { method: 'POST', body: JSON.stringify
 const userToken: string = verify.body?.token || '';
 check('клиент вошёл', !!userToken);
 
-const login = await call('/staff/login', { method: 'POST', body: JSON.stringify({ login: staffLogin, pin: staffPin }) });
+const panel = await call('/staff/panel', { method: 'POST', body: JSON.stringify({ code: panelCode }) });
+const login = await call('/staff/login', { method: 'POST', body: JSON.stringify({ login: staffLogin, pin: staffPin, ticket: panel.body?.ticket }) });
 const staffToken: string = login.body?.token || '';
 check('сотрудник вошёл', !!staffToken);
 

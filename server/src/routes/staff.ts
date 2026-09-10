@@ -12,6 +12,7 @@
  * имена и телефоны всех гостей. Поэтому у него два независимых рубежа: предел частоты по IP
  * и счётчик неудач по самой учётной записи (ниже), как счётчик попыток кода в routes/auth.ts.
  */
+import { createHash, timingSafeEqual } from 'node:crypto';
 import type { FastifyError, FastifyInstance, FastifyRequest } from 'fastify';
 // Только ради типов: плагин ограничения частоты добавляет полю config маршрута ключ rateLimit.
 import type {} from '@fastify/rate-limit';
@@ -34,6 +35,17 @@ function fail(status: number, code: string, message: string): never {
 }
 
 const sleep = (ms: number) => new Promise<void>(resolve => setTimeout(resolve, ms));
+
+/**
+ * Сравнение секретов за одинаковое время. Обычное === сравнивает посимвольно и обрывается
+ * на первом несовпадении, поэтому по времени ответа подбираются цифры по одной.
+ * Хэшируем, чтобы длины совпали: timingSafeEqual требует буферов одного размера.
+ */
+function sameSecret(a: string, b: string): boolean {
+  const ha = createHash('sha256').update(a).digest();
+  const hb = createHash('sha256').update(b).digest();
+  return timingSafeEqual(ha, hb);
+}
 
 /** Названия статусов по-русски: нужны в пояснениях к отказам. */
 const STATUS_NAME: Record<OrderStatus, string> = {
@@ -284,8 +296,60 @@ export async function staffRoutes(app: FastifyInstance) {
   });
 
   /**
-   * Вход сотрудника. Два рубежа: предел частоты по IP (ниже) и счётчик неудач
-   * по логину (loginFails) — по отдельности каждый из них обходится.
+   * Первый шаг входа в панель: код заведения. Он один на кафе и знают его только сотрудники.
+   * В ответ выдаётся короткий пропуск, без которого вход сотрудника вообще не отвечает —
+   * значит, перебирать PIN, не зная кода заведения, бессмысленно.
+   *
+   * Код сравнивается по хэшу и за постоянное время: посимвольное сравнение выдало бы
+   * правильные цифры по времени ответа.
+   */
+  app.post<{ Body: { code?: unknown } }>(
+    '/staff/panel',
+    {
+      config: {
+        rateLimit: {
+          max: 10,
+          timeWindow: '5 minutes',
+          keyGenerator: (req: FastifyRequest) => req.ip,
+          errorResponseBuilder: () =>
+            Object.assign(new Error('Слишком много попыток. Подождите несколько минут.'), {
+              statusCode: 429,
+              code: 'too_many_requests',
+              expose: true,
+            }),
+        },
+      },
+    },
+    async req => {
+      const started = Date.now();
+      const code = typeof req.body?.code === 'string' ? req.body.code.trim().slice(0, LIMITS.pin) : '';
+      const key = 'panel:' + req.ip;
+
+      const left = lockLeft(key, started);
+      if (left > 0) {
+        fail(429, 'too_many_requests', `Слишком много попыток. Подождите ${Math.ceil(left / 1000)} с.`);
+      }
+
+      if (!config.staffPanelCode) {
+        fail(503, 'unavailable', 'Код заведения не настроен. Задайте STAFF_PANEL_CODE на сервере.');
+      }
+      if (!code || !sameSecret(code, config.staffPanelCode)) {
+        const locked = noteFail(key, Date.now());
+        audit('staff:?', 'staff.panel.failed', { ip: req.ip });
+        if (locked) audit('staff:?', 'staff.panel.locked', { ip: req.ip, seconds: Math.round(locked / 1000) });
+        await sleep(Math.max(0, LOGIN_ANSWER_MS - (Date.now() - started)));
+        fail(401, 'unauthorized', 'Неверный код заведения');
+      }
+
+      noteSuccess(key);
+      const ticket = signToken({ sub: 'panel', role: 'panel' }, config.panelTicketMinutes * 60);
+      return { ticket, minutes: config.panelTicketMinutes };
+    },
+  );
+
+  /**
+   * Вход сотрудника. Три рубежа: пропуск за код заведения, предел частоты по IP
+   * и счётчик неудач по логину (loginFails) — по отдельности каждый из них обходится.
    */
   app.post<{ Body: Partial<StaffLoginBody> }>(
     '/staff/login',
@@ -313,6 +377,12 @@ export async function staffRoutes(app: FastifyInstance) {
       const login = typeof body.login === 'string' ? body.login.trim().slice(0, LIMITS.login) : '';
       const pin = typeof body.pin === 'string' ? body.pin.slice(0, LIMITS.pin) : '';
 
+      // Без пропуска за код заведения вход не отвечает вовсе: подбирать PIN не с чего.
+      const ticket = verifyToken(typeof body.ticket === 'string' ? body.ticket : bearer(req.headers.authorization));
+      if (!ticket || ticket.role !== 'panel') {
+        fail(401, 'panel_required', 'Сначала введите код заведения');
+      }
+
       const left = lockLeft(login, started);
       if (left > 0) {
         fail(
@@ -336,7 +406,7 @@ export async function staffRoutes(app: FastifyInstance) {
         // Отказ занимает одинаковое время при любом исходе: и работа, и пауза
         // укладываются в общий срок, поэтому по нему нельзя узнать, есть ли такой логин.
         await sleep(Math.max(0, LOGIN_ANSWER_MS - (Date.now() - started)));
-        fail(401, 'unauthorized', 'Неверный логин или PIN');
+        fail(401, 'unauthorized', 'Неверный номер сотрудника или PIN');
       }
 
       noteSuccess(login);
