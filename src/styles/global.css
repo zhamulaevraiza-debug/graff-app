@@ -160,9 +160,6 @@ h1, h2, h3, p, ul, ol { margin: 0; }
 .screen--nonav { padding-bottom: 40px; }
 
 /* ---------- типографика ---------- */
-.t-logo { font: 900 22px var(--f-logo); color: var(--copper); letter-spacing: .02em; line-height: 1; }
-.t-fd { font: 600 7px var(--f-caps); letter-spacing: .3em; color: var(--sec); text-transform: uppercase; }
-.t-script { font: 400 34px var(--f-script); color: var(--copper); line-height: 1; }
 .t-hand { font: 600 15px var(--f-hand); color: var(--copper); line-height: 1.05; }
 .t-caps { font: 700 12px var(--f-head); letter-spacing: .14em; color: var(--sec); text-transform: uppercase; }
 .t-head { font: 700 18px var(--f-head); letter-spacing: .06em; }

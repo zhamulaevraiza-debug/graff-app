@@ -15,12 +15,11 @@
 <link rel="icon" href="/icon.svg" type="image/svg+xml">
 <link rel="icon" href="/icon-192.png" sizes="192x192" type="image/png">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
-<!-- Шрифты грузим асинхронно: если fonts.googleapis.com недоступен, приложение всё равно откроется на системных шрифтах -->
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@900&family=Montserrat:wght@500;600&family=Marck+Script&family=Oswald:wght@500;700&family=Roboto+Condensed:wght@400;500;700&family=Caveat:wght@500;600&display=swap">
-<link rel="stylesheet" media="print" onload="this.media='all';this.onload=null" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@900&family=Montserrat:wght@500;600&family=Marck+Script&family=Oswald:wght@500;700&family=Roboto+Condensed:wght@400;500;700&family=Caveat:wght@500;600&display=swap">
-<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@900&family=Montserrat:wght@500;600&family=Marck+Script&family=Oswald:wght@500;700&family=Roboto+Condensed:wght@400;500;700&family=Caveat:wght@500;600&display=swap"></noscript>
+<!-- Шрифты лежат в самом приложении: к серверам Google оно не обращается, поэтому адрес гостя
+     никуда не уходит и меню открывается своим шрифтом даже без доступа к внешним сервисам.
+     Файлы и лицензии — в public/fonts, собирает scripts/fonts.mjs. -->
+<link rel="preload" as="font" type="font/woff2" href="/fonts/RobotoCondensed-400-cyrillic.woff2" crossorigin>
+<link rel="stylesheet" href="/fonts/fonts.css">
 </head>
 <body>
 <div id="root"></div>
