@@ -8,7 +8,7 @@
  * Пути считаются от области действия воркера, поэтому приложение работает и в корне домена,
  * и в подпапке (например, на GitHub Pages по адресу /graff-app/).
  */
-const CACHE = 'graff-v4';
+const CACHE = 'graff-v5';
 const BASE = new URL(self.registration.scope).pathname;
 const INDEX = BASE + 'index.html';
 const OFFLINE_URLS = [BASE, INDEX, BASE + 'manifest.webmanifest', BASE + 'icon.svg', BASE + 'icon-192.png', BASE + 'apple-touch-icon.png'];
