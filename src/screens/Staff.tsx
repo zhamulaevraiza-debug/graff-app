@@ -8,14 +8,14 @@
 import { useEffect, useRef, useState, type FormEvent, type ReactNode } from 'react';
 import { useStore, LIVE, type Settings } from '../state/store';
 import { hasStaffToken } from '../lib/api';
-import { FORMATS, ZONES, STATUS_TEXT, ETA_CHOICES, type IconName } from '../data/menu';
+import { FORMATS, ZONES, STATUS_TEXT, ETA_CHOICES, MENU, catIcon, type IconName } from '../data/menu';
 import { MISSING_REQUISITES } from '../data/legal';
 import { DEMO_PANEL_CODE, DEMO_STAFF } from '../data/staff';
 import { rub, fmtTime } from '../lib/format';
 import { formatText, itemsText, minutesLeft, type Order } from '../lib/orders';
 import { Monogram, LogoWord } from '../components/Logo';
 import { Photo } from '../components/Photo';
-import { setOwnPhoto, clearOwnPhoto, useOwnPhoto } from '../lib/photoStore';
+import { setOwnPhoto, clearOwnPhoto, clearAllOwnPhotos, useHasOwnPhoto, useOwnPhotoCount } from '../lib/photoStore';
 import { photoCredit } from '../data/photos';
 import { Icon, Crown } from '../components/Icon';
 import './Staff.css';
@@ -445,11 +445,16 @@ export function Staff() {
         <OwnPhotoRow slot="about-terrace" title="«О нас»: терраса" icon="sun" />
         <OwnPhotoRow slot="about-map" title="«О нас»: карта" icon="pin" />
       </div>
+
+      {/* ---------- ФОТОГРАФИИ БЛЮД ---------- */}
+      <DishPhotos />
+
       <p className="t-small mt-8">
         Выбранный здесь снимок хранится в этом браузере и виден только на этом устройстве. Чтобы фото
         увидели все гости, положите файл с тем же именем (например, <code>hero-burger.jpg</code>) в папку
         <code> public/photos</code> и соберите приложение заново — список имён лежит в README этой папки.
       </p>
+      <ClearAllPhotos />
 
       {/* ---------- НАСТРОЙКИ ---------- */}
       <div className="t-caps" style={{ marginTop: 24 }}>НАСТРОЙКИ</div>
@@ -465,9 +470,56 @@ export function Staff() {
   );
 }
 
+/**
+ * Фотографии блюд: сверху выбирается раздел меню, ниже — его обложка и каждое блюдо.
+ * Всё меню одним списком не показываем: на телефоне такой список не пролистать.
+ */
+function DishPhotos() {
+  const [catId, setCatId] = useState(MENU[0].id);
+  const cat = MENU.find(c => c.id === catId) || MENU[0];
+  const icon = catIcon(cat.id);
+
+  return (
+    <>
+      <div className="t-caps" style={{ marginTop: 24 }}>ФОТОГРАФИИ БЛЮД</div>
+      {/* Чипы с aria-pressed, как в остальном приложении: роли вкладок обещали бы клавиатурную
+          навигацию стрелками и связанную панель, которых здесь нет. */}
+      <div className="hscroll mt-8" aria-label="Раздел меню">
+        {MENU.map(c => {
+          const on = c.id === cat.id;
+          return (
+            <button
+              key={c.id}
+              type="button"
+              aria-pressed={on}
+              className={cx('chip', 'chip--sm', on && 'chip--on')}
+              style={{ flex: 'none' }}
+              onClick={() => setCatId(c.id)}
+            >
+              {c.name}
+            </button>
+          );
+        })}
+      </div>
+      {/* key по разделу: иначе React оставит строкам состояние прошлого раздела — например,
+          сообщение об ошибке от совсем другого блюда. */}
+      <div className="list mt-8" key={cat.id}>
+        {/* Обложка есть не у всех разделов: у «Соусов» её нет и в меню, ставить её некуда. */}
+        {cat.hasPhoto && <OwnPhotoRow slot={'cat-' + cat.id} title="Обложка раздела" icon={icon} />}
+        {cat.groups.flatMap(g => g.items).map(it => (
+          <OwnPhotoRow key={it.id} slot={'dish-' + it.id} title={it.name + it.groupNote} icon={icon} />
+        ))}
+      </div>
+    </>
+  );
+}
+
 /** Строка выбора своего снимка для одного слота фотографии. */
 function OwnPhotoRow({ slot, title, icon }: { slot: string; title: string; icon: IconName }) {
-  const own = useOwnPhoto(slot);
+  // Именно has-, а не сам адрес снимка: адрес приходит из хранилища с задержкой, и строка
+  // успела бы сказать «снимок из каталога», а кнопка «Убрать» — появиться уже под пальцем.
+  const own = useHasOwnPhoto(slot);
+  const touchStaff = useStore(s => s.touchStaff);
   const [err, setErr] = useState('');
   const input = useRef<HTMLInputElement>(null);
 
@@ -481,21 +533,31 @@ function OwnPhotoRow({ slot, title, icon }: { slot: string; title: string; icon:
     }
   };
 
+  const drop = async () => {
+    setErr('');
+    try {
+      await clearOwnPhoto(slot);
+    } catch {
+      setErr('Не удалось убрать фото');
+    }
+  };
+
   return (
     <div className="list__row list__row--static">
       <Photo id={slot} shape="circle" width={40} height={40} placeholder={title} icon={icon} />
       <div className="list__grow">
         <div>{title}</div>
-        <div className="list__sub">
-          {own ? 'своё фото' : photoCredit(slot) ? 'снимок из каталога' : 'фото пока нет'}
-        </div>
+        {/* Когда снимка нет ни своего, ни из каталога, подписи нет: что стоит в слоте, видно по кружку слева. */}
+        {(own || photoCredit(slot)) && (
+          <div className="list__sub">{own ? 'своё фото' : 'снимок из каталога'}</div>
+        )}
         {err && <div className="t-small" style={{ color: 'var(--price)' }}>{err}</div>}
       </div>
-      <button type="button" className="chip chip--sm" onClick={() => input.current?.click()}>
+      <button type="button" className="chip chip--sm" onClick={() => { touchStaff(); input.current?.click(); }}>
         {own ? 'Заменить' : 'Выбрать'}
       </button>
       {own && (
-        <button type="button" className="chip chip--sm" onClick={() => { setErr(''); clearOwnPhoto(slot); }}>Убрать</button>
+        <button type="button" className="chip chip--sm" onClick={() => void drop()} aria-label={`Убрать фото: ${title}`}>Убрать</button>
       )}
       <input
         ref={input}
@@ -503,9 +565,30 @@ function OwnPhotoRow({ slot, title, icon }: { slot: string; title: string; icon:
         accept="image/*"
         hidden
         aria-label={`Выбрать фото: ${title}`}
-        onChange={e => { const f = e.target.files?.[0]; e.target.value = ''; void pick(f); }}
+        onChange={e => { const f = e.target.files?.[0]; e.target.value = ''; touchStaff(); void pick(f); }}
       />
     </div>
+  );
+}
+
+/** Сброс своих снимков. Отдельным компонентом, чтобы счётчик не перерисовывал всю панель. */
+function ClearAllPhotos() {
+  const count = useOwnPhotoCount();
+  const [err, setErr] = useState('');
+  if (!count) return null;
+  const clear = () => {
+    if (!window.confirm(`Убрать все свои фотографии кафе и блюд (${count})? Вернётся то, что было до замены.`)) return;
+    setErr('');
+    // Молчать нельзя: без ответа хранилища кнопка просто ничего не сделает, и это выглядит поломкой.
+    clearAllOwnPhotos().catch(() => setErr('Не удалось убрать фотографии'));
+  };
+  return (
+    <>
+      <button type="button" className="btn btn--ghost mt-8" style={{ fontSize: 13, padding: 0 }} onClick={clear}>
+        Убрать все свои фото · {count}
+      </button>
+      {err && <div className="t-small" style={{ color: 'var(--price)' }}>{err}</div>}
+    </>
   );
 }
 

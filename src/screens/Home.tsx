@@ -125,7 +125,8 @@ export function Home() {
                 display: 'flex', flexDirection: 'column', gap: 8,
               }}
             >
-              <Photo id={'new-' + it.id} height={84} radius={10} placeholder={'Фото: ' + it.name} icon="star" />
+              {/* own: своё фото блюдо получает один раз — в панели персонала — и показывается им и здесь. */}
+              <Photo id={'new-' + it.id} own={'dish-' + it.id} height={84} radius={10} placeholder={'Фото: ' + it.name} icon="star" />
               <span style={{ fontSize: 14, lineHeight: 1.2, minHeight: 34 }}>{it.name}</span>
               <span style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <span className="t-price">{it.priceLabel}</span>

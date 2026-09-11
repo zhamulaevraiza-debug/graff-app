@@ -4,7 +4,7 @@ import { rub } from '../lib/format';
 import { Icon, Crown } from '../components/Icon';
 import { Photo } from '../components/Photo';
 import { photoCredit } from '../data/photos';
-import { useOwnPhoto } from '../lib/photoStore';
+import { useHasOwnPhoto } from '../lib/photoStore';
 import { BackButton } from '../components/Titles';
 import { appBack } from '../lib/nav';
 import './Dish.css';
@@ -32,7 +32,7 @@ export function Dish() {
 
   const it = dishId ? ITEMS[dishId] : undefined;
   const photoSlot = it ? 'dish-' + it.id : '';
-  const ownPhoto = useOwnPhoto(photoSlot);
+  const ownPhoto = useHasOwnPhoto(photoSlot);
   // Снимок из открытого каталога, а не съёмка этой порции — об этом честно говорим под фото.
   // Если кафе поставило собственное фото, оговорка не нужна.
   const stockPhoto = !ownPhoto && !!(it && photoCredit(photoSlot));
