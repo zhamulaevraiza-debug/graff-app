@@ -36,7 +36,7 @@
   --sat: env(safe-area-inset-top, 0px);
   --sab: env(safe-area-inset-bottom, 0px);
   --top-pad: calc(var(--sat) + 16px);         /* отступ контента от верха экрана */
-  --nav-h: calc(86px + var(--sab));           /* высота нижней навигации вместе с отступом под ней */
+  --nav-h: calc(78px + var(--sab));           /* высота нижней навигации */
   --gutter: 18px;
   --phone-w: 402px;
   --r-card: 16px;
@@ -408,49 +408,33 @@ h1, h2, h3, p, ul, ol { margin: 0; }
 }
 
 /* нижняя навигация */
-/* Навигация — отдельная плашка со скруглением, как в макете главной: она не приклеена
-   к краю экрана, а лежит поверх него и просвечивает содержимое под собой. */
 .bottom-nav {
   position: absolute;
-  left: 12px; right: 12px;
-  bottom: calc(var(--sab) + 12px);
-  height: 68px;
+  left: 0; right: 0; bottom: 0;
+  height: var(--nav-h);
   z-index: 7;
-  background: rgba(249, 243, 236, .93);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  border: 1px solid rgba(180, 150, 120, .18);
-  border-radius: 26px;
-  box-shadow: 0 8px 24px rgba(120, 80, 40, .1);
+  background: rgba(251, 246, 239, .96);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-top: 1px solid var(--line);
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  padding: 0 4px;
+  padding: 6px 8px calc(var(--sab));
 }
 .bottom-nav__tab {
-  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  padding-top: 4px;
   cursor: pointer;
   color: var(--nav-inactive);
   position: relative;
   background: none; border: 0;
-  border-radius: 20px;
   -webkit-tap-highlight-color: transparent;
 }
 .bottom-nav__tab--on { color: var(--copper); }
-/* Подложка под активной вкладкой: без неё медный цвет теряется на светлой плашке.
-   Иконка и подпись поднимаются над ней — позиционированный ::before иначе закрасил бы их сверху. */
-.bottom-nav__tab--on::before {
-  content: '';
-  position: absolute;
-  top: 8px;
-  width: 46px; height: 30px;
-  border-radius: 15px;
-  background: rgba(184, 98, 43, .1);
-}
-.bottom-nav__tab > * { position: relative; z-index: 1; }
 .bottom-nav__label { font: 500 11px var(--f-body); }
 .bottom-nav__tab--on .bottom-nav__label { font-weight: 700; }
 .bottom-nav__badge {
-  position: absolute; top: 6px; left: calc(50% + 6px);
+  position: absolute; top: 0; left: calc(50% + 6px);
   min-width: 16px; height: 16px; border-radius: 8px;
   background: var(--price); color: #fff;
   font-size: 10px; font-weight: 700;

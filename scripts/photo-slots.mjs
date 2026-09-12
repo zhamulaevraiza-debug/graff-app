@@ -11,7 +11,8 @@ const d = (slot, what, ...q) => ({ slot, what, q });
 
 export const SLOTS = [
   /* Главная и разделы меню */
-  d('hero-burger', 'снимок в шапке главной', 'cheeseburger white background', 'double cheeseburger'),
+  d('hero-burger', 'бургер в круге на главной', 'double cheeseburger', 'cheeseburger'),
+  d('hero-fries', 'картофель фри в круге на главной', 'french fries paper cup', 'french fries'),
   d('cat-burgers', 'раздел «Бургеры»', 'hamburger sandwich beef', 'cheeseburger'),
   d('cat-fastfood', 'раздел «Фастфуд»', 'fried chicken wings plate', 'fried chicken basket'),
   d('cat-new', 'раздел «Новинки»', 'chicken fajitas', 'fajita'),

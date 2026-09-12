@@ -1,166 +1,158 @@
 /**
- * Главная — витрина кафе: крупный заголовок с фотографией навылет, три обещания бренда
- * карточками, активный заказ, формат получения, категории, Новинки ★ и адрес.
- *
- * Верх экрана собран по макету владельца: заголовок «Вкус в каждой детали», кнопка
- * «Смотреть меню» и снимок, выходящий за правый край. Категории, новинки и адрес
- * остаются ниже — без них в меню было бы не попасть.
+ * Главная — шапка печатного меню на телефоне: логотип, «Позвонить», hero с бургером и фри,
+ * три обещания бренда, карточка активного заказа, формат получения, категории, Новинки ★, адрес.
+ * Источник: design/GRAFF App.dc.html, секция isHome (строки 100–183).
  */
-import { useEffect, useRef, useState } from 'react';
-import { createPortal } from 'react-dom';
 import { useStore, selActiveMine } from '../state/store';
-import {
-  MENU, NEW_ITEMS, FORMATS, PROMISES, TOWN, ADDRESS, HOURS, TAGLINE_LINES,
-  HERO_EYEBROW, HERO_TITLE, HERO_SUB, PHONE_DISPLAY, PHONE_TEL,
-} from '../data/menu';
+import { MENU, NEW_ITEMS, TOWN, ADDRESS, HOURS, SLOGAN_LINES, TAGLINE } from '../data/menu';
 import { orderView, type Order } from '../lib/orders';
-import { Icon } from '../components/Icon';
+import { Icon, Crown, SpeedStrokes } from '../components/Icon';
 import { HeaderLogo } from '../components/Logo';
 import { Photo } from '../components/Photo';
-import './Home.css';
+import { Promises } from '../components/Promises';
+import { CallRound } from '../components/CallButton';
+import { FormatPicker } from '../components/FormatPicker';
+
+/** Сброс стилей нативной кнопки: карточка/плитка выглядит как в макете, но остаётся <button>. */
+const btnReset = {
+  background: 'none', border: 0, padding: 0, margin: 0, color: 'inherit', font: 'inherit', textAlign: 'left', cursor: 'pointer',
+  WebkitTapHighlightColor: 'transparent',
+} as const;
 
 export function Home() {
   const go = useStore(s => s.go);
   const openCat = useStore(s => s.openCat);
   const openDish = useStore(s => s.openDish);
-  const format = useStore(s => s.format);
-  const pickFormat = useStore(s => s.pickFormat);
   // первый активный заказ пользователя — ссылка стабильна, пока заказ не изменится
   const active = useStore(s => selActiveMine(s)[0]);
-  const heroPhoto = useStore(s => s.settings.heroPhotos);
-  const [sheet, setSheet] = useState(false);
-  const burger = useRef<HTMLButtonElement>(null);
-
-  // Фокус возвращаем на кнопку, которой лист открыли: иначе он падает в начало страницы.
-  const closeSheet = () => { setSheet(false); burger.current?.focus(); };
+  const heroPhotos = useStore(s => s.settings.heroPhotos);
 
   return (
-    <div className="screen home">
-      {/* шапка: логотип и кнопка меню */}
-      <div className="home-head">
-        <HeaderLogo height={46} />
-        <button
-          ref={burger}
-          type="button"
-          className="home-burger"
-          onClick={() => setSheet(true)}
-          aria-label="Меню и контакты"
-          aria-haspopup="dialog"
-          aria-expanded={sheet}
-        >
-          <Icon name="bars" size={22} color="var(--h-title)" strokeWidth={1.8} />
-        </button>
+    <div className="screen">
+      {/* шапка: логотип и «Позвонить» */}
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', padding: '0 var(--gutter)' }}>
+        <HeaderLogo />
+        <CallRound />
       </div>
 
-      {/* заголовок, кнопка и фотография */}
-      <section className="hero">
-        <div className={heroPhoto ? 'hero__top hero__top--photo' : 'hero__top'}>
-          {heroPhoto && (
-            <div className="hero__photo">
-              <Leaf className="hero__leaf" />
-              <Photo id="hero-burger" width="100%" height="100%" placeholder="Фото бургера" icon="burger" style={{ borderRadius: '26px 0 0 26px' }} />
-            </div>
-          )}
-          <div className={heroPhoto ? 'hero__col' : 'hero__col hero__col--wide'}>
-            <div className="hero__eyebrow">{HERO_EYEBROW}</div>
-            <h1 className="hero__title">
-              {HERO_TITLE.map((line, i) => <span key={i} style={{ display: 'block' }}>{line}</span>)}
-            </h1>
-            <p className="hero__sub">
-              {HERO_SUB.map((line, i) => <span key={i} style={{ display: 'block' }}>{line}</span>)}
-            </p>
+      {/* hero как верх печатного меню; два круглых фото по краям можно убрать в панели персонала */}
+      {/* колонки фото сжимаются на узких экранах (320–375px), чтобы правая колонка не уезжала за край */}
+      <div
+        style={heroPhotos
+          ? { margin: '22px var(--gutter) 0', display: 'grid', gridTemplateColumns: 'minmax(64px, 104px) minmax(max-content, 1fr) minmax(64px, 104px)', alignItems: 'center', gap: 6 }
+          : { margin: '22px var(--gutter) 0', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}
+      >
+        {heroPhotos ? (
+          <div style={{ position: 'relative' }}>
+            <div className="t-hand" style={{ position: 'absolute', left: 0, top: -18, width: 96 }}>{SLOGAN_LINES}</div>
+            <Photo id="hero-burger" shape="circle" width="100%" height="auto" placeholder="Фото бургера" icon="burger" style={{ marginTop: 20, aspectRatio: '1' }} />
           </div>
-        </div>
-        <div className="hero__bottom">
-          <button type="button" className="hero__cta" onClick={() => go('menu')}>
-            Смотреть меню
-            <Icon name="arrow" size={20} color="#fff" strokeWidth={1.8} />
+        ) : (
+          <div className="t-hand">{SLOGAN_LINES}</div>
+        )}
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', minWidth: 0 }}>
+          <Crown width={26} strokeWidth={1.4} />
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, whiteSpace: 'nowrap' }}>
+            <SpeedStrokes width={20} style={{ flex: 'none' }} />
+            <div style={{ font: '400 clamp(38px, 12vw, 46px)/1 var(--f-script)', color: 'var(--copper)' }}>Меню</div>
+            <SpeedStrokes width={20} mirror style={{ flex: 'none' }} />
+          </div>
+          <button
+            type="button"
+            onClick={() => go('menu')}
+            style={{
+              marginTop: 8, border: '1.5px solid var(--copper)', borderRadius: 999, padding: '5px 14px',
+              font: '700 12px var(--f-head)', letterSpacing: '.1em', color: 'var(--copper)', background: 'transparent',
+              cursor: 'pointer', WebkitTapHighlightColor: 'transparent',
+            }}
+          >
+            СМОТРЕТЬ
           </button>
-          <div className="hero__hand">
-            {TAGLINE_LINES.map((line, i) => <span key={i} style={{ display: 'block' }}>{line}</span>)}
-          </div>
         </div>
-      </section>
+        {heroPhotos ? (
+          <div style={{ position: 'relative', minWidth: 0 }}>
+            <Photo id="hero-fries" shape="circle" width="100%" height="auto" placeholder="Фото фри GRAFF" icon="fries" style={{ aspectRatio: '1' }} />
+            <div className="t-hand" style={{ textAlign: 'right', marginTop: 6 }}>{TAGLINE}</div>
+          </div>
+        ) : (
+          <div className="t-hand">{TAGLINE}</div>
+        )}
+      </div>
 
       {/* три обещания бренда */}
-      <div className="home-promises">
-        {PROMISES.map(p => (
-          <div key={p.icon} className="home-promise">
-            <span className="home-promise__badge">
-              <Icon name={p.icon} size={19} color={p.color || 'var(--copper)'} strokeWidth={1.7} />
-            </span>
-            <span className="home-promise__text">{p.tile}</span>
-          </div>
-        ))}
-      </div>
+      <Promises variant="framed" style={{ margin: '18px var(--gutter) 0' }} />
 
       {/* активный заказ */}
       {active && <ActiveOrderCard order={active} />}
 
       {/* формат получения */}
-      <div className="home-formats" role="radiogroup" aria-label="Формат получения">
-        {FORMATS.map(f => {
-          const on = format === f.id;
-          return (
-            <button
-              key={f.id}
-              type="button"
-              role="radio"
-              aria-checked={on}
-              onClick={() => pickFormat(f.id)}
-              className={['home-format', on ? 'home-format--on' : ''].join(' ').trim()}
-            >
-              <Icon d={f.icon} size={24} color={on ? '#fff' : 'var(--h-title)'} strokeWidth={1.5} />
-              {f.name}
-            </button>
-          );
-        })}
+      <div style={{ margin: '16px var(--gutter) 0' }}>
+        <FormatPicker />
       </div>
 
       {/* категории */}
-      <h2 className="home-cap">Категории</h2>
-      <div className="hscroll" style={{ padding: '12px var(--h-gutter) 4px' }}>
+      <div style={{ margin: '20px var(--gutter) 0', font: '700 13px var(--f-head)', letterSpacing: '.14em', color: 'var(--text)' }}>КАТЕГОРИИ</div>
+      <div className="hscroll" style={{ padding: '10px var(--gutter) 4px' }}>
         {MENU.map(c => (
-          <button key={c.id} type="button" className="home-cat" onClick={() => openCat(c.id)}>
-            <span className="home-cat__tile"><Icon d={c.icon} size={28} strokeWidth={1.5} /></span>
-            <span className="home-cat__name">{c.name}</span>
+          <button
+            key={c.id}
+            type="button"
+            onClick={() => openCat(c.id)}
+            style={{ ...btnReset, flex: 'none', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, width: 72 }}
+          >
+            <span style={{ width: 60, height: 60, borderRadius: 18, background: c.plateBg, border: '1px solid var(--line)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Icon d={c.icon} size={28} strokeWidth={1.5} />
+            </span>
+            <span style={{ font: '500 12px var(--f-body)', textAlign: 'center' }}>{c.name}</span>
           </button>
         ))}
       </div>
 
       {/* Новинки ★ */}
-      <h2 className="home-cap">Новинки ★</h2>
-      <div className="hscroll" style={{ padding: '12px var(--h-gutter) 4px' }}>
-        {NEW_ITEMS.map(it => (
-          <button
-            key={it.id}
-            type="button"
-            className="home-new"
-            onClick={() => openDish(it.id, 0, 'home')}
-            aria-label={`${it.name}, ${it.priceLabel}`}
-          >
-            {/* own: своё фото блюдо получает один раз — в панели персонала — и показывается им и здесь. */}
-            <Photo id={'new-' + it.id} own={'dish-' + it.id} height={86} radius={12} placeholder={'Фото: ' + it.name} icon="star" />
-            <span className="home-new__name">{it.name}</span>
-            <span style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span className="t-price">{it.priceLabel}</span>
-              <span aria-hidden="true" style={{ width: 26, height: 26, borderRadius: '50%', background: 'var(--grad)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, lineHeight: 1 }}>+</span>
-            </span>
-          </button>
-        ))}
+      <div style={{ margin: '14px var(--gutter) 0', background: 'var(--peach)', border: '1px solid var(--line)', borderRadius: 16, padding: '12px 0' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '0 14px', font: '700 15px var(--f-head)', letterSpacing: '.1em' }}>
+          <span className="star" style={{ fontSize: 18 }}>★</span> НОВИНКИ
+        </div>
+        <div className="hscroll" style={{ padding: '10px 14px 0' }}>
+          {NEW_ITEMS.map(it => (
+            <button
+              key={it.id}
+              type="button"
+              onClick={() => openDish(it.id, 0, 'home')}
+              aria-label={`${it.name}, ${it.priceLabel}`}
+              style={{
+                ...btnReset, flex: 'none', width: 150, background: 'var(--bg)', border: '1px solid var(--line)', borderRadius: 14, padding: 10,
+                display: 'flex', flexDirection: 'column', gap: 8,
+              }}
+            >
+              {/* own: своё фото блюдо получает один раз — в панели персонала — и показывается им и здесь. */}
+              <Photo id={'new-' + it.id} own={'dish-' + it.id} height={84} radius={10} placeholder={'Фото: ' + it.name} icon="star" />
+              <span style={{ fontSize: 14, lineHeight: 1.2, minHeight: 34 }}>{it.name}</span>
+              <span style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span className="t-price">{it.priceLabel}</span>
+                <span aria-hidden="true" style={{ width: 26, height: 26, borderRadius: '50%', background: 'var(--grad)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, lineHeight: 1 }}>+</span>
+              </span>
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* адрес и часы → «О нас» */}
-      <button type="button" className="home-place" onClick={() => go('about')}>
+      <button
+        type="button"
+        onClick={() => go('about')}
+        style={{
+          ...btnReset, margin: '14px var(--gutter) 0', width: 'calc(100% - var(--gutter) * 2)', display: 'flex', alignItems: 'center', gap: 10,
+          padding: '12px 14px', background: 'var(--card)', border: '1px solid var(--line)', borderRadius: 14,
+        }}
+      >
         <Icon name="pin" size={22} />
         <span className="grow" style={{ display: 'block' }}>
           <span style={{ display: 'block', fontWeight: 500 }}>{TOWN}, {ADDRESS}</span>
-          <span className="home-order__sub" style={{ marginTop: 0 }}>{HOURS} · зал и терраса</span>
+          <span className="t-small" style={{ display: 'block' }}>{HOURS} · зал и терраса</span>
         </span>
         <Icon name="chevron" size={18} strokeWidth={1.8} />
       </button>
-
-      {sheet && <HomeSheet onClose={closeSheet} />}
     </div>
   );
 }
@@ -170,91 +162,29 @@ function ActiveOrderCard({ order }: { order: Order }) {
   const now = useStore(s => s.now);
   const openActive = useStore(s => s.openActive);
   const view = orderView(order, now);
-  const ready = order.status === 'ready';
   return (
-    <button type="button" className="home-order" onClick={openActive}>
-      <span className="home-order__ring" style={{ color: view.ringColor }}>
-        {ready ? <Icon name="check" size={26} color={view.ringColor} strokeWidth={2} /> : view.minutesShort}
+    <button
+      type="button"
+      onClick={openActive}
+      style={{
+        ...btnReset, margin: '16px var(--gutter) 0', width: 'calc(100% - var(--gutter) * 2)', background: '#fff', border: '1px solid var(--line)',
+        borderRadius: 16, padding: '12px 14px', display: 'flex', alignItems: 'center', gap: 14, boxShadow: 'var(--shadow-card)',
+      }}
+    >
+      <span
+        style={{
+          width: 56, height: 56, borderRadius: '50%', border: `3px solid ${view.ringColor}`, display: 'flex', alignItems: 'center', justifyContent: 'center',
+          font: '700 14px/1 var(--f-head)', color: view.ringColor, textAlign: 'center', flex: 'none',
+        }}
+      >
+        {view.minutesShort}
       </span>
       <span className="grow" style={{ display: 'block' }}>
-        <span className="home-order__cap">Ваш заказ</span>
-        <span className="home-order__title">№{view.no} — {view.statusText}</span>
-        <span className="home-order__sub">{view.where || view.subline}</span>
+        <span style={{ display: 'block', font: '700 11px var(--f-head)', letterSpacing: '.14em', color: 'var(--sec)' }}>ВАШ ЗАКАЗ</span>
+        <span style={{ display: 'block', font: '700 18px var(--f-head)' }}>№{view.no} · {view.statusText}</span>
+        <span className="t-small" style={{ display: 'block' }}>{view.subline}</span>
       </span>
-      <Icon name="chevron" size={20} color="var(--h-muted)" strokeWidth={1.8} />
+      <Icon name="chevron" size={20} strokeWidth={1.8} />
     </button>
-  );
-}
-
-/**
- * Лист из кнопки в шапке: то, до чего с главной иначе не дотянуться, — звонок и разделы.
- * Рисуется рядом с нижней навигацией, а не внутри экрана: экран — отдельный слой,
- * и перекрыть из него навигацию невозможно.
- */
-function HomeSheet({ onClose }: { onClose: () => void }) {
-  const go = useStore(s => s.go);
-  const openLegal = useStore(s => s.openLegal);
-
-  const box = useRef<HTMLDivElement>(null);
-
-  // Лист объявлен модальным, значит и вести себя должен так: фокус переходит внутрь,
-  // Tab ходит по кругу внутри листа, Escape закрывает. Иначе озвучка обещает одно, а выходит другое.
-  useEffect(() => {
-    const items = () => Array.from(box.current?.querySelectorAll<HTMLElement>('a, button') ?? []);
-    items()[0]?.focus();
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') { onClose(); return; }
-      if (e.key !== 'Tab') return;
-      const list = items();
-      if (!list.length) return;
-      const first = list[0];
-      const last = list[list.length - 1];
-      const active = document.activeElement;
-      const inside = !!box.current?.contains(active);
-      if (e.shiftKey && (active === first || !inside)) { e.preventDefault(); last.focus(); }
-      else if (!e.shiftKey && (active === last || !inside)) { e.preventDefault(); first.focus(); }
-    };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [onClose]);
-
-  const goTo = (fn: () => void) => () => { onClose(); fn(); };
-  const host = document.querySelector('.phone') || document.body;
-
-  return createPortal((
-    <div className="home-sheet" role="dialog" aria-modal="true" aria-label="Меню и контакты" onClick={onClose}>
-      <div className="home-sheet__box" ref={box} onClick={e => e.stopPropagation()}>
-        <div className="home-sheet__grip" />
-        <a href={PHONE_TEL} className="home-sheet__item" onClick={onClose}>
-          <Icon name="phone" size={21} />
-          <span className="grow">
-            Позвонить
-            <span className="home-sheet__sub" style={{ display: 'block' }}>{PHONE_DISPLAY}</span>
-          </span>
-        </a>
-        <button type="button" className="home-sheet__item" onClick={goTo(() => go('menu'))}>
-          <Icon name="burger" size={21} /><span className="grow">Меню</span>
-        </button>
-        <button type="button" className="home-sheet__item" onClick={goTo(() => go('about'))}>
-          <Icon name="pin" size={21} /><span className="grow">О нас и контакты</span>
-        </button>
-        <button type="button" className="home-sheet__item" onClick={goTo(() => openLegal(null))}>
-          <Icon name="receipt" size={21} /><span className="grow">Правовая информация</span>
-        </button>
-        <button type="button" className="home-sheet__item" onClick={onClose}>
-          <Icon name="back" size={21} color="var(--sec)" /><span className="grow" style={{ color: 'var(--sec)' }}>Закрыть</span>
-        </button>
-      </div>
-    </div>
-  ), host);
-}
-
-/** Листик у фотографии — та же зелень, что на снимке блюда в макете. */
-function Leaf({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" width={30} height={30} fill="none" stroke="#6E9A62" strokeWidth={1.4} strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true">
-      <path d="M4 20c0-8 6-14 16-16 0 10-6 16-16 16z" fill="#DCE8D4" />
-      <path d="M4 20c2-6 6-9 11-11" />
-    </svg>
   );
 }

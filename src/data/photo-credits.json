@@ -1,12 +1,21 @@
 {
   "hero-burger": {
-    "what": "снимок в шапке главной",
+    "what": "бургер в круге на главной",
     "id": "46498605-681f-4575-aaaa-9aa279e6865d",
     "title": "Double cheeseburger: tomato confit, red onions, butter lettuce, sharp cheddar, sesame mayo, sans buttered brioche bun",
     "author": "T.Tseng",
     "license": "CC BY 2.0",
     "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
     "source": "https://www.flickr.com/photos/68147320@N02/14585225540"
+  },
+  "hero-fries": {
+    "what": "картофель фри в круге на главной",
+    "id": "9031add3-a847-484e-af47-eff5d3c28af5",
+    "title": "french fries",
+    "author": "waferboard",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+    "source": "https://www.flickr.com/photos/60944931@N00/5729028796"
   },
   "cat-burgers": {
     "what": "раздел «Бургеры»",

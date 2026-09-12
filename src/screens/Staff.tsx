@@ -434,12 +434,13 @@ export function Staff() {
       <div className="t-caps" style={{ marginTop: 24 }}>ФОТОГРАФИИ КАФЕ</div>
       <div className="list mt-8">
         <SwitchRow
-          title="Фото на главной"
-          sub="крупный снимок рядом с заголовком «Вкус в каждой детали»"
+          title="Круглые фото в шапке"
+          sub="два снимка по краям заголовка «Меню» на главной"
           on={settings.heroPhotos}
           onToggle={flip('heroPhotos')}
         />
-        <OwnPhotoRow slot="hero-burger" title="Главная: снимок в шапке" icon="burger" />
+        <OwnPhotoRow slot="hero-burger" title="Главная, слева" icon="burger" />
+        <OwnPhotoRow slot="hero-fries" title="Главная, справа" icon="fries" />
         <OwnPhotoRow slot="about-hall" title="«О нас»: зал" icon="chair" />
         <OwnPhotoRow slot="about-terrace" title="«О нас»: терраса" icon="sun" />
         <OwnPhotoRow slot="about-map" title="«О нас»: карта" icon="pin" />

@@ -40,10 +40,6 @@ export const ICON = {
   pin: 'M12 22s7-7.5 7-13a7 7 0 0 0-14 0c0 5.5 7 13 7 13zM12 9m-2.5 0a2.5 2.5 0 1 0 5 0a2.5 2.5 0 1 0-5 0',
   chevron: 'M9 5l7 7-7 7',
   back: 'M15 5l-7 7 7 7',
-  arrow: 'M4 12h15M13 6l6 6-6 6',
-  bars: 'M4 7h16M4 12h16M4 17h16',
-  leaf: 'M4 20c0-8 6-14 16-16 0 10-6 16-16 16zM4 20c2-6 6-9 11-11',
-  bolt: 'M13 2L4 14h7l-1 8 9-12h-7z',
 } as const;
 export type IconName = keyof typeof ICON;
 
@@ -57,23 +53,12 @@ export const HOURS = '[ЧАСЫ РАБОТЫ]';
 export const MAPS_URL = 'https://yandex.ru/maps/?text=' + encodeURIComponent(`${TOWN} кафе GRAFF`);
 
 export const SLOGAN = 'Вкус · Качество · Скорость';
+export const SLOGAN_LINES = 'Вкус Качество Скорость';
 export const TAGLINE = 'Еда, которая всегда рядом ♥';
-/** Та же подпись, разбитая на строки, — для рукописного блока на главной. */
-export const TAGLINE_LINES = ['Еда, которая всегда', 'рядом ♥'];
-/** Заголовок главного экрана. Правится здесь: на экране он собирается из этих трёх строк. */
-export const HERO_EYEBROW = 'Больше чем еда';
-export const HERO_TITLE = ['Вкус', 'в каждой', 'детали'];
-export const HERO_SUB = ['Свежие продукты.', 'Быстро.', 'С любовью.'];
-
-/**
- * Три обещания бренда из футера печатного меню.
- * tile — короткая подпись для карточек на главной, short и text — для полосы в меню и «О нас».
- * color — цвет иконки: у свежести он зелёный, остальные медные.
- */
-export const PROMISES: { icon: IconName; tile: string; text: string; short: string; color?: string }[] = [
-  { icon: 'leaf', tile: 'Свежие продукты', text: 'Свежие продукты каждый день', short: 'Свежие продукты каждый день', color: C.green },
-  { icon: 'bolt', tile: 'Быстрое приготовление', text: 'Быстрое приготовление, без лишнего ожидания', short: 'Быстрое приготовление, без лишнего ожидания' },
-  { icon: 'heart', tile: 'С любовью для вас', text: 'С любовью для вас! Спасибо, что выбираете нас!', short: 'С любовью для вас!' },
+export const PROMISES: { icon: IconName; text: string; short: string }[] = [
+  { icon: 'chef', text: 'Свежие продукты каждый день', short: 'Свежие продукты каждый день' },
+  { icon: 'clock', text: 'Быстрое приготовление, без лишнего ожидания', short: 'Быстрое приготовление, без лишнего ожидания' },
+  { icon: 'heart', text: 'С любовью для вас! Спасибо, что выбираете нас!', short: 'С любовью для вас!' },
 ];
 
 export interface Size { l: string; p: number }

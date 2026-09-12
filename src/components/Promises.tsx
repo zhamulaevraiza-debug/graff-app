@@ -12,7 +12,7 @@ export function Promises({ variant = 'framed', full = false, style }: { variant?
     <div className={['promises', variant === 'framed' ? 'promises--framed' : 'promises--footer'].join(' ')} style={style}>
       {PROMISES.map(p => (
         <div key={p.icon} className="promises__item">
-          <Icon name={p.icon} size={22} color={p.color || 'var(--copper)'} />
+          <Icon name={p.icon} size={22} />
           {full ? p.text : p.short}
         </div>
       ))}

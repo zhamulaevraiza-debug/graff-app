@@ -556,7 +556,7 @@ export const useStore = create<Store>()(
     }),
     {
       name: 'graff-app',
-      version: 5,
+      version: 4,
       storage: createJSONStorage(() => safeStorage),
       partialize: s => ({
         screen: s.screen, staffTab: s.staffTab,
@@ -576,10 +576,6 @@ export const useStore = create<Store>()(
         // Редакция 4: вымышленных заказов и занятых столиков больше нет. У тех, кто открывал
         // приложение раньше, они сохранены на устройстве — стираем, счёт начинаем сначала.
         if (from < 4) p = { ...p, orders: [], occupied: {}, nextNo: FIRST_ORDER_NO, viewOrder: null };
-        // Редакция 5: переключатель heroPhotos раньше прятал два круглых снимка по краям заголовка,
-        // и их выключали, пока не было своих фотографий. Теперь он управляет главным снимком экрана,
-        // и старое «выключено» скрывало бы его целиком — возвращаем к значению по умолчанию.
-        if (from < 5) p = { ...p, settings: { ...(p.settings || DEFAULT_SETTINGS), heroPhotos: DEFAULT_SETTINGS.heroPhotos } };
         return p;
       },
       merge: (persisted, current) => {
